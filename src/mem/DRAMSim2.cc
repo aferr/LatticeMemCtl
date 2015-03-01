@@ -166,7 +166,8 @@ DRAMSim2::MemoryPort::recvTimingReq(PacketPtr pkt)
             uint64_t threadID = pkt->threadID;
             // For trace generation
             if (threadID >= dram->num_pids){
-                panic( "gem5 made a trans for a packet with threadID >= dram->numpids\n" );
+                fprintf( stderr,"warn: gem5 made a trans for a packet with threadID >= dram->numpids\n" );
+                threadID = 0;
             }
 
 #ifdef DEBUGI
@@ -189,7 +190,8 @@ DRAMSim2::MemoryPort::recvTimingReq(PacketPtr pkt)
                 uint64_t threadID = pkt->threadID;
                 // For trace generation
             	if (threadID >= dram->num_pids) {
-                    panic( "gem5 made a trans for a packet with threadID >= dram->numpids\n" );
+                    fprintf( stderr,"warn: gem5 made a trans for a packet with threadID >= dram->numpids\n" );
+                    threadID = 0;
                 }
 #ifdef DEBUGI
                 if( isInteresting( pkt ) ){

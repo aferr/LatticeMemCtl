@@ -80,14 +80,14 @@ class DRAMSim2Wrapper : public AbstractMemory
     {
 
       public:
+        SlavePacketQueue** respQueues;
 
         DRAMSim2Wrapper* memory;
         MemoryPort(const std::string& _name, DRAMSim2Wrapper* _memory, int numPids);
         void removePendingDelete()
         {
-            for (int x = 0; x < pendingDelete.size(); x++){
+            for (int x = 0; x < pendingDelete.size(); x++)
                 delete pendingDelete[x];
-            }
             pendingDelete.clear();
         }
         void addPendingDelete(PacketPtr pkt)
@@ -101,7 +101,7 @@ class DRAMSim2Wrapper : public AbstractMemory
         }
 
         virtual void schedTimingResp(PacketPtr pkt, Tick when ){
-            QueuedSlavePort::schedTimingResp( pkt, when, pkt->threadID );
+            QueuedSlavePort::schedTimingResp( pkt, when );
         }
         virtual void recvRetry() { QueuedSlavePort::recvRetry(); }
 
@@ -129,11 +129,6 @@ class DRAMSim2Wrapper : public AbstractMemory
         { 
             memory->tracePrinter->addTrace( pkt, "split schedSendTiming" );
             this->respQueues[threadID]->schedSendTiming(pkt, when);
-        }
-
-        virtual void schedTimingResp(PacketPtr pkt, Tick when)
-        { 
-            schedTimingResp(pkt, when, pkt->threadID);
         }
 
         virtual void recvRetry( int threadID ){

@@ -60,7 +60,6 @@ class QueuedSlavePort : public SlavePort
 {
 
   protected:
-    SlavePacketQueue** respQueues;
 
     /** Packet queue used to store outgoing requests and responses. */
     SlavePacketQueue &queue;
@@ -150,6 +149,10 @@ class QueuedMasterPort : public MasterPort
      */
     void schedTimingReq(PacketPtr pkt, Tick when)
     { queue.schedSendTiming(pkt, when); }
+
+    virtual void schedTimingResp(PacketPtr pkt, Tick when, int threadID){
+        schedTimingReq( pkt, when );
+    }
 
     /**
      * Schedule the sending of a timing snoop response.
