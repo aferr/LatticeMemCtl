@@ -39,7 +39,7 @@ class L3Config(object):
         self.options = options
         self.system = system
         self.latencies = {
-            '9MB' : '10ns',
+            '8MB' : '10ns',
             '4MB' : '8.48ns',
             '3MB' : '7.5',
             '2MB' : '6.5ns',
