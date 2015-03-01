@@ -2,7 +2,6 @@
 
 require_relative 'rerun'
 require_relative 'runscripts'
-require_relative 'security'
 require_relative 'functionality'
 require_relative 'performance'
 include RunScripts
@@ -13,41 +12,16 @@ include RunScripts
 # rerun
 
 #------------------------------------------------------------------------------
-# Security
-#------------------------------------------------------------------------------
-# cache_security
-# execution_time_compare
-# execution_time_compare_qsub
-# security_debug
-# paddr_test
-# setpart_vs_private
-
-#------------------------------------------------------------------------------
 # Functionality
 #------------------------------------------------------------------------------
-# insecure_sanity
-# insecure_deep
-# secure_sanity
-# secure_deep
-# secure_scaling
-# only_waypart
-# only_mc
-# only_l2l3
-# only_membus
-# check_fwt
-# check_coordination
-# debug_only_waypart
-# test_double_tc
-# test_cache_flush
-# test_scale_to
+single_short
+baseline_short
+secure_short
 
 #------------------------------------------------------------------------------
 # Performance
 #----------------------------------------------------------------------------
 # single 
-# breakdown
 # baseline
 # ncore_2tc
 # ncore_ntc
-#flush_overhead
-# coordination

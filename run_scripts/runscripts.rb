@@ -89,10 +89,6 @@ $secure_opts = {
   schemes: %w[tp],
   scheme: "tp", 
   addrpar: true,
-  rr_nc: true,
-  waypart: true,
-  split_mshr: true,
-  split_rport: true
 }
 
 #benchmarks
@@ -150,8 +146,6 @@ def sav_script( options = {} )
     cpu = options[:cpu]
     scheme = options[:scheme]
 
-
-
     # workloads to run on p1-p3
     p0         = options[:p0]
     p1         = options[:p1]
@@ -177,12 +171,6 @@ def sav_script( options = {} )
     # number of instructions to fastforward,
     # 0 removes --fastforward from the script
     fastforward= options[:fastforward]
-    # Should L3 be set partitioned?
-    use_set_part = options[:setpart]
-    # Should L3 be way partitioned?
-    use_way_part = options[:waypart]
-    # Use a round robin noncoherent bus
-    rr_nc        = options[:rr_nc]
     # Determines if trace files for security should be saved
     savetraces = options[:savetraces]
     # Determines l3 trace file output.
@@ -207,12 +195,11 @@ def sav_script( options = {} )
       end; n
     )
 
-    cacheSize  = options[:cacheSize] || {
-      2 => 2,
-      4 => 2,
-      6 => 6,
-      8 => 9
-    }[numcpus]
+    cacheSize  = options[:cacheSize] || lambda { |x|
+        x >= 8 ? 8 :
+        x >= 6 ? 4 :
+        2
+    }.call(numcpus)
 
     o = options
 
@@ -249,35 +236,6 @@ def sav_script( options = {} )
 
     #Protection Mechanisms
     script.puts("    --fixaddr \\")       if scheme == "fa" || options[:addrpar]
-    script.puts("    --rr_nc \\" )        if rr_nc
-    script.puts("    --rr_l2l3 \\")       if options[:rr_l2l3]
-    script.puts("    --rr_mem \\")        if options[:rr_mem]
-    script.puts("    --use_set_part \\" ) if use_set_part
-    script.puts("    --use_way_part \\")  if use_way_part
-    script.puts("    --split_mshr \\")    if options[:split_mshr]
-    script.puts("    --split_rport \\")   if options[:split_rport]
-    script.puts("    --do_flush \\")      if options[:do_flush]
-    script.puts("    --reserve_flush \\") if options[:reserve_flush]
-    script.puts("    --flushRatio=#{options[:flushRatio]} \\") unless options[:flushRatio].nil?
-    cswf = options[:context_sw_freq]
-    script.puts("    --context_sw_freq=#{cswf}\\" ) unless cswf.nil?
-
-    #Time Quanta and Offsets
-    [
-      :l2l3req_tl,
-      :l2l3req_offset,
-      :l2l3resp_tl,
-      :l2l3resp_offset,
-      :membusreq_tl,
-      :membusreq_offset,
-      :membusresp_tl,
-      :membusresp_offset,
-      :dramoffset
-    ].each do |param|
-      unless options[param].nil?
-       script.puts("    --#{param.to_s} #{options[param]} \\")
-      end
-    end
 
     #Security Policy
     options[:numpids] = options[:numcpus] if options[:numpids].nil?
@@ -327,10 +285,8 @@ def sav_script( options = {} )
     script_abspath = File.expand_path(script.path)
     script.close
 
-
     FileUtils.mkdir_p( "stderr" ) unless File.directory?( "stderr" )
     FileUtils.mkdir_p( "stdout" ) unless File.directory?( "stdout" )
-    
 
     if runmode == :qsub
       sleep(1)
@@ -339,48 +295,6 @@ def sav_script( options = {} )
     puts "#{filename}".magenta
     success = system "sh #{script_abspath}" if runmode == :local
     [success,filename]
-end
-
-def iterate_and_submit opts={}, &block
-    o = {
-        cpus: %w[detailed],
-        schemes: $schemes,
-        benchmarks: $specint,
-        runmode: :local,
-        threads: 4
-    }.merge opts
-
-    o[:otherbench] = o[:benchmarks] if o[:otherbench].nil?
-
-    f = []
-
-    submit = block_given? ?
-      block :
-      ( lambda do |param, p0, other|
-          r = sav_script(param.merge(p0: p0, p1: other))
-          (r[0] && [] ) || r[1]
-        end
-      )
-      
-    o[:cpus].product(o[:schemes]).each do |cpu, scheme|
-      o[:benchmarks].product(o[:otherbench]).each_slice(o[:threads]) do |i|
-        threads=[]
-        o.merge!(scheme: scheme, cpu: cpu)
-        i.each do |p0,other|
-          threads << Thread.new { f << submit.call(o, p0, other) }
-        end
-        threads.each { |t| t.join }
-      end
-    end
-    puts f.flatten.to_s.red
-end
-
-def parallel_local opts={}
-  iterate_and_submit opts
-end
-
-def qsub_fast opts={}
-  iterate_and_submit ({runmode: :qsub, threads: 1}).merge(opts)
 end
 
 def single opts={}
@@ -392,64 +306,10 @@ def single opts={}
         threads: 1
     }.merge opts
 
-    #f = []
-
     o[:benchmarks].each do |b|
         sav_script o.merge(p0: b)
     end
 
-    # o[:schemes].product(o[:benchmarks]).each_slice(o[:threads]) do |i|
-    #   t={}
-    #   i.each do |scheme,p0|
-    #     t[i] = Thread.new do
-    #       r=sav_script(o.merge(p0: p0))
-    #       f << r[1] unless r[0]
-    #     end
-    #   end
-    #   t.each { |_,v| v.join }
-    # end
-    # puts f.flatten.to_s.red
-end
-
-def single_qsub opts={}
-  single opts.merge(runmode: :qsub)
-end
-
-def parallel_local_scaling opts={}
-  iterate_and_submit(opts) do |param, p0, other|
-    f = []
-    p = param.merge(p0: p0)
-    #2
-    p = p.merge(p1: other)
-    p = p.merge coordinate(n:2) if opts[:coordination]
-    r = opts[:skip2]? [true,""] : sav_script(p)
-    f << r[1] unless r[0]
-    #3
-    p = p.merge(p2: other)
-    p = p.merge coordinate(n:3) if opts[:coordination]
-    r = opts[:skip3]? [true,""] : sav_script(p)
-    f << r[1] unless r[0]
-    #4
-    p = p.merge(p3: other)
-    p = p.merge coordinate(n:4) if opts[:coordination]
-    r = opts[:skip4]? [true,""] : sav_script(p)
-    f << r[1] unless r[0]
-    f
-  end
-end
-
-def scale_to opts={}
-  opts = { num_wl: 2 }.merge opts
-  iterate_and_submit(opts) do |param, p0, other|
-    f = []
-    p = param.merge(p0: p0)
-    1.upto(opts[:num_wl]-1) do |n|
-      p = p.merge( "p#{n}".to_sym => other ) 
-      r = (eval "opts[:skip#{n+1}]") ? [true,""] : sav_script(p)
-      f << r[1] unless r[0]
-    end
-    f
-  end
 end
 
 def iterate_mp o={}
@@ -473,10 +333,6 @@ def iterate_mp o={}
     end
   end
 
-end
-
-def qsub_scaling opts = {}
-  parallel_local_scaling opts.merge(runmode: :qsub)
 end
 
 end
