@@ -94,8 +94,6 @@ class Cache : public BaseCache
     }
 
   public:
-    //TODO a sign of terrible OO design
-    virtual bool isSplitMSHR(){ return false; }
     /** Define the type of cache block to use. */
     typedef typename TagStore::BlkType BlkType;
     /** A typedef for a list of BlkType pointers. */
@@ -130,8 +128,8 @@ class Cache : public BaseCache
 
     void drainWritebacks( int tcid ){
       for(int i=0; i< getWriteBuffer(tcid)->numReady(); i++){
-        memSidePort->requestBus(Request_WB, nextCycle(), tcid, false);
-        //explicitWriteback( tcid );
+        //memSidePort->requestBus(Request_WB, nextCycle(), tcid, false);
+        explicitWriteback( tcid );
       }
     }
 

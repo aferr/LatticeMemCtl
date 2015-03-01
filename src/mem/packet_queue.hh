@@ -307,7 +307,7 @@ class MasterPacketQueue : public PacketQueue
      * @param _label Label to push on the label stack for print request packets
      */
     MasterPacketQueue(EventManager& _em, MasterPort& _masterPort,
-                      const std::string _label = "MasterPacketQueue", int ID = -1);
+                      const std::string _label = "MasterPacketQueue", int ID = 0);
 
     virtual ~MasterPacketQueue() { }
 
@@ -336,7 +336,7 @@ class SlavePacketQueue : public PacketQueue
      * @param _label Label to push on the label stack for print request packets
      */
     SlavePacketQueue(EventManager& _em, SlavePort& _slavePort,
-                     const std::string _label = "SlavePacketQueue", int ID = -1);
+                     const std::string _label = "SlavePacketQueue", int ID = 0);
 
     virtual ~SlavePacketQueue() { }
 

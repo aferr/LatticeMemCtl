@@ -14,14 +14,11 @@ class SplitRPortCache : public SplitMSHRCache<TagStore>
     protected:
     //virtual bool isSplitRPort() {return true;}
     class SRCpuSidePort : public SplitMSHRCache<TagStore>::CpuSidePort{
+        SlavePacketQueue** respQueues;
 
         virtual void schedTimingResp(PacketPtr pkt, Tick when, int threadID)
         { 
             this->respQueues[threadID]->schedSendTiming(pkt, when);
-        }
-
-        virtual void schedTimingResp(PacketPtr pkt, Tick when){
-            schedTimingResp(pkt, when, pkt->threadID);
         }
 
         virtual void recvRetry(int threadID) { 
