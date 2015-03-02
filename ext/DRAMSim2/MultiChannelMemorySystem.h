@@ -34,6 +34,7 @@
 #include "IniReader.h"
 #include "ClockDomain.h"
 #include "CSVWriter.h"
+#include "../ARM/base/lattice.hh"
 
 
 namespace DRAMSim {

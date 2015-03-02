@@ -180,6 +180,8 @@ enum TimingProtection
     None,
     FixedTiming,
     TimingPartitioning,
+    Donor,
+    Monotonic,
     FixedAddress,
     FR_FCFS,
 	TimingPartitioningD
