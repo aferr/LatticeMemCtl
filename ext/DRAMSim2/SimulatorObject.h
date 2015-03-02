@@ -52,7 +52,7 @@ class SimulatorObject
 public:
 	uint64_t currentClockCycle;
 
-	void step();
+	virtual void step();
 	virtual void update()=0;
 };
 }

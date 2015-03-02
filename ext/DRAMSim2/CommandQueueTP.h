@@ -1,4 +1,5 @@
 #include "CommandQueue.h"
+#include "../ARM/base/lattice.hh"
 
 #define BLOCK_TIME 12
 // #define DEBUG_TP
@@ -18,6 +19,7 @@ namespace DRAMSim
             virtual bool hasRoomFor(unsigned numberToEnqueue, unsigned rank, 
                     unsigned bank, unsigned pid);
             virtual bool isEmpty(unsigned rank);
+            virtual bool tcidEmpty(int tcid);
             virtual vector<BusPacket *> &getCommandQueue(unsigned rank, 
                     unsigned pid);
             virtual void print();

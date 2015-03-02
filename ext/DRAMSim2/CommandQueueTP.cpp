@@ -51,6 +51,13 @@ bool CommandQueueTP::isEmpty(unsigned rank)
     return true;
 }
 
+bool CommandQueueTP::tcidEmpty(int tcid)
+{
+    for(int i=0; i<NUM_RANKS; i++)
+        if(!queues[i][tcid].empty()) return false;
+    return true;
+}
+
 vector<BusPacket *> &CommandQueueTP::getCommandQueue(unsigned rank, unsigned 
         pid)
 {
