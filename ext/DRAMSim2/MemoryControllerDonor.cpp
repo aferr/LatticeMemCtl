@@ -1,4 +1,9 @@
 #include "MemoryControllerDonor.h"
+#ifndef ccdonor
+#include "CommandQueueDonor.h"
+#define ccdonor
+#endif
+
 using namespace DRAMSim;
 
 MemoryControllerDonor::MemoryControllerDonor(MemorySystem *parent, 
@@ -28,6 +33,5 @@ MemoryControllerDonor::MemoryControllerDonor(MemorySystem *parent,
       p1Period,
       offset)
 {
-    commandQueue = new CommandQueueTP(bankStates,dramsim_log,tpTurnLength,
-        num_pids, fixAddr, diffPeriod, p0Period, p1Period, offset); 
+    commandQueue = new CommandQueueDonor(bankStates,dramsim_log,tpTurnLength,num_pids, fixAddr, diffPeriod, p0Period, p1Period, offset); 
 }

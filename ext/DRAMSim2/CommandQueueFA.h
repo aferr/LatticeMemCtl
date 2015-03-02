@@ -1,4 +1,7 @@
+#ifndef cctp
 #include "CommandQueueTP.h"
+#define cctp
+#endif
 
 using namespace std;
 

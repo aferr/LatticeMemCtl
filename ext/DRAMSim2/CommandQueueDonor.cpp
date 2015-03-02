@@ -1,5 +1,22 @@
+#ifndef ccdonor
 #include "CommandQueueDonor.h"
+#define ccdonor
+#endif
+using namespace DRAMSim;
+using namespace std;
 
+CommandQueueDonor::CommandQueueDonor(vector< vector<BankState> > &states, 
+        ostream &dramsim_log_, unsigned tpTurnLength_,
+        int num_pids_, bool fixAddr_,
+        bool diffPeriod_, int p0Period_, int p1Period_, int offset_) :
+        CommandQueueTP(states,dramsim_log_,tpTurnLength_,num_pids_,fixAddr_,
+          diffPeriod_, p0Period_, p1Period_, offset_)
+{
+  donated = false;
+  tcid_donated_to = 0;
+}
+
+void
 CommandQueueDonor::step(){
 
     SimulatorObject::step();
@@ -7,24 +24,36 @@ CommandQueueDonor::step(){
     unsigned ccc_ = currentClockCycle - offset;
     unsigned schedule_time = ccc_ % (p0Period + (num_pids-1) * p1Period);
     
-    int nat_tcid = CommandQueueTP::getCurrentPID();
+    unsigned nat_tcid = CommandQueueTP::getCurrentPID();
     bool is_turn_start = schedule_time==0 ||
         ((schedule_time-p0Period)%p1Period==0); 
 
     // If it's the start of a turn and the next TC can't fill its slot, try to 
     // replace it
-    if(is_turn_start && tcidEmpty(nat_tcid)){
-
+    if(is_turn_start){
+      donated = false;
+      print();
+      if(tcidEmpty(nat_tcid)){
+        donated = true;
+        tcid_donated_to = nextHigherTC(nat_tcid);
+      }
     }
 }
 
-CommandQueue::nextHigherTC(int tcid){
-    //To start, assume the lattice is always linear
-    next = tcid+1;
-    //bool next_is_top = Lattice::instance()->is_top(next);
-    bool next_is_top = next == (num_pids-1);
+unsigned
+CommandQueueDonor::getCurrentPID(){
+  if(donated) return tcid_donated_to;
+  return CommandQueueTP::getCurrentPID();
+}
 
-    if(next_is_top) return next;
-    if(tcidEmpty(nat_tcid)) return nextHigherTC(next);
+int
+CommandQueueDonor::nextHigherTC(unsigned tcid){
+    //To start, assume the lattice is always linear
+    unsigned next = tcid+1;
+    //bool next_is_top = Lattice::instance()->is_top(next);
+    bool tcid_is_top = tcid >= ((unsigned) num_pids-1);
+
+    if(tcid_is_top) return tcid;
+    if(tcidEmpty(next)) return nextHigherTC(next);
     return next;
 }

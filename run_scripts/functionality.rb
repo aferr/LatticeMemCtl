@@ -33,4 +33,14 @@ module RunScripts
         )
     end
 
+    # Donor test
+    def donor_short
+      iterate_mp $test_opts.merge(
+        scheme: "donor",
+        maxinsts: 10**5,
+        fastforward: 10,
+        num_wl: 2
+      )
+    end
+
 end

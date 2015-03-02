@@ -1,5 +1,8 @@
 #include "CommandQueue.h"
+#ifndef lattice
 #include "../ARM/base/lattice.hh"
+#define lattice
+#endif
 
 #define BLOCK_TIME 12
 // #define DEBUG_TP
@@ -41,15 +44,12 @@ namespace DRAMSim
             int p1Period;
 			int offset;
 
-            unsigned getCurrentPID();
+            virtual unsigned getCurrentPID();
             bool isBufferTime();
 
-            virtual int normal_deadtime(int tlength){
-              return tlength - (tlength - WORST_CASE_DELAY)/10;
-            }
+            virtual int normal_deadtime(int tlength);
 
-            virtual int refresh_deadtime(int tlength){
-              return tlength - (tlength - TP_BUFFER_TIME)/10;
-            }
+            virtual int refresh_deadtime(int tlength);
+
     };
 }

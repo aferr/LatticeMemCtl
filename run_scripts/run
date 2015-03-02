@@ -14,9 +14,10 @@ include RunScripts
 #------------------------------------------------------------------------------
 # Functionality
 #------------------------------------------------------------------------------
-single_short
-baseline_short
-secure_short
+# single_short
+# baseline_short
+# secure_short
+donor_short
 
 #------------------------------------------------------------------------------
 # Performance

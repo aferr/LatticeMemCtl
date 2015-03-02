@@ -21,6 +21,7 @@ main.SharedObject('MemoryControllerFR.cpp'),
 main.SharedObject('MemoryControllerTPD.cpp'), 
 main.SharedObject('CommandQueueFT.cpp'),
 main.SharedObject('CommandQueueTP.cpp'),
+main.SharedObject('CommandQueueDonor.cpp'),
 main.SharedObject('CommandQueueFA.cpp'),
 main.SharedObject('CommandQueueFR.cpp'),
 main.SharedObject('CommandQueueTPD.cpp'),])

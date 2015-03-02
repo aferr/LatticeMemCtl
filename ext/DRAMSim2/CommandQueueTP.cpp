@@ -19,6 +19,14 @@ CommandQueueTP::CommandQueueTP(vector< vector<BankState> > &states,
 #endif
 }
 
+int CommandQueueTP::normal_deadtime(int tlength){
+  return tlength - (tlength - WORST_CASE_DELAY)/10;
+}
+
+int CommandQueueTP::refresh_deadtime(int tlength){
+  return tlength - (tlength - TP_BUFFER_TIME)/10;
+}
+
 void CommandQueueTP::enqueue(BusPacket *newBusPacket)
 {
     unsigned rank = newBusPacket->rank;
