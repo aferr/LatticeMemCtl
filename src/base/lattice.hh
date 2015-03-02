@@ -1,26 +1,48 @@
-#include <stddef.h>
-#include <string>
 #include <map>
 
-class SLevel {
-  public:
-  std::string name;
+
+class SecurityClass{
+    public:
+    SecurityClass(int _val) : val(_val){}
+
+    bool operator<=(SecurityClass* that){
+        return this->val <= that->val;
+    }
+
+    SecurityClass* join(SecurityClass* that){
+        if(this->val <= that->val) return that;
+        return this;
+    }
+
+    SecurityClass* meet(SecurityClass* that){
+        if(this->val <= that->val) return this;
+        return that;
+    }
+
+    private:
+    int val;
 };
 
-class Lattice {
-  private:
-  // assoc arr of the form level l -> level -r -> (l <= r)?
-  std::map< SLevel*, std::map< SLevel*, bool > > lmap;
-  Lattice();
-  static Lattice * instance;
-  
-  public:
-  static Lattice * get();
-  static bool isLeq(SLevel * l, SLevel * r);
-  static void addL(SLevel * s);
-  static void setLeq(SLevel * l, SLevel * r);
+class Lattice : public std::map<int,SecurityClass*>{
 
-  // Will only be written if needed
-  // SLevel supremum();
-  // SLevel infimum();
+    private:
+    static Lattice* lattice;
+
+    Lattice(){
+        for(int i=0; i<8; i++){
+            (*this)[i] = new SecurityClass(i);
+        }
+    }
+
+    //Lattice(Lattice const&){};
+
+    public:
+    static Lattice* instance(){
+        if(!lattice){
+            lattice = new Lattice();
+        }
+        return lattice;
+    }
+
 };
+

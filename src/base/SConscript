@@ -61,6 +61,7 @@ Source('str.cc')
 Source('time.cc')
 Source('trace.cc')
 Source('userinfo.cc')
+Source('lattice.cc')
 
 Source('loader/aout_object.cc')
 Source('loader/ecoff_object.cc')
