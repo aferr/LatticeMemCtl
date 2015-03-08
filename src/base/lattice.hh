@@ -8,15 +8,15 @@ class Lattice;
 class SecurityClass {
     public:
     SecurityClass(int _val);
-    bool operator<=(SecurityClass* that);
+    bool operator<=(SecurityClass &that);
     SecurityClass* join(SecurityClass* that);
     SecurityClass* meet(SecurityClass* that);
-    std::vector<SecurityClass*>::iterator upper_list();
+    std::vector<SecurityClass*>* upper_list();
     SecurityClass* next_upper();
     bool is_top();
+    int val;
 
     private:
-    int val;
     std::vector<SecurityClass*>* upper_list_;
     std::vector<SecurityClass*>::iterator ul_circular;
 };
