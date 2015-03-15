@@ -21,3 +21,4 @@ class DRAMSim2(DRAMSim2Wrapper):
     p0Period = Param.Int(64, "Period for thread 0")
     p1Period = Param.Int(64, "Period for thread 1")
     offset = Param.Int(0, "offset for turn length")
+    lattice_config = Param.Int(1, "lattice configuration")

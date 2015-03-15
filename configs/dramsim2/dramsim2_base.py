@@ -163,6 +163,8 @@ def add_options():
                 help="reserve bandwidth when flushing.")
         parser.add_option("--context_sw_freq", type="int", default=1000,
                 help="Frequency of context switches in us.")
+        parser.add_option("--lattice_config", type="int", default=1,
+                help="Lattice configuration number")
 
         (options, args) = parser.parse_args()
 

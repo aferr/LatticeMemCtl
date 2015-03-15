@@ -17,7 +17,9 @@ MemoryControllerDonor::MemoryControllerDonor(MemorySystem *parent,
         bool diffPeriod,
         int p0Period,
         int p1Period,
-        int offset) :
+        int offset,
+        int lattice_config_) :
+  lattice_config(lattice_config_),
   MemoryControllerTP(
       parent,
       csvOut,
@@ -33,5 +35,5 @@ MemoryControllerDonor::MemoryControllerDonor(MemorySystem *parent,
       p1Period,
       offset)
 {
-    commandQueue = new CommandQueueDonor(bankStates,dramsim_log,tpTurnLength,num_pids, fixAddr, diffPeriod, p0Period, p1Period, offset); 
+    commandQueue = new CommandQueueDonor(bankStates,dramsim_log,tpTurnLength,num_pids, fixAddr, diffPeriod, p0Period, p1Period, offset, lattice_config_); 
 }

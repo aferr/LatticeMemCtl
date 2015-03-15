@@ -246,6 +246,7 @@ def sav_script( options = {} )
         script.puts("    --#{param.to_s} #{i}\\") :
         script.puts("    --#{param.to_s} #{options[param]}\\") 
     end
+    script.pus("    --lattice_config #{options[:lattice_config] || 0}")
 
     #Trace Options
     script.puts("    --do_cache_trace \\") if options[:do_cache_trace]
@@ -329,6 +330,7 @@ def iterate_mp o={}
       wls[wl].each_with_index do |benchmark,i|
         p = p.merge( "p#{i}".to_sym => benchmark )
       end
+      p = p.merge( lattice_config: 2 ) if wl[-1]=='r'
       sav_script p unless eval("o[:skip#{n}]")
     end
   end

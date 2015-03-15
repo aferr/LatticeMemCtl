@@ -15,7 +15,9 @@ namespace DRAMSim
                     const string &traceFilename_,
                     int num_pids_, bool fixAddr,
                     bool diffPeriod, int p0Period, int p1Period,
-                    int offset);
+                    int offset, int lattice_config);
+
+            int lattice_config;
 
     };
 }
