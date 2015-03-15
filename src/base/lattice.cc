@@ -28,12 +28,14 @@ SecurityClass::upper_list(){
     }
     ul_circular = upper_list_->begin();
   }
+
   return upper_list_;
 }
 
 SecurityClass* SecurityClass::next_upper(){
   // Initialized the circular list
   upper_list();
+
   if(is_top()) return this;
   ul_circular++;
   if(ul_circular == upper_list_->end()){
@@ -60,23 +62,17 @@ SecurityClass* SecurityClass::meet(SecurityClass* that){
 
 Lattice::Lattice(){
 
-    SecurityClass* L = new SecurityClass(0);
-    SecurityClass* H = new SecurityClass(1);
-    SecurityClass* H2 = new SecurityClass(2);
+    SecurityClass* H = new SecurityClass(0);
+    SecurityClass* L = new SecurityClass(1);
 
-    (*this)[0] = L;
-    (*this)[1] = H;
-    (*this)[2] = H2;
+    (*this)[0] = H;
+    (*this)[1] = L;
 
     rules = *(new map<SecurityClass*,set<SecurityClass*> >);
-
     rules[L] = *(new set<SecurityClass*>());
     rules[L].insert(H);
-    rules[L].insert(H2);
-
+   
     rules[H] = *(new set<SecurityClass*>());
-
-    rules[H2] = *(new set<SecurityClass*>());
 
 }
 
@@ -88,8 +84,6 @@ Lattice* Lattice::instance(){
 }
 
 bool Lattice::has_rule(SecurityClass* x, SecurityClass* y){
-  // fprintf(stderr, "hi2\n");
-  // fprintf(stderr, "x: %p, y: %p\n", (void*) x, (void*)y);
-  return Lattice::instance()->rules[x].find(y) !=
+    return Lattice::instance()->rules[x].find(y) !=
     Lattice::instance()->rules[x].end();
 }

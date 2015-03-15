@@ -15,11 +15,18 @@ module RunScripts
     end
     
     def ncore_ntc
-      puts $secure_opts
       iterate_mp $secure_opts.merge(
         num_wl: 8,
-        skip3: false
       )
+    end
+
+    def ncore_ntc_donor
+        iterate_mp(
+            schemes: %w[donor],
+            scheme: 'donor',
+            addrpar: true,
+            num_wl: 8
+        )
     end
 
     def ncore_2tc

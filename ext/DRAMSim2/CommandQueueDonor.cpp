@@ -26,7 +26,7 @@ CommandQueueDonor::step(){
     
     unsigned nat_tcid = CommandQueueTP::getCurrentPID();
     bool is_turn_start = schedule_time==0 ||
-        ((schedule_time-p0Period)%p1Period==0); 
+        ((schedule_time-p0Period)%p1Period==0);
 
     // If it's the start of a turn and the next TC can't fill its slot, try to 
     // replace it
@@ -48,12 +48,5 @@ CommandQueueDonor::getCurrentPID(){
 
 int
 CommandQueueDonor::nextHigherTC(unsigned tcid){
-    //To start, assume the lattice is always linear
-    unsigned next = tcid+1;
-    //bool next_is_top = Lattice::instance()->is_top(next);
-    bool tcid_is_top = tcid >= ((unsigned) num_pids-1);
-
-    if(tcid_is_top) return tcid;
-    if(tcidEmpty(next)) return nextHigherTC(next);
-    return next;
+    return 0;
 }

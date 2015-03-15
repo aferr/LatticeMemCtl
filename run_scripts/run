@@ -17,12 +17,12 @@ include RunScripts
 # single_short
 # baseline_short
 # secure_short
-donor_short
+# donor_short
 
 #------------------------------------------------------------------------------
 # Performance
 #----------------------------------------------------------------------------
-# single 
 # baseline
-# ncore_2tc
 # ncore_ntc
+donor
+# ncore_2tc
