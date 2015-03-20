@@ -246,7 +246,7 @@ def sav_script( options = {} )
         script.puts("    --#{param.to_s} #{i}\\") :
         script.puts("    --#{param.to_s} #{options[param]}\\") 
     end
-    script.pus("    --lattice_config #{options[:lattice_config] || 0}")
+    script.puts("    --lattice_config #{options[:lattice_config] || 1}\\")
 
     #Trace Options
     script.puts("    --do_cache_trace \\") if options[:do_cache_trace]
@@ -282,7 +282,7 @@ def sav_script( options = {} )
     script.puts("   --p0period=#{tl0} \\")
     script.puts("   --p1period=#{tl1} \\")
 
-    script.puts("    > #{result_dir}/stdout_#{filename}.out")
+    script.puts("    >! #{result_dir}/stdout_#{filename}.out")
     script_abspath = File.expand_path(script.path)
     script.close
 

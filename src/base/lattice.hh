@@ -21,13 +21,13 @@ class SecurityClass {
     std::vector<SecurityClass*>::iterator ul_circular;
 };
 
-class Lattice : public std::map<int,SecurityClass*>{
+class Lattice : public std::map<int, SecurityClass*>{
     public:
     static Lattice* instance();
     static bool has_rule(SecurityClass*, SecurityClass*);
 
     private:
-    map<SecurityClass*,std::set<SecurityClass*> > rules;
+    std::map< SecurityClass*, std::set<SecurityClass*> > rules;
     static Lattice* lattice;
     Lattice();
 };

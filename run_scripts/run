@@ -22,7 +22,7 @@ include RunScripts
 #------------------------------------------------------------------------------
 # Performance
 #----------------------------------------------------------------------------
-# baseline
-# ncore_ntc
-donor
+   baseline
+   ncore_ntc
+ncore_ntc_donor
 # ncore_2tc

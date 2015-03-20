@@ -10,13 +10,13 @@ module RunScripts
       iterate_mp(
         scheme: "none",
         skip3: false,
-        num_wl: 8,
+        num_wl: 2,
       )
     end
     
     def ncore_ntc
       iterate_mp $secure_opts.merge(
-        num_wl: 8,
+        num_wl: 2,
       )
     end
 
@@ -25,7 +25,7 @@ module RunScripts
             schemes: %w[donor],
             scheme: 'donor',
             addrpar: true,
-            num_wl: 8
+            num_wl: 2
         )
     end
 

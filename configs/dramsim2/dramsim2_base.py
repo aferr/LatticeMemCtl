@@ -229,7 +229,8 @@ def setup_dramsim(options):
                             save_trace  = options.do_mem_trace,
                             trace_file  = options.mem_trace_file,
                             addr_trace  = options.addr_trace,
-                            trace_addr  = options.trace_addr
+                            trace_addr  = options.trace_addr,
+                            lattice_config = options.lattice_config
                         );
     else: # or we just use the original memory model
         DRAM = SimpleMemory( range = AddrRange(memorysize) )
