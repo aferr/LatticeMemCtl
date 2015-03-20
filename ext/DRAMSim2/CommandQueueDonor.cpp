@@ -69,8 +69,8 @@ CommandQueueDonor::nextHigherTC_config1(unsigned tcid){
 
 int
 CommandQueueDonor::nextHigherTC_config2(unsigned tcid){
-    if(tcid==num_pids){
-        return num_pids;
+    if( tcid == num_pids - 1 ){
+        return num_pids-1;
     } else {
         if(tcidEmpty(tcid+1)) return nextHigherTC(tcid+1);
         else return tcid+1;
