@@ -154,7 +154,7 @@ MemorySystem::MemorySystem(unsigned id, unsigned int megsOfMemory,
 		use_TP = true;
         memoryController = 
             new MemoryControllerMonotonic(this, csvOut, dramsim_log, 
-                    outputFilename, tpTurnLength, genTrace, traceFilename, num_pids, fixAddr, diffPeriod, p0Period, p1Period, offset);
+                    outputFilename, tpTurnLength, genTrace, traceFilename, num_pids, fixAddr, diffPeriod, p0Period, p1Period, offset, lattice_config);
     } else if(timingProtection == FixedAddress){
     	memoryController = 
             new MemoryControllerFA(this, csvOut, dramsim_log, 

@@ -43,4 +43,13 @@ module RunScripts
       )
     end
 
+    def monotonic_short
+        iterate_mp $test_opts.merge(
+            scheme: "monotonic",
+            maxinsts: 10**5,
+            fastforward: 10,
+            num_wl: 2
+        )
+    end
+
 end

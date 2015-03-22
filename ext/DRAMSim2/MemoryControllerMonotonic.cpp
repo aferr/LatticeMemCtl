@@ -1,4 +1,9 @@
 #include "MemoryControllerMonotonic.h"
+#ifndef ccmono
+#include "CommandQueueMonotonic.h"
+#define ccmono
+#endif
+
 using namespace DRAMSim;
 
 MemoryControllerMonotonic::MemoryControllerMonotonic(MemorySystem *parent, 
@@ -12,7 +17,8 @@ MemoryControllerMonotonic::MemoryControllerMonotonic(MemorySystem *parent,
         bool diffPeriod,
         int p0Period,
         int p1Period,
-        int offset) :
+        int offset,
+        int lattice_config) :
   MemoryControllerTP(
       parent,
       csvOut,
@@ -28,6 +34,6 @@ MemoryControllerMonotonic::MemoryControllerMonotonic(MemorySystem *parent,
       p1Period,
       offset)
 {
-    commandQueue = new CommandQueueTP(bankStates,dramsim_log,tpTurnLength,
-        num_pids, fixAddr, diffPeriod, p0Period, p1Period, offset); 
+    commandQueue = new CommandQueueMonotonic(bankStates,dramsim_log,tpTurnLength,
+        num_pids, fixAddr, diffPeriod, p0Period, p1Period, offset, lattice_config); 
 }
