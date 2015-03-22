@@ -33,7 +33,6 @@ CommandQueueDonor::step(){
     // replace it
     if(is_turn_start){
       donated = false;
-      print();
       if(tcidEmpty(nat_tcid)){
         donated = true;
         tcid_donated_to = nextHigherTC(nat_tcid);
