@@ -55,18 +55,23 @@ $p0periods = [64,96,128,192,256]
 
 #Multiprogram Workloads
 $mpworkloads = {
-  hhd: %w[ mcf bzip2 ],
-  hhn: %w[ mcf xalan ],
-  hhi: %w[ libquantum libquantum],
-  hli: %w[ libquantum astar ],
-  hld: %w[ mcf h264ref ],
-  hmi: %w[ libquantum sjeng ],
-  hmd: %w[ xalan gcc ],
-  mmi: %w[ gcc gobmk ],
-  mmd: %w[ sjeng sjeng ],
-  llp: %w[ astar h264ref ],
-  lld: %w[ h264ref hmmer ],
-  lli: %w[ astar astar]
+  mcf_bz2: %w[ mcf bzip2 ],
+  mcf_xln: %w[ mcf xalan ],
+  mcf_mcf: %w[ mcf mcf ],
+  mcf_lib: %w[mcf lib],
+  mcf_ast: %w[mcf ast],
+  ast_mcf: %w[ast mcf],
+  lib_mcf: %w[lib mcf],
+  lib_lib: %w[ libquantum libquantum],
+  lib_ast: %w[ libquantum astar ],
+  mcf_h264: %w[ mcf h264ref ],
+  lib_sjg: %w[ libquantum sjeng ],
+  xln_gcc: %w[ xalan gcc ],
+  gcc_gob: %w[ gcc gobmk ],
+  sjg_sgj: %w[ sjeng sjeng ],
+  ast_h264: %w[ astar h264ref ],
+  h264_hmm: %w[ h264ref hmmer ],
+  ast_ast: %w[ astar astar]
 }
 
 def workloads_of_size n, wl2=$mpworkloads
