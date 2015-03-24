@@ -20,6 +20,15 @@ module RunScripts
       )
     end
 
+    def ncore_ntc_monotonic
+        iterate_mp(
+            schemes: %w[monotonic],
+            scheme: 'monotonic',
+            addrpar: true,
+            num_wl: 2
+        )
+    end
+
     def ncore_ntc_donor
         iterate_mp(
             schemes: %w[donor],
