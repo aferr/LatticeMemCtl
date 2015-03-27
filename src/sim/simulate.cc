@@ -62,6 +62,9 @@ simulate(Tick num_cycles, int numPids)
         new SimLoopExitEvent("simulate() limit reached", 0);
     mainEventQueue.schedule(limit_event, num_cycles);
 
+    //Dump stats every million cycles starting after a million cycles
+    Stats::schedStatEvent(true, false, 1000*1000*1000, 1000*1000*1000);
+
     while (1) {
         // if there is DRAMsim2
         if (dramsim2) {
