@@ -234,11 +234,12 @@ def sav_script( options = {} )
       end; n
     )
 
-    cacheSize  = options[:cacheSize] || lambda { |x|
-        x >= 8 ? 8 :
-        x >= 6 ? 4 :
-        2
-    }.call(numcpus)
+    # cacheSize  = options[:cacheSize] || lambda { |x|
+    #     x >= 8 ? 8 :
+    #     x >= 6 ? 4 :
+    #     2
+    # }.call(numcpus)
+    cacheSize = 4;
 
     o = options
 
