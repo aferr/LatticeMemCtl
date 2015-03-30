@@ -64,7 +64,7 @@ isInteresting(PacketPtr pkt ){
 
 void
 DRAMSim2::incr_stat(void* v,int pid, void*, void*){
-    fprintf(stderr, "hello from gem5\n");
+  ++queueing_delay_cycles;
 }
 
 

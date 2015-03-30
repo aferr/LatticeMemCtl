@@ -69,6 +69,8 @@ class DRAMSim2Wrapper : public AbstractMemory
 
   public:
 
+    Stats::Scalar queueing_delay_cycles;
+
     void updateDRAMSim2(){
             while ( (double)dramsim2->currentClockCycle
                     <= (double)(curTick()) / 1000.0 / tCK) {
@@ -145,6 +147,7 @@ class DRAMSim2Wrapper : public AbstractMemory
 
 
   public:
+    virtual void regStats();
     TracePrinter * tracePrinter;
 
     typedef DRAMSim2WrapperParams Params;
