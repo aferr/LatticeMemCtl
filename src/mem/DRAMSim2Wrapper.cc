@@ -65,11 +65,23 @@ void DRAMSim2Wrapper::regStats()
   using namespace Stats;
   queueing_delay_cycles
       .name(name() + ".queueing_delay_cycles")
-      .desc("cycles spent waiting for turn while bandwidth is wasted")
+      .desc("cycles spent by tc 0 waiting for turn while bandwidth is wasted")
       ;
   donations
       .name(name() + ".donations")
-      .desc("number of turns given up by lower security classes")
+      .desc("number of turns given up by lower security classes to tc 0")
+      ;
+  donated_issues
+      .name(name() + ".donated_issues")
+      .desc("number of cycles that issues by tc0 were made earlier because of donated turns")
+      ;
+  donor_blocked_cycles
+      .name(name() + ".donor_blocked_cycles")
+      .desc("number cycles while a donated turn could have been used naturally, but wasn't used by the recipient of the turn.")
+      ;
+  monotonic_undead_cycles
+      .name(name() + ".monotonic_undead_cycles")
+      .desc("number of cycles saved for tc0 with shorter monotonic dead time.")
       ;
 }
 

@@ -29,7 +29,11 @@ module RunScripts
     # Secure test
     def secure_short
         iterate_mp $test_opts.merge(
-            scheme: "tp"
+            scheme: "tp",
+            maxinsts: 10**5,
+            fastforward: 10,
+            num_wl: 2,
+            addrpar: true
         )
     end
 
@@ -39,7 +43,8 @@ module RunScripts
         scheme: "donor",
         maxinsts: 10**5,
         fastforward: 10,
-        num_wl: 2
+        num_wl: 2,
+        addrpar: true
       )
     end
 
@@ -48,7 +53,8 @@ module RunScripts
             scheme: "monotonic",
             maxinsts: 10**5,
             fastforward: 10,
-            num_wl: 2
+            num_wl: 2,
+            addrpar: true
         )
     end
 

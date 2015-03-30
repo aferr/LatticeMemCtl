@@ -47,8 +47,14 @@ namespace DRAMSim
 
             virtual unsigned getCurrentPID();
             bool isBufferTime();
+            bool isBufferTimePure();
             virtual int normal_deadtime(int tlength);
             virtual int refresh_deadtime(int tlength);
+
+            // Tell the donor scheme child to check if an issue was allowed 
+            // because of a donated turn
+            virtual void check_donor_issue(){};
+            virtual void monotonic_check_deadtime(){};
 
     };
 }

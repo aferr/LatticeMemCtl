@@ -295,11 +295,21 @@ void MemorySystem::RegisterCallbacks(
 
 void MemorySystem::RegisterStats(
         void* queueing_delay_cycles_,
-        void* donations_){
+        void* donations_,
+        void* donated_issues_,
+        void* donor_blocked_cycles_,
+        void* monotonic_undead_cycles_
+    ){
     memoryController->commandQueue->queueing_delay_cycles =
         queueing_delay_cycles_;
     memoryController->commandQueue->donations =
         donations_;
+    memoryController->commandQueue->donated_issues =
+        donated_issues_;
+    memoryController->commandQueue->donor_blocked_cycles =
+        donor_blocked_cycles_;
+    memoryController->commandQueue->monotonic_undead_cycles =
+        monotonic_undead_cycles_;
 }
 
 } /*namespace DRAMSim */

@@ -68,7 +68,10 @@ namespace DRAMSim {
                     );
             void RegisterStats(
                     void* queueing_delay_cycles,
-                    void* donations
+                    void* donations,
+                    void* donated_issues,
+                    void* donor_blocked_cycles,
+                    void* monotonic_undead_cycles
                     );
 
             void InitOutputFiles(string tracefilename);

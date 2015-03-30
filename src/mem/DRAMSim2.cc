@@ -94,7 +94,13 @@ DRAMSim2::DRAMSim2(const Params *p) : DRAMSim2Wrapper(p)
     DRAMSim::StatCallback_t * incr_stat = new DRAMSim::Callback<DRAMSim2,
         void, void*, int, void*, void*>(this, &DRAMSim2::incr_stat);
     dramsim2->RegisterCallbacks(read_cb, write_cb, NULL, incr_stat);
-    dramsim2->RegisterStats((void*)&queueing_delay_cycles, (void*)&donations);
+    dramsim2->RegisterStats(
+            (void*)&queueing_delay_cycles,
+            (void*)&donations,
+            (void*)&donated_issues,
+            (void*)&donor_blocked_cycles,
+            (void*)&monotonic_undead_cycles
+            );
 }
 
 DRAMSim2 *

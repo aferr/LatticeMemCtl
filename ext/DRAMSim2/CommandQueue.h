@@ -69,6 +69,9 @@ namespace DRAMSim
         StatCallback_t* incr_stat;
         void* queueing_delay_cycles;
         void* donations;
+        void* donated_issues;
+        void* donor_blocked_cycles;
+        void* monotonic_undead_cycles;
 
         ostream &dramsim_log;
         //typedefs

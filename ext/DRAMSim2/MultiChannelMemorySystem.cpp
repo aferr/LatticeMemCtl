@@ -525,10 +525,20 @@ void MultiChannelMemorySystem::RegisterCallbacks(
 
 void MultiChannelMemorySystem::RegisterStats(
         void* queueing_delay_cycles,
-        void* donations){
+        void* donations,
+        void* donated_issues,
+        void* donor_blocked_cycles,
+        void* monotonic_undead_cycles
+    ){
     for(size_t i=0; i<NUM_CHANS; i++)
     {
-        channels[i]->RegisterStats(queueing_delay_cycles, donations); 
+        channels[i]->RegisterStats(
+                queueing_delay_cycles,
+                donations,
+                donated_issues,
+                donor_blocked_cycles,
+                monotonic_undead_cycles
+            ); 
     }
 }
 

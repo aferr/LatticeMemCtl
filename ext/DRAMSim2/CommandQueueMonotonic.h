@@ -19,6 +19,7 @@ namespace DRAMSim
         virtual int normal_deadtime(int tlength);
         virtual int refresh_deadtime(int tlength);
         bool current_tcid_is_top();
+        virtual void monotonic_check_deadtime();
     };
 
 }

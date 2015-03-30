@@ -23,6 +23,7 @@ namespace DRAMSim
         bool donated;
         unsigned tcid_donated_to;
         int lattice_config;
+        virtual void check_donor_issue();
     };
 
 }

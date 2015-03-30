@@ -23,21 +23,17 @@ void
 CommandQueueTP::step(){
     SimulatorObject::step();
   
-   // If the active SD has no requests and some other SD has requests, an extra 
-   // queueing delay cycle is incurred. 
-    if( isEmpty(getCurrentPID()) ){ 
-        for(int i=0; i < num_pids; i++){
-            if( !isEmpty(i) && getCurrentPID()!=i ){
-                (*incr_stat)(queueing_delay_cycles,i,NULL,NULL);
-                break;
-            }
-        }
-    }
+   // If the active SD has no requests, but pid 0 does, this a queueing delay 
+   // cycle that affects the memory latency.
+   if( isEmpty(getCurrentPID()) && !isEmpty(0) && getCurrentPID()!=0 ){ 
+       (*incr_stat)(queueing_delay_cycles,0,NULL,NULL);
+   }
 
 }
 
 int CommandQueueTP::normal_deadtime(int tlength){
-  return tlength - (tlength - WORST_CASE_DELAY)/10;
+  int ret = tlength - (tlength - WORST_CASE_DELAY)/10;
+  return ret;
 }
 
 int CommandQueueTP::refresh_deadtime(int tlength){
@@ -230,9 +226,12 @@ bool CommandQueueTP::normalPopClosePage(BusPacket **busPacket, bool
 #endif /*DEBUG_TP*/
                     //If a turn change is about to happen, don't
                     //issue any activates
-
-                    if(isBufferTime() && queue[i]->busPacketType==ACTIVATE)
-                        continue;
+                    
+                    if(queue[i]->busPacketType==ACTIVATE){
+                        monotonic_check_deadtime();
+                        if(isBufferTime())
+                            continue;
+                    }
 
                     //check to make sure we aren't removing a read/write that 
                     //is paired with an activate
@@ -275,7 +274,10 @@ bool CommandQueueTP::normalPopClosePage(BusPacket **busPacket, bool
 #endif /*DEBUG_TP*/
 
         //if we found something, break out of do-while
-        if (foundIssuable) break;
+        if (foundIssuable){
+            check_donor_issue();
+            break;
+        }
 
         nextRankAndBank(nextRank, nextBank);
         if (startingRank == nextRank && startingBank == nextBank)
@@ -340,6 +342,33 @@ bool CommandQueueTP::isBufferTime(){
 
   return ccc_ >= (turn_end - deadtime);
 
+}
+
+bool CommandQueueTP::isBufferTimePure(){
+  unsigned ccc_ = currentClockCycle - offset;
+  unsigned current_tc = CommandQueueTP::getCurrentPID();
+  unsigned schedule_length = p0Period + p1Period * (num_pids - 1);
+  unsigned schedule_start = ccc_ - ( ccc_ % schedule_length );
+
+  unsigned turn_start = current_tc == 0 ?
+    schedule_start :
+    schedule_start + p0Period + p1Period * (current_tc-1);
+  unsigned turn_end = current_tc == 0 ?
+    turn_start + p0Period :
+    turn_start + p1Period;
+
+  // Time between refreshes to ANY rank.
+  unsigned refresh_period = REFRESH_PERIOD/NUM_RANKS/tCK;
+  unsigned next_refresh = ccc_ + refresh_period - (ccc_ % refresh_period);
+ 
+  unsigned tlength = current_tc == 0 ? p0Period : p1Period;
+
+  //TODO It returns a bool you tool
+  unsigned deadtime = (turn_start <= next_refresh && next_refresh < turn_end) ?
+    CommandQueueTP::refresh_deadtime( tlength ) :
+    CommandQueueTP::normal_deadtime( tlength );
+
+  return ccc_ >= (turn_end - deadtime);
 }
 
 #ifdef DEBUG_TP

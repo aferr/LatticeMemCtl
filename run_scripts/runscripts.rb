@@ -57,32 +57,32 @@ $p0periods = [64,96,128,192,256]
 #Multiprogram Workloads
 $mpworkloads = {
   # integer workloads
-  mcf_bz2: %w[ mcf bzip2 ],
-  mcf_xln: %w[ mcf xalan ],
+  # mcf_bz2: %w[ mcf bzip2 ],
+  # mcf_xln: %w[ mcf xalan ],
   mcf_mcf: %w[ mcf mcf ],
-  mcf_lib: %w[mcf libquantum],
+  # mcf_lib: %w[mcf libquantum],
   mcf_ast: %w[mcf astar],
   ast_mcf: %w[astar mcf],
-  lib_mcf: %w[libquantum mcf],
-  lib_lib: %w[ libquantum libquantum],
-  lib_ast: %w[ libquantum astar ],
-  mcf_h264: %w[ mcf h264ref ],
-  lib_sjg: %w[ libquantum sjeng ],
-  xln_gcc: %w[ xalan gcc ],
-  gcc_gob: %w[ gcc gobmk ],
-  sjg_sgj: %w[ sjeng sjeng ],
-  ast_h264: %w[ astar h264ref ],
-  h264_hmm: %w[ h264ref hmmer ],
-  ast_ast: %w[ astar astar],
+  # lib_mcf: %w[libquantum mcf],
+  # lib_lib: %w[ libquantum libquantum],
+  # lib_ast: %w[ libquantum astar ],
+  # mcf_h264: %w[ mcf h264ref ],
+  # lib_sjg: %w[ libquantum sjeng ],
+  # xln_gcc: %w[ xalan gcc ],
+  # gcc_gob: %w[ gcc gobmk ],
+  # sjg_sgj: %w[ sjeng sjeng ],
+  # ast_h264: %w[ astar h264ref ],
+  # h264_hmm: %w[ h264ref hmmer ],
+  # ast_ast: %w[ astar astar],
 
-  # Float workloads
-  milc_milc: %w[milc milc],
-  namd_namd: %w[namd namd],
-  deal_deal: %w[dealII dealII],
-  splx_splx: %w[soplex soplex],
-  pov_pov: %w[povray povray],
-  lbm_lbm: %w[lbm lbm],
-  spx_spx: %w[sphinx3 sphinx3]
+  # # Float workloads
+  # milc_milc: %w[milc milc],
+  # namd_namd: %w[namd namd],
+  # deal_deal: %w[dealII dealII],
+  # splx_splx: %w[soplex soplex],
+  # pov_pov: %w[povray povray],
+  # lbm_lbm: %w[lbm lbm],
+  # spx_spx: %w[sphinx3 sphinx3]
 
 }
 
