@@ -6,7 +6,7 @@ require 'colored'
 module RunScripts
 #directories
 $gem5home = Dir.new(Dir.pwd)
-$specint_dir = "/benchmarks/spec2k6bin/specint"
+$specint_dir = "benchmarks/spec2k6bin/specint"
 $specfp_dir = "benchmarks/spec2k6bin/specfloat"
 $scriptgen_dir = Dir.new(Dir.pwd+"/scriptgen")
 
@@ -60,10 +60,10 @@ $mpworkloads = {
   mcf_bz2: %w[ mcf bzip2 ],
   mcf_xln: %w[ mcf xalan ],
   mcf_mcf: %w[ mcf mcf ],
-  mcf_lib: %w[mcf lib],
-  mcf_ast: %w[mcf ast],
-  ast_mcf: %w[ast mcf],
-  lib_mcf: %w[lib mcf],
+  mcf_lib: %w[mcf libquantum],
+  mcf_ast: %w[mcf astar],
+  ast_mcf: %w[astar mcf],
+  lib_mcf: %w[libquantum mcf],
   lib_lib: %w[ libquantum libquantum],
   lib_ast: %w[ libquantum astar ],
   mcf_h264: %w[ mcf h264ref ],
@@ -78,7 +78,7 @@ $mpworkloads = {
   # Float workloads
   milc_milc: %w[milc milc],
   namd_namd: %w[namd namd],
-  deal_deal: %w[deal deal],
+  deal_deal: %w[dealII dealII],
   splx_splx: %w[soplex soplex],
   pov_pov: %w[povray povray],
   lbm_lbm: %w[lbm lbm],
@@ -321,7 +321,7 @@ def sav_script( options = {} )
     script.puts("   --p0period=#{tl0} \\")
     script.puts("   --p1period=#{tl1} \\")
 
-    script.puts("    >! #{result_dir}/stdout_#{filename}.out")
+    script.puts("    > #{result_dir}/stdout_#{filename}.out")
     script_abspath = script.path
     script.close
 
