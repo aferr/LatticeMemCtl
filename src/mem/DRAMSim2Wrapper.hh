@@ -70,6 +70,7 @@ class DRAMSim2Wrapper : public AbstractMemory
   public:
 
     Stats::Scalar queueing_delay_cycles;
+    Stats::Scalar donations;
 
     void updateDRAMSim2(){
             while ( (double)dramsim2->currentClockCycle

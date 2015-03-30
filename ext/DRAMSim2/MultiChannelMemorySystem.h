@@ -66,6 +66,10 @@ namespace DRAMSim {
                         double refreshpower, double actprepower),
                     StatIncrCB* incr_stat
                     );
+            void RegisterStats(
+                    void* queueing_delay_cycles,
+                    void* donations
+                    );
 
             void InitOutputFiles(string tracefilename);
             void setCPUClockSpeed(uint64_t cpuClkFreqHz);

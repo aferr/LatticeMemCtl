@@ -64,7 +64,7 @@ isInteresting(PacketPtr pkt ){
 
 void
 DRAMSim2::incr_stat(void* v,int pid, void*, void*){
-  ++queueing_delay_cycles;
+    ++(*((Stats::Scalar*)v));
 }
 
 
@@ -94,6 +94,7 @@ DRAMSim2::DRAMSim2(const Params *p) : DRAMSim2Wrapper(p)
     DRAMSim::StatCallback_t * incr_stat = new DRAMSim::Callback<DRAMSim2,
         void, void*, int, void*, void*>(this, &DRAMSim2::incr_stat);
     dramsim2->RegisterCallbacks(read_cb, write_cb, NULL, incr_stat);
+    dramsim2->RegisterStats((void*)&queueing_delay_cycles, (void*)&donations);
 }
 
 DRAMSim2 *

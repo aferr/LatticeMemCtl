@@ -293,6 +293,15 @@ void MemorySystem::RegisterCallbacks(
     memoryController->commandQueue->incr_stat = incr_stat;
 }
 
+void MemorySystem::RegisterStats(
+        void* queueing_delay_cycles_,
+        void* donations_){
+    memoryController->commandQueue->queueing_delay_cycles =
+        queueing_delay_cycles_;
+    memoryController->commandQueue->donations =
+        donations_;
+}
+
 } /*namespace DRAMSim */
 
 

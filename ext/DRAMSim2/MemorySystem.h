@@ -73,9 +73,14 @@ public:
 	void RegisterCallbacks(
 	    Callback_t *readDone,
 	    Callback_t *writeDone,
-	    void (*reportPower)(double bgpower, double burstpower, double refreshpower, double actprepower),
+	    void (*reportPower)(double bgpower, double burstpower,
+            double refreshpower, double actprepower),
         StatCallback_t * incr_stat
         );
+    void RegisterStats(
+            void* queueing_delay_cycles,
+            void* donations
+            );
 
 	//fields
 	MemoryController *memoryController;

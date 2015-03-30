@@ -59,6 +59,10 @@ namespace DRAMSim
                         double refreshpower, double actprepower),
                     void (*incr_stat)(void* stat)
                     );
+            void RegisterStats(
+                    void* queueing_delay_cycles,
+                    void* donations
+                    );
     };
     MultiChannelMemorySystem *getMemorySystemInstance(const string &dev, 
             const string &sys, unsigned tpTurnLength, bool genTrance,

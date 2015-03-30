@@ -63,10 +63,14 @@ void DRAMSim2Wrapper::regStats()
   AbstractMemory::regStats();
 
   using namespace Stats;
-    queueing_delay_cycles
-        .name(name() + ".queueing_delay_cycles")
-        .desc("cycles spent waiting for turn while bandwidth is wasted")
-        ;
+  queueing_delay_cycles
+      .name(name() + ".queueing_delay_cycles")
+      .desc("cycles spent waiting for turn while bandwidth is wasted")
+      ;
+  donations
+      .name(name() + ".donations")
+      .desc("number of turns given up by lower security classes")
+      ;
 }
 
 void

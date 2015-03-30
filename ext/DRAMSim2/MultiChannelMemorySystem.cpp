@@ -522,6 +522,16 @@ void MultiChannelMemorySystem::RegisterCallbacks(
         channels[i]->RegisterCallbacks(readDone, writeDone, reportPower, incr_stat); 
     }
 }
+
+void MultiChannelMemorySystem::RegisterStats(
+        void* queueing_delay_cycles,
+        void* donations){
+    for(size_t i=0; i<NUM_CHANS; i++)
+    {
+        channels[i]->RegisterStats(queueing_delay_cycles, donations); 
+    }
+}
+
 namespace DRAMSim {
     MultiChannelMemorySystem *getMemorySystemInstance(const string &dev, 
             const string &sys, unsigned tpTurnLength, bool genTrace,

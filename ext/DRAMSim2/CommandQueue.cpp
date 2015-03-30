@@ -137,6 +137,7 @@ CommandQueue::~CommandQueue()
         }
     }
 }
+
 //Adds a command to appropriate queue
 void CommandQueue::enqueue(BusPacket *newBusPacket)
 {

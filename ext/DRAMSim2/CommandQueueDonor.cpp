@@ -44,7 +44,8 @@ CommandQueueDonor::step(){
     if( isEmpty(getCurrentPID()) ){ 
         for(int i=0; i < num_pids; i++){
             if( !isEmpty(i) && getCurrentPID()!=i ){
-                queueing_delay_incr(i);
+                (*incr_stat)(queueing_delay_cycles,i,NULL,NULL);
+                break;
             }
         }
     }

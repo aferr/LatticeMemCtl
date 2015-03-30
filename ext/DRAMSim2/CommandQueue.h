@@ -65,7 +65,11 @@ namespace DRAMSim
         CommandQueue();
         typedef CallbackBase<void,void*,int,void*,void*> StatCallback_t;
         public:
+
         StatCallback_t* incr_stat;
+        void* queueing_delay_cycles;
+        void* donations;
+
         ostream &dramsim_log;
         //typedefs
         typedef vector<BusPacket *> BusPacket1D;
