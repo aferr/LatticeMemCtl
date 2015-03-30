@@ -25,6 +25,7 @@ namespace DRAMSim
             virtual bool tcidEmpty(int tcid);
             virtual vector<BusPacket *> &getCommandQueue(unsigned rank, 
                     unsigned pid);
+            virtual void step();
             virtual void print();
 
         protected:
@@ -44,12 +45,14 @@ namespace DRAMSim
             int p1Period;
 			int offset;
 
+
+
             virtual unsigned getCurrentPID();
             bool isBufferTime();
-
             virtual int normal_deadtime(int tlength);
-
             virtual int refresh_deadtime(int tlength);
+
+            void queueing_delay_incr(int pid);
 
     };
 }

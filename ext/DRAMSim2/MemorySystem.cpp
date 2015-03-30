@@ -279,13 +279,18 @@ void MemorySystem::update()
 	//PRINT("\n"); // two new lines
 }
 
-void MemorySystem::RegisterCallbacks( Callback_t* readCB, Callback_t* writeCB,
-                                      void (*reportPower)(double bgpower, double burstpower,
-                                                          double refreshpower, double actprepower))
+void MemorySystem::RegisterCallbacks(
+        Callback_t* readCB, Callback_t* writeCB,
+        void (*reportPower)(double bgpower,
+            double burstpower,double refreshpower,
+            double actprepower),
+        StatCallback_t* incr_stat
+        )
 {
 	ReturnReadData = readCB;
 	WriteDataDone = writeCB;
 	ReportPower = reportPower;
+    memoryController->commandQueue->incr_stat = incr_stat;
 }
 
 } /*namespace DRAMSim */

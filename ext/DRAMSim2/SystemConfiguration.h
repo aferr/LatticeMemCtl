@@ -201,6 +201,7 @@ namespace DRAMSim
 {
 typedef void (*returnCallBack_t)(unsigned id, uint64_t addr, uint64_t clockcycle);
 typedef void (*powerCallBack_t)(double bgpower, double burstpower, double refreshpower, double actprepower);
+typedef void (*incrCallBack_t)(void* stat, int tid);
 
 extern RowBufferPolicy rowBufferPolicy;
 extern SchedulingPolicy schedulingPolicy;

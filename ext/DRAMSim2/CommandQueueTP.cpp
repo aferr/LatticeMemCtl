@@ -19,6 +19,26 @@ CommandQueueTP::CommandQueueTP(vector< vector<BankState> > &states,
 #endif
 }
 
+void
+CommandQueueTP::step(){
+    SimulatorObject::step();
+  
+   // If the active SD has no requests and some other SD has requests, an extra 
+   // queueing delay cycle is incurred. 
+    if( isEmpty(getCurrentPID()) ){ 
+        for(int i=0; i < num_pids; i++){
+            if( !isEmpty(i) && getCurrentPID()!=i ){
+                queueing_delay_incr(i);
+            }
+        }
+    }
+
+}
+
+void CommandQueueTP::queueing_delay_incr(int pid){
+    (*incr_stat)(NULL,pid,NULL,NULL);
+}
+
 int CommandQueueTP::normal_deadtime(int tlength){
   return tlength - (tlength - WORST_CASE_DELAY)/10;
 }

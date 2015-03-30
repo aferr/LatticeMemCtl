@@ -38,6 +38,17 @@ CommandQueueDonor::step(){
         tcid_donated_to = nextHigherTC(nat_tcid);
       }
     }
+  
+   // If the active SD has no requests and some other SD has requests, an extra 
+   // queueing delay cycle is incurred. 
+    if( isEmpty(getCurrentPID()) ){ 
+        for(int i=0; i < num_pids; i++){
+            if( !isEmpty(i) && getCurrentPID()!=i ){
+                queueing_delay_incr(i);
+            }
+        }
+    }
+
 }
 
 unsigned

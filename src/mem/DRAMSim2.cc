@@ -62,6 +62,12 @@ isInteresting(PacketPtr pkt ){
     return is_interesting_addr;
 }
 
+void
+DRAMSim2::incr_stat(void* v,int pid, void*, void*){
+    fprintf(stderr, "hello from gem5\n");
+}
+
+
 DRAMSim2::DRAMSim2(const Params *p) : DRAMSim2Wrapper(p)
 {
     warn("This is an integrated DRAMsim v2 module");
@@ -81,9 +87,13 @@ DRAMSim2::DRAMSim2(const Params *p) : DRAMSim2Wrapper(p)
     std::cout << "DRAM Clock = " << (1000 / tCK) << "MHz" << std::endl;
     std::cout << "Memory Capacity = " << memoryCapacity << "MB" << std::endl;
 
-    DRAMSim::Callback_t *read_cb = new DRAMSim::Callback<DRAMSim2, void, unsigned, uint64_t, uint64_t, uint64_t>(this, &DRAMSim2::read_complete);
-    DRAMSim::Callback_t *write_cb = new DRAMSim::Callback<DRAMSim2, void, unsigned, uint64_t, uint64_t, uint64_t>(this, &DRAMSim2::write_complete);
-    dramsim2->RegisterCallbacks(read_cb, write_cb, NULL);
+    DRAMSim::Callback_t *read_cb = new DRAMSim::Callback<DRAMSim2,
+        void, unsigned, uint64_t, uint64_t, uint64_t>(this, &DRAMSim2::read_complete);
+    DRAMSim::Callback_t *write_cb = new DRAMSim::Callback<DRAMSim2,
+        void, unsigned, uint64_t, uint64_t, uint64_t>(this, &DRAMSim2::write_complete);
+    DRAMSim::StatCallback_t * incr_stat = new DRAMSim::Callback<DRAMSim2,
+        void, void*, int, void*, void*>(this, &DRAMSim2::incr_stat);
+    dramsim2->RegisterCallbacks(read_cb, write_cb, NULL, incr_stat);
 }
 
 DRAMSim2 *

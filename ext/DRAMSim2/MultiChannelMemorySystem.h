@@ -63,7 +63,8 @@ namespace DRAMSim {
                     TransactionCompleteCB *readDone,
                     TransactionCompleteCB *writeDone,
                     void (*reportPower)(double bgpower, double burstpower, 
-                        double refreshpower, double actprepower)
+                        double refreshpower, double actprepower),
+                    StatIncrCB* incr_stat
                     );
 
             void InitOutputFiles(string tracefilename);

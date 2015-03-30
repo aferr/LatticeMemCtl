@@ -54,6 +54,7 @@
 #include "Transaction.h"
 #include "SystemConfiguration.h"
 #include "SimulatorObject.h"
+#include "Callback.h"
 
 using namespace std;
 
@@ -62,7 +63,9 @@ namespace DRAMSim
     class CommandQueue : public SimulatorObject
     {
         CommandQueue();
+        typedef CallbackBase<void,void*,int,void*,void*> StatCallback_t;
         public:
+        StatCallback_t* incr_stat;
         ostream &dramsim_log;
         //typedefs
         typedef vector<BusPacket *> BusPacket1D;
@@ -122,6 +125,7 @@ namespace DRAMSim
         vector<unsigned> threadCounters;
 
         bool sendAct;
+
     };
 }
 

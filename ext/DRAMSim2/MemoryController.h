@@ -103,6 +103,7 @@ namespace DRAMSim
             ofstream traceFile;
             unsigned lastReturnTime[NUM_MSHRS];
             unsigned transactionID;
+            CommandQueue *commandQueue;
             // transactionQueues should be a private instance variable of the 
             // subclass.
             // methods that use it should call private virtual "strategy" 
@@ -118,7 +119,6 @@ namespace DRAMSim
             //fields
             MemorySystem *parentMemorySystem;
 
-            CommandQueue *commandQueue;
             BusPacket *poppedBusPacket;
             vector<unsigned>refreshCountdown;
             vector<BusPacket *> writeDataToSend;

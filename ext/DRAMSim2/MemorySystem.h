@@ -53,6 +53,7 @@
 namespace DRAMSim
 {
 typedef CallbackBase<void,unsigned,uint64_t,uint64_t,uint64_t> Callback_t;
+typedef CallbackBase<void,void*,int,void*,void*> StatCallback_t;
 class MemorySystem : public SimulatorObject
 {
 	ostream &dramsim_log;
@@ -72,7 +73,9 @@ public:
 	void RegisterCallbacks(
 	    Callback_t *readDone,
 	    Callback_t *writeDone,
-	    void (*reportPower)(double bgpower, double burstpower, double refreshpower, double actprepower));
+	    void (*reportPower)(double bgpower, double burstpower, double refreshpower, double actprepower),
+        StatCallback_t * incr_stat
+        );
 
 	//fields
 	MemoryController *memoryController;

@@ -73,6 +73,7 @@ class DRAMSim2 : public DRAMSim2Wrapper
     void read_complete(unsigned, uint64_t, uint64_t, uint64_t);
     void write_complete(unsigned, uint64_t, uint64_t, uint64_t);
     void report_power(double, double, double, double);
+    void incr_stat(void*,int,void*,void*);
     
     uint64_t num_pids;
 };
