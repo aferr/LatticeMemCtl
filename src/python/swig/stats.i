@@ -93,12 +93,14 @@ call_module_function(const char *module_name, const char *func_name)
 
     PyObject *result = PyObject_CallMethod(module, PCC(func_name), PCC(""));
     if (result == NULL) {
-        PyErr_Print();
-        panic("failure on call to function %s", func_name);
+        // PyErr_Print();
+        // panic("failure on call to function %s", func_name);
     }
 
     Py_DECREF(module);
-    Py_DECREF(result);
+    if (result != NULL) {
+      Py_DECREF(result);
+    }
 }
 
 void
