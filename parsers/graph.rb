@@ -78,6 +78,21 @@ def simple_bar data, o={}
   vis.to_svg
 end
 
+def grouped_csv data, o={}
+  o = {
+    x_labels: $specint
+  }.merge o
+
+  bench_i = 0
+  data.inject("") do |s, bench_data|
+    s += o[:x_labels][bench_i] + bench+data.inject("") do |s1, legend_data|
+      s1 += "#{legend_data}, "
+    end + '\n'
+    s
+  end
+
+end
+
 # Takes 2D array, outputs grouped bar graph
 def grouped_bar data, o={}
   o = {

@@ -25,55 +25,44 @@ $schemes = %w[ none tp ]
 
 # Workloads
 def benchmarks_in wl
-  {
-    hhd: %w[ mcf bzip2 ],
-    hhn: %w[ mcf xalan ],
-    hhi: %w[ libquantum libquantum],
-    hli: %w[ libquantum astar ],
-    hld: %w[ mcf h264ref ],
-    hmi: %w[ libquantum sjeng ],
-    #hmd: %w[ xalan gcc ],
-    mmi: %w[ gcc gobmk ],
-    mmd: %w[ sjeng sjeng ],
-    llp: %w[ astar h264ref ],
-    lld: %w[ h264ref hmmer ],
-    lli: %w[ astar astar]
-  }[wl]
+  $mpworkloads[wl]
 end
 
 $mpworkloads = {
-  hhd: %w[ mcf bzip2 ],
-  hhn: %w[ mcf xalan ],
-  hhi: %w[ libquantum libquantum],
-  hli: %w[ libquantum astar ],
-  hld: %w[ mcf h264ref ],
-  hmi: %w[ libquantum sjeng ],
-  #hmd: %w[ xalan gcc ],
-  mmi: %w[ gcc gobmk ],
-  mmd: %w[ sjeng sjeng ],
-  llp: %w[ astar h264ref ],
-  lld: %w[ h264ref hmmer ],
-  lli: %w[ astar astar]
-}
+  # integer workloads
+  mcf_bz2: %w[ mcf bzip2 ],
+  #bz2_mcf: %w[ bzip2 mcf ],
+  mcf_xln: %w[ mcf xalan ],
+  mcf_mcf: %w[ mcf mcf ],
+  mcf_lib: %w[mcf libquantum],
+  mcf_ast: %w[mcf astar],
+  ast_mcf: %w[astar mcf],
+  lib_mcf: %w[libquantum mcf],
+  lib_lib: %w[ libquantum libquantum],
+  lib_ast: %w[ libquantum astar ],
+  mcf_h264: %w[ mcf h264ref ],
+  lib_sjg: %w[ libquantum sjeng ],
+  # xln_gcc: %w[ xalan gcc ],
+  # gcc_gob: %w[ gcc gobmk ],
+  sjg_sgj: %w[ sjeng sjeng ],
+  ast_h264: %w[ astar h264ref ],
+  h264_hmm: %w[ h264ref hmmer ],
+  ast_ast: %w[ astar astar],
 
-$mpworkload_nn = {
-  hhd: "mcf_bz2",
-  hhn: "mcf_xln",
-  hhi: "lib_lib",
-  hli: "lib_ast",
-  hld: "mcf_h264ref",
-  hmi: "lib_sjg",
-  #hmd: "xalan_gcc",
-  mmi: "gcc_gobmk",
-  mmd: "sjg_sjg",
-  llp: "ast_h264",
-  lld: "h264_hmr",
-  lli: "ast_ast"
-}
+  # Float workloads
+  # milc_milc: %w[milc milc],
+  # namd_namd: %w[namd namd],
+  # deal_deal: %w[deal deal],
+  # splx_splx: %w[soplex soplex],
+  # pov_pov: %w[povray povray],
+  # lbm_lbm: %w[lbm lbm],
+  # spx_spx: %w[sphinx3 sphinx3]
 
+}
 
 $workload_names = $mpworkloads.keys.map { |k| k.to_s }
-$new_names = $mpworkload_nn.keys.map { |k| $mpworkload_nn[k] }
+$new_names = $workload_names
+
 #-------------------------------------------------------------------------------
 # Filenames
 #-------------------------------------------------------------------------------
@@ -101,9 +90,17 @@ def single_stdo( p={} )
   "#{p[:dir]}/stdout_none_1cpus_#{p[:bench]}64_#{64}.out"
 end
 
+def single_m5out p={}
+  p={dir: "m5out"}.merge p
+  "#{p[:dir]}/none_1cpus_#{p[:bench]}64_#{64}_stats.txt"
+end
+
 # This can be memoized or eagerly constructed later.
 def single_time( p={} )
-  find_time single_stdo p
+  find_time single_m5out(p), p.merge(
+    insts_regex: /system.switch_cpus.commit.committedInsts\s*(\d*)/,
+    ticks_regex: /system.switch_cpus.numCycles\s*(\d*)/ 
+  )
 end
 
 #-------------------------------------------------------------------------------
@@ -112,7 +109,6 @@ end
 MEMLATENCY = /system.l20.overall_miss_latency::total\s*(\d*.\d*)/
 
 def get_m5out_stat(filename, opts={})
-  puts filename.to_s.blue
   (puts filename.red; return 0) unless File.exists? filename
   time = nil
   File.open(filename,'r') do |f|
@@ -125,7 +121,7 @@ def get_m5out_stat(filename, opts={})
 end
 
 
-def find_time(filename, opts = {} )
+def find_time_old(filename, opts = {} )
   (puts filename.red; return nil) unless File.exists? filename
   time = nil
   File.open(filename,'r') do |f|
@@ -137,6 +133,27 @@ def find_time(filename, opts = {} )
   end
   puts filename.blue
   time
+end
+
+def find_time(filename, opts = {} )
+  o = {
+    insts_regex: /system.switch_cpus1.commit.committedInsts\s*(\d*)/,
+    ticks_regex: /system.switch_cpus1.numCycles\s*(\d*)/ 
+  }.merge opts
+  (puts filename.red; return nil) unless File.exists? filename
+  insts_regex = o[:insts_regex]
+  ticks_regex = o[:ticks_regex]
+  insts = nil
+  ticks = nil
+  File.open(filename,'r') do |f|
+    f.each_line.to_a.reverse.each do |l|
+        insts = l.match(insts_regex)[1].to_f if insts.nil? && l =~ insts_regex
+        ticks = l.match(ticks_regex)[1].to_f if ticks.nil? && l =~ ticks_regex 
+        break unless insts.nil? or ticks.nil?
+    end
+  end
+  (puts filename.blue; return) if insts.nil? or ticks.nil?
+  ticks / insts
 end
 
 def get_datum( filename, regex )
@@ -159,7 +176,7 @@ def stp( p={} )
   wl = p[:workload]
   s = p[:numcpus].times.map do |i|
     tisp = single_time p.merge(bench: benchmarks_in(wl)[i%2], )
-    timp = find_time stdo_file(i%2 == 1 ? p.merge(workload: wl.to_s + 'r') : p)
+    timp = find_time m5out_file(i%2 == 1 ? p.merge(workload: wl.to_s + 'r') : p)
     (tisp.nil? || timp.nil?) ? [] : tisp/timp
   end
   s.include?([]) ? 0 : s.reduce(:+)
@@ -170,7 +187,7 @@ def antt( p={} )
   wl = p[:workload]
   s = p[:numcpus].times.map do |i|
     tisp = single_time p.merge(bench: benchmarks_in(wl)[i%2])
-    timp = find_time stdo_file(i%2 == 1 ? p.merge(workload: wl.to_s + 'r') : p)
+    timp = find_time m5out_file(i%2 == 1 ? p.merge(workload: wl.to_s + 'r') : p)
     (tisp.nil? || timp.nil?) ? [] : timp/tisp
   end
   s.include?([]) ? 0 : s.reduce(:+)

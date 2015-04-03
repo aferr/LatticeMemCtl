@@ -10,7 +10,7 @@ include Parsers
 #------------------------------------------------------------------------------
 def abs_baseline o={}
   r = o[:fun].call o.merge(
-    core_set: [2]#,4,6,8]
+    core_set: [8]#,4,6,8]
   )
   puts "abs_baseline".green
   puts r
@@ -21,7 +21,7 @@ end
 def abs_ntc o={}
   r = o[:fun].call o.merge(
     scheme: "tp",
-    core_set: [2] #,4,6,8],
+    core_set: [8] #,4,6,8],
   )
   puts "abs_ntc".green
   puts r
@@ -42,7 +42,7 @@ end
 def abs_donor o={}
   r = o[:fun].call o.merge(
     scheme: "donor",
-    core_set: [2],
+    core_set: [8],
   )
   puts "abs_donor".green
   puts r
@@ -53,7 +53,7 @@ end
 def abs_monotonic o={}
   r = o[:fun].call o.merge(
     scheme: "monotonic",
-    core_set: [2],
+    core_set: [8],
   )
   puts "abs_monotonic".green
   puts r
@@ -66,14 +66,14 @@ end
 #------------------------------------------------------------------------------
 def baseline o={}
   o[:fun].call o.merge(
-    core_set: [2] #, 4, 6, 8]
+    core_set: [8] #, 4, 6, 8]
   )
 end
 
 def ntc o={}
   o[:fun].call o.merge(
     scheme: "tp",
-    core_set: [2] #, 4, 6, 8],
+    core_set: [8] #, 4, 6, 8],
   )
 end
 
@@ -87,15 +87,15 @@ def safe_schemes o ={}
     schemes = [
         (o[:fun].call o.merge(
             scheme: "tp",
-            core_set: [2]
+            core_set: [8]
         )).flatten,
         (o[:fun].call o.merge(
             scheme: "donor",
-            core_set: [2]
+            core_set: [8]
         )).flatten,
         (o[:fun].call o.merge(
             scheme: "monotonic",
-            core_set: [2]
+            core_set: [8]
         )).flatten,
     ]
     puts baseline(o).to_s.yellow
@@ -115,10 +115,10 @@ if __FILE__ == $0
   abs_o = {
     x_labels: $new_names,
     x_title: "System Throughput",
-    core_set: [2],
+    core_set: [8],
     dir: in_dir,
     out_dir: out_dir,
-    numcpus: 2,
+    numcpus: 8,
     scheme: "none",
     fun: method(:stp_data_of),
     mname: "stp",
@@ -135,10 +135,10 @@ if __FILE__ == $0
   normo = {
     x_labels: $new_names,
     x_title: "Normalized STP",
-    core_set: [2],
+    core_set: [8],
     dir: in_dir,
     out_dir: out_dir,
-    numcpus: 2,
+    numcpus: 8,
     scheme: "none",
     fun: method(:stp_data_of),
     mname: "stp",
