@@ -53,7 +53,7 @@
 namespace DRAMSim
 {
 typedef CallbackBase<void,unsigned,uint64_t,uint64_t,uint64_t> Callback_t;
-typedef CallbackBase<void,void*,int,void*,void*> StatCallback_t;
+typedef CallbackBase<void,void*,int,int,void*> StatCallback_t;
 class MemorySystem : public SimulatorObject
 {
 	ostream &dramsim_log;
@@ -78,11 +78,15 @@ public:
         StatCallback_t * incr_stat
         );
     void RegisterStats(
-            void* queueing_delay_cycles,
-            void* donations,
-            void* donated_issues,
-            void* donor_blocked_cycles,
-            void* monotonic_undead_cycles
+            void * queueing_delay,
+            void * head_of_queue_delay,
+            void * tmux_overhead,
+            void * wasted_tmux_overhead,
+            void * donations,
+            void * donated_issue_cycles,
+            void * donation_overhead,
+            void * dead_time_overhead,
+            void * monotonic_dead_time_recovered
             );
 
 	//fields

@@ -82,7 +82,7 @@ private:
 
 typedef CallbackBase <void, unsigned, uint64_t, uint64_t, uint64_t> TransactionCompleteCB;
 
-typedef CallbackBase <void, void*, int, void*, void*> StatIncrCB;
+typedef CallbackBase <void, void*, int, int, void*> StatIncrCB;
 
 } // namespace DRAMSim
 

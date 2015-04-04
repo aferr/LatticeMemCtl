@@ -15,15 +15,10 @@ CommandQueueMonotonic::CommandQueueMonotonic(vector< vector<BankState> > &states
 {
 }
 
-void CommandQueueMonotonic::monotonic_check_deadtime(){
-    if(!isBufferTime() && isBufferTimePure() && getCurrentPID()==0){
-        unsigned ccc_ = currentClockCycle - offset;
-        unsigned schedule_length = p0Period + p1Period * (num_pids - 1);
-        unsigned schedule_time = ccc_ % (p0Period + (num_pids-1) * p1Period);
-        unsigned time_saved = schedule_length - schedule_time;
-        for( int i=0; i<time_saved; i++ ){
-            (*incr_stat)(monotonic_undead_cycles,0,NULL,NULL);
-        }
+void CommandQueueMonotonic::step(){
+    SimulatorObject::step();
+    if(!isBufferTime() && isBufferTimePure() && !isEmpty(getCurrentPID())){
+           (*incr_stat)(monotonic_dead_time_recovered,getCurrentPID(),1,NULL);
     }
 }
 

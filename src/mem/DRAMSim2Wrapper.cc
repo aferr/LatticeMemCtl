@@ -63,26 +63,44 @@ void DRAMSim2Wrapper::regStats()
   AbstractMemory::regStats();
 
   using namespace Stats;
-  queueing_delay_cycles
-      .name(name() + ".queueing_delay_cycles")
-      .desc("cycles spent by tc 0 waiting for turn while bandwidth is wasted")
-      ;
-  donations
-      .name(name() + ".donations")
-      .desc("number of turns given up by lower security classes to tc 0")
-      ;
-  donated_issues
-      .name(name() + ".donated_issues")
-      .desc("number of cycles that issues by tc0 were made earlier because of donated turns")
-      ;
-  donor_blocked_cycles
-      .name(name() + ".donor_blocked_cycles")
-      .desc("number cycles while a donated turn could have been used naturally, but wasn't used by the recipient of the turn.")
-      ;
-  monotonic_undead_cycles
-      .name(name() + ".monotonic_undead_cycles")
-      .desc("number of cycles saved for tc0 with shorter monotonic dead time.")
-      ;
+
+
+    queueing_delay
+        .name(name() + ".queueing_delay")
+        .desc( "cycles spent in the queue")
+        ;
+    head_of_queue_delay
+        .name(name() + ".donations")
+        .desc( "cycles spent at the head of the queue")
+        ;
+    tmux_overhead
+        .name(name() + ".tmux_overhead")
+        .desc("cycles spent at head of queue wating for turn to start")
+        ;
+    wasted_tmux_overhead
+        .name(name() + ".wasted_tmux_overhead")
+        .desc( "portion of tmux_overhead while active is idle")
+        ;
+    donations
+        .name(name() + ".donations")
+        .desc( "number of turns donated")
+        ;
+    donated_issue_cycles
+        .name(name() + ".donated_issue_cycles")
+        .desc( "number of cycles consumed by issues in donated turns")
+        ;
+    donation_overhead
+        .name(name() + ".donation_overhead")
+        .desc("cycles wasted by donations to idle domains while the donor has work")
+        ;
+    dead_time_overhead
+        .name(name() + "dead_time_overhead")
+        .desc("cycles each command is delayed because of dead time")
+        ;
+    monotonic_dead_time_recovered
+        .name(name() + "monotonic_time_recovered")
+        .desc("time recovered by monotonic schedule")
+        ;
 }
 
 void

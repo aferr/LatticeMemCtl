@@ -143,6 +143,7 @@ void CommandQueue::enqueue(BusPacket *newBusPacket)
 {
     unsigned rank = newBusPacket->rank;
     unsigned bank = newBusPacket->bank;
+    newBusPacket->enqueueTime = currentClockCycle;
     if (queuingStructure==PerRank)
     {
         queues[rank][0].push_back(newBusPacket);
@@ -340,11 +341,13 @@ bool CommandQueue::pop(BusPacket **busPacket)
 
                                 // remove both i-1 (the activate) and i (we've saved the pointer in *busPacket)
                                 queue.erase(queue.begin()+i-1,queue.begin()+i+1);
+                                (*queue.begin())->beginHeadTime = currentClockCycle;
                             }
                             else // there's no activate before this packet
                             {
                                 //or just remove the one bus packet
                                 queue.erase(queue.begin()+i);
+                                (*queue.begin())->beginHeadTime = currentClockCycle;
                             }
 
                             foundIssuable = true;
@@ -472,6 +475,7 @@ void CommandQueue::refreshPopClosePage(BusPacket **busPacket, bool &sendingREF)
                     {
                         *busPacket = packet;
                         queue.erase(queue.begin() + j);
+                        (*queue.begin())->beginHeadTime = currentClockCycle;
                         sendingREF = true;
                     }
                     break;
@@ -533,6 +537,7 @@ bool CommandQueue::normalPopClosePage(BusPacket **busPacket, bool & sendingREF)
 
                         *busPacket = queue[i];
                         queue.erase(queue.begin()+i);
+                        (*queue.begin())->beginHeadTime = currentClockCycle;
                         foundIssuable = true;
                         break;
                     }
@@ -547,6 +552,7 @@ bool CommandQueue::normalPopClosePage(BusPacket **busPacket, bool & sendingREF)
                     // then no chance something behind it can go instead
                     *busPacket = queue[0];
                     queue.erase(queue.begin());
+                    (*queue.begin())->beginHeadTime = currentClockCycle;
                     foundIssuable = true;
                 }
             }

@@ -36,32 +36,32 @@ CommandQueueDonor::step(){
       if(tcidEmpty(nat_tcid)){
         donated = true;
         tcid_donated_to = nextHigherTC(nat_tcid);
-        if(tcid_donated_to == 0) (*incr_stat)(donations,0,NULL,NULL);
+        if(tcid_donated_to == 0) (*incr_stat)(donations,0,1,NULL);
       }
     }
 
-    // If the active SD has no requests, but pid 0 does, this a queueing delay 
-    // cycle that affects the memory latency.
-    if( isEmpty(getCurrentPID()) && !isEmpty(0) && getCurrentPID()!=0 ){ 
-        (*incr_stat)(queueing_delay_cycles,0,NULL,NULL);
+    for(int i=0; i < num_pids; i++){
+        if( !isEmpty(i) && getCurrentPID()!=i ){
+            (*incr_stat)(tmux_overhead,i,1,NULL);
 
-        // If TC 0 gave up its turn, the active turn doesn't have useful work, but 
-        // now TC 0 does, this is a blocked issue that wouldn't have been incurred 
-        // in the TP scheme.
-        if(CommandQueueTP::getCurrentPID()==0)
-            (*incr_stat)(donor_blocked_cycles,0,NULL,NULL);
+            if( isEmpty(getCurrentPID()) ){
+                (*incr_stat)(wasted_tmux_overhead,i,1,NULL);
+                if( !isEmpty(CommandQueueTP::getCurrentPID()) )
+                    (*incr_stat)(donation_overhead,i,1,NULL);
+            }
+        }
     }
+
 }
 
 void CommandQueueDonor::check_donor_issue(){
-    //Count the number of issues by TC 0 during donated turns
-    if(getCurrentPID()==0 && CommandQueueTP::getCurrentPID()!=0){
+    if(CommandQueueTP::getCurrentPID() != getCurrentPID()){
         unsigned ccc_ = currentClockCycle - offset;
         unsigned schedule_length = p0Period + p1Period * (num_pids - 1);
         unsigned schedule_time = ccc_ % (p0Period + (num_pids-1) * p1Period);
         unsigned time_saved = schedule_length - schedule_time;
         for(int i=0; i<time_saved; i++){
-            (*incr_stat)(donated_issues,0,NULL,NULL);
+            (*incr_stat)(donated_issue_cycles,getCurrentPID(),NULL,NULL);
         }
     }
 }

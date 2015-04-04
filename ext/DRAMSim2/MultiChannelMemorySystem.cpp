@@ -524,20 +524,28 @@ void MultiChannelMemorySystem::RegisterCallbacks(
 }
 
 void MultiChannelMemorySystem::RegisterStats(
-        void* queueing_delay_cycles,
-        void* donations,
-        void* donated_issues,
-        void* donor_blocked_cycles,
-        void* monotonic_undead_cycles
+        void * queueing_delay,
+        void * head_of_queue_delay,
+        void * tmux_overhead,
+        void * wasted_tmux_overhead,
+        void * donations,
+        void * donated_issue_cycles,
+        void * donation_overhead,
+        void * dead_time_overhead,
+        void * monotonic_dead_time_recovered
     ){
     for(size_t i=0; i<NUM_CHANS; i++)
     {
         channels[i]->RegisterStats(
-                queueing_delay_cycles,
+                queueing_delay,
+                head_of_queue_delay,
+                tmux_overhead,
+                wasted_tmux_overhead,
                 donations,
-                donated_issues,
-                donor_blocked_cycles,
-                monotonic_undead_cycles
+                donated_issue_cycles,
+                donation_overhead,
+                dead_time_overhead,
+                monotonic_dead_time_recovered
             ); 
     }
 }

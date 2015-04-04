@@ -68,6 +68,11 @@ public:
 	//unsigned index;
 	unsigned returnTime;
 
+    unsigned enqueueTime;
+    unsigned beginHeadTime;
+    unsigned popTime;
+
+
 	//Functions
 	BusPacket(BusPacketType packtype, uint64_t physicalAddr, unsigned col, unsigned rw, unsigned r, unsigned b, void *dat, ostream &dramsim_log_);
 	BusPacket(BusPacketType packtype, uint64_t physicalAddr, unsigned col, unsigned rw, unsigned r, unsigned b, void *dat, unsigned pid, ostream &dramsim_log_);

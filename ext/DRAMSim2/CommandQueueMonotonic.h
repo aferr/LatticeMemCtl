@@ -18,8 +18,8 @@ namespace DRAMSim
         int lattice_config;
         virtual int normal_deadtime(int tlength);
         virtual int refresh_deadtime(int tlength);
+        virtual void step();
         bool current_tcid_is_top();
-        virtual void monotonic_check_deadtime();
     };
 
 }

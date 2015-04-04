@@ -21,12 +21,19 @@ CommandQueueTP::CommandQueueTP(vector< vector<BankState> > &states,
 
 void
 CommandQueueTP::step(){
-    SimulatorObject::step();
-  
-   // If the active SD has no requests, but pid 0 does, this a queueing delay 
-   // cycle that affects the memory latency.
-   if( isEmpty(getCurrentPID()) && !isEmpty(0) && getCurrentPID()!=0 ){ 
-       (*incr_stat)(queueing_delay_cycles,0,NULL,NULL);
+   SimulatorObject::step();
+ 
+   for(int i=0; i < num_pids; i++){
+       if( !isEmpty(i) && getCurrentPID()!=i ){
+           (*incr_stat)(tmux_overhead,i,1,NULL);
+           if( isEmpty(getCurrentPID()) ){
+               (*incr_stat)(wasted_tmux_overhead,i,1,NULL);
+           }
+       }
+   }
+
+   if(isBufferTime() && !isEmpty(getCurrentPID())){
+       (*incr_stat)(dead_time_overhead,getCurrentPID(),1,NULL);
    }
 
 }
@@ -44,6 +51,7 @@ void CommandQueueTP::enqueue(BusPacket *newBusPacket)
 {
     unsigned rank = newBusPacket->rank;
     unsigned pid = newBusPacket->threadID;
+    newBusPacket->enqueueTime = currentClockCycle;
     queues[rank][pid].push_back(newBusPacket);
 #ifdef DEBUG_TP
     if(newBusPacket->physicalAddress == interesting)
@@ -118,6 +126,7 @@ void CommandQueueTP::refreshPopClosePage(BusPacket **busPacket, bool &
                     {
                         *busPacket = packet;
                         queue.erase(queue.begin() + j);
+                        (*queue.begin())->beginHeadTime = currentClockCycle;
                         sendingREF = true;
                     }
 
@@ -228,7 +237,6 @@ bool CommandQueueTP::normalPopClosePage(BusPacket **busPacket, bool
                     //issue any activates
                     
                     if(queue[i]->busPacketType==ACTIVATE){
-                        monotonic_check_deadtime();
                         if(isBufferTime())
                             continue;
                     }
@@ -244,6 +252,7 @@ bool CommandQueueTP::normalPopClosePage(BusPacket **busPacket, bool
 					//cout << "popped " << queue[i]->physicalAddress << " @ " << currentClockCycle << endl;
 
                     queue.erase(queue.begin()+i);
+                    (*queue.begin())->beginHeadTime = currentClockCycle;
                     foundIssuable = true;
                     break;
                 }

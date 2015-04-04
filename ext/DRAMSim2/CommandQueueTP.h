@@ -54,7 +54,6 @@ namespace DRAMSim
             // Tell the donor scheme child to check if an issue was allowed 
             // because of a donated turn
             virtual void check_donor_issue(){};
-            virtual void monotonic_check_deadtime(){};
 
     };
 }

@@ -63,7 +63,7 @@ isInteresting(PacketPtr pkt ){
 }
 
 void
-DRAMSim2::incr_stat(void* v,int pid, void*, void*){
+DRAMSim2::incr_stat(void* v,int pid, int, void*){
     ++(*((Stats::Scalar*)v));
 }
 
@@ -92,14 +92,18 @@ DRAMSim2::DRAMSim2(const Params *p) : DRAMSim2Wrapper(p)
     DRAMSim::Callback_t *write_cb = new DRAMSim::Callback<DRAMSim2,
         void, unsigned, uint64_t, uint64_t, uint64_t>(this, &DRAMSim2::write_complete);
     DRAMSim::StatCallback_t * incr_stat = new DRAMSim::Callback<DRAMSim2,
-        void, void*, int, void*, void*>(this, &DRAMSim2::incr_stat);
+        void, void*, int, int, void*>(this, &DRAMSim2::incr_stat);
     dramsim2->RegisterCallbacks(read_cb, write_cb, NULL, incr_stat);
     dramsim2->RegisterStats(
-            (void*)&queueing_delay_cycles,
-            (void*)&donations,
-            (void*)&donated_issues,
-            (void*)&donor_blocked_cycles,
-            (void*)&monotonic_undead_cycles
+                (void*)&queueing_delay,
+                (void*)&head_of_queue_delay,
+                (void*)&tmux_overhead,
+                (void*)&wasted_tmux_overhead,
+                (void*)&donations,
+                (void*)&donated_issue_cycles,
+                (void*)&donation_overhead,
+                (void*)&dead_time_overhead,
+                (void*)&monotonic_dead_time_recovered
             );
 }
 
