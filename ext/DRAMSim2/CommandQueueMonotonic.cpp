@@ -16,9 +16,10 @@ CommandQueueMonotonic::CommandQueueMonotonic(vector< vector<BankState> > &states
 }
 
 void CommandQueueMonotonic::step(){
-    SimulatorObject::step();
-    if(!isBufferTime() && isBufferTimePure() && !isEmpty(getCurrentPID())){
-           (*incr_stat)(monotonic_dead_time_recovered,getCurrentPID(),1,NULL);
+    CommandQueueTP::step();
+    if(!isBufferTime() && isBufferTimePure() && !tcidEmpty(getCurrentPID())){
+           (*incr_stat)(monotonic_dead_time_recovered,getCurrentPID(),
+                   queueSizeByTcid(getCurrentPID()),NULL);
     }
 }
 

@@ -314,8 +314,6 @@ void MemoryController::update()
         BusPacket* pbp = poppedBusPacket;
         (*(commandQueue->incr_stat))(commandQueue->queueing_delay,
                 pbp->threadID,currentClockCycle - pbp->enqueueTime,0);
-        (*(commandQueue->incr_stat))(commandQueue->head_of_queue_delay,
-                pbp->threadID,currentClockCycle - pbp->beginHeadTime,0);
 
 
         if (poppedBusPacket->busPacketType == WRITE || poppedBusPacket->busPacketType == WRITE_P)

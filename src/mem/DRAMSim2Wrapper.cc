@@ -70,7 +70,7 @@ void DRAMSim2Wrapper::regStats()
         .desc( "cycles spent in the queue")
         ;
     head_of_queue_delay
-        .name(name() + ".donations")
+        .name(name() + ".head_of_queue_delay")
         .desc( "cycles spent at the head of the queue")
         ;
     tmux_overhead
@@ -94,11 +94,11 @@ void DRAMSim2Wrapper::regStats()
         .desc("cycles wasted by donations to idle domains while the donor has work")
         ;
     dead_time_overhead
-        .name(name() + "dead_time_overhead")
+        .name(name() + ".dead_time_overhead")
         .desc("cycles each command is delayed because of dead time")
         ;
     monotonic_dead_time_recovered
-        .name(name() + "monotonic_time_recovered")
+        .name(name() + ".monotonic_time_recovered")
         .desc("time recovered by monotonic schedule")
         ;
 }

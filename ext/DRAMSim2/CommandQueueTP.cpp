@@ -24,15 +24,17 @@ CommandQueueTP::step(){
    SimulatorObject::step();
  
    for(int i=0; i < num_pids; i++){
-       if( !isEmpty(i) && getCurrentPID()!=i ){
-           (*incr_stat)(tmux_overhead,i,1,NULL);
-           if( isEmpty(getCurrentPID()) ){
-               (*incr_stat)(wasted_tmux_overhead,i,1,NULL);
+       if( !tcidEmpty(i) && getCurrentPID()!=i ){
+           (*incr_stat)(tmux_overhead,i,
+                   queueSizeByTcid(getCurrentPID()),NULL);
+           if( tcidEmpty(getCurrentPID()) ){
+               (*incr_stat)(wasted_tmux_overhead,i,
+                       queueSizeByTcid(getCurrentPID()),NULL);
            }
        }
    }
 
-   if(isBufferTime() && !isEmpty(getCurrentPID())){
+   if(isBufferTime() && !tcidEmpty(getCurrentPID())){
        (*incr_stat)(dead_time_overhead,getCurrentPID(),1,NULL);
    }
 
@@ -85,6 +87,13 @@ bool CommandQueueTP::tcidEmpty(int tcid)
     for(int i=0; i<NUM_RANKS; i++)
         if(!queues[i][tcid].empty()) return false;
     return true;
+}
+
+int CommandQueueTP::queueSizeByTcid(unsigned tcid){
+    int r = 0;
+    for( int i=0; i<NUM_RANKS; i++)
+        r += queues[i][tcid].size();
+    return r;
 }
 
 vector<BusPacket *> &CommandQueueTP::getCommandQueue(unsigned rank, unsigned 

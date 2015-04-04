@@ -63,8 +63,9 @@ isInteresting(PacketPtr pkt ){
 }
 
 void
-DRAMSim2::incr_stat(void* v,int pid, int, void*){
-    ++(*((Stats::Scalar*)v));
+DRAMSim2::incr_stat(void* v,int pid, int num_inc, void*){
+    for(int i=0; i < num_inc; i++)
+        ++(*((Stats::Scalar*)v));
 }
 
 

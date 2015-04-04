@@ -41,13 +41,16 @@ CommandQueueDonor::step(){
     }
 
     for(int i=0; i < num_pids; i++){
-        if( !isEmpty(i) && getCurrentPID()!=i ){
-            (*incr_stat)(tmux_overhead,i,1,NULL);
+        if( !tcidEmpty(i) && getCurrentPID()!=i ){
+            (*incr_stat)(tmux_overhead,i,
+                    queueSizeByTcid(getCurrentPID()),NULL);
 
-            if( isEmpty(getCurrentPID()) ){
-                (*incr_stat)(wasted_tmux_overhead,i,1,NULL);
-                if( !isEmpty(CommandQueueTP::getCurrentPID()) )
-                    (*incr_stat)(donation_overhead,i,1,NULL);
+            if( tcidEmpty(getCurrentPID()) ){
+                (*incr_stat)(wasted_tmux_overhead,i,
+                        queueSizeByTcid(getCurrentPID()),NULL);
+                if( !tcidEmpty(CommandQueueTP::getCurrentPID()) )
+                    (*incr_stat)(donation_overhead,i,
+                            queueSizeByTcid(getCurrentPID()),NULL);
             }
         }
     }
@@ -60,9 +63,8 @@ void CommandQueueDonor::check_donor_issue(){
         unsigned schedule_length = p0Period + p1Period * (num_pids - 1);
         unsigned schedule_time = ccc_ % (p0Period + (num_pids-1) * p1Period);
         unsigned time_saved = schedule_length - schedule_time;
-        for(int i=0; i<time_saved; i++){
-            (*incr_stat)(donated_issue_cycles,getCurrentPID(),NULL,NULL);
-        }
+        (*incr_stat)(donated_issue_cycles,getCurrentPID(),
+                time_saved * queueSizeByTcid(getCurrentPID()),NULL);
     }
 }
 

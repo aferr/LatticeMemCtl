@@ -22,6 +22,7 @@ namespace DRAMSim
             virtual bool hasRoomFor(unsigned numberToEnqueue, unsigned rank, 
                     unsigned bank, unsigned pid);
             virtual bool isEmpty(unsigned rank);
+            int queueSizeByTcid(unsigned tcid);
             virtual bool tcidEmpty(int tcid);
             virtual vector<BusPacket *> &getCommandQueue(unsigned rank, 
                     unsigned pid);
