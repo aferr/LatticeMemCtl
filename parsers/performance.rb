@@ -14,7 +14,7 @@ def abs_baseline o={}
   )
   puts "abs_baseline".green
   puts r
-  gb = grouped_bar r.transpose, o.merge(legend: [2])#,4,6,8])
+  gb = grouped_bar r.transpose, o.merge(legend: [8])#,4,6,8])
   string_to_f gb, "#{o[:out_dir]}/baseline_#{o[:mname]}.svg"
 end
 
@@ -25,7 +25,7 @@ def abs_ntc o={}
   )
   puts "abs_ntc".green
   puts r
-  gb = grouped_bar r.transpose, o.merge(legend: [2])#,4,6,8])
+  gb = grouped_bar r.transpose, o.merge(legend: [8])#,4,6,8])
   string_to_f gb, "#{o[:out_dir]}/ntc_#{o[:mname]}.svg"
 end
 
@@ -46,7 +46,7 @@ def abs_donor o={}
   )
   puts "abs_donor".green
   puts r
-  gb = grouped_bar r.transpose, o.merge(legend: [2])
+  gb = grouped_bar r.transpose, o.merge(legend: [8])
   string_to_f gb, "#{o[:out_dir]}/donor_#{o[:mname]}.svg"
 end
 
@@ -57,7 +57,7 @@ def abs_monotonic o={}
   )
   puts "abs_monotonic".green
   puts r
-  gb = grouped_bar r.transpose, o.merge(legend: [2])
+  gb = grouped_bar r.transpose, o.merge(legend: [8])
   string_to_f gb, "#{o[:out_dir]}/monotonic_#{o[:mname]}.svg"
 end
 
@@ -103,6 +103,9 @@ def safe_schemes o ={}
     gb = grouped_bar r.transpose, o.merge(legend: %w[tp donor monotonic],
                                          legend_space: 58)
     string_to_f gb, "#{o[:out_dir]}/safe_schemes_#{o[:mname]}_norm.svg"
+    string_to_f (grouped_csv r.transpose, x_labels: $new_names, legend:
+                %w[tp donor monotonic]),
+        "#{o[:out_dir]}/safe_schemes_#{o[:mname]}_norm.csv"
 
 end
 
@@ -127,10 +130,10 @@ if __FILE__ == $0
     # font: "18px arial"
   }
 
-  abs_baseline abs_o
-  abs_ntc abs_o
-  abs_donor abs_o
-  abs_monotonic abs_o
+  # abs_baseline abs_o
+  # abs_ntc abs_o
+  # abs_donor abs_o
+  # abs_monotonic abs_o
   
   normo = {
     x_labels: $new_names,

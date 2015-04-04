@@ -80,16 +80,19 @@ end
 
 def grouped_csv data, o={}
   o = {
-    x_labels: $specint
+    x_labels: $specint,
+    legend: %w[]
   }.merge o
+  puts data
 
-  bench_i = 0
-  data.inject("") do |s, bench_data|
-    s += o[:x_labels][bench_i] + bench+data.inject("") do |s1, legend_data|
-      s1 += "#{legend_data}, "
-    end + '\n'
-    s
-  end
+  "%-15s" % "bench," +  "#{o[:legend].inject("") { |s, l| s += "%-15s" % "#{l}, " }} \n" +
+    data.each_with_index.inject("") do |s, (bench_data, i)|
+        s += "%-15s" % "#{o[:x_labels][i]}: " +
+          bench_data.inject("") do |si, legend_data|
+              si += "%.11f" % legend_data + ", "; si
+          end + "\n"
+        s
+    end
 
 end
 
