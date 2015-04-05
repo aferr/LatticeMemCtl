@@ -22,33 +22,23 @@ CommandQueueTP::CommandQueueTP(vector< vector<BankState> > &states,
 void
 CommandQueueTP::step(){
    SimulatorObject::step();
-   PRINT("==============================================================================");
-   PRINT("" << currentClockCycle);
-   PRINT("Current PID: " << getCurrentPID() );
-   print();
  
    for(int i=0; i < num_pids; i++){
        if( !tcidEmpty(i) && getCurrentPID()!=i ){
            (*incr_stat)(tmux_overhead,i,
                    queueSizeByTcid(i),NULL);
-           PRINT("tmux overhead " << i);
            if( tcidEmpty(getCurrentPID()) ){
                (*incr_stat)(wasted_tmux_overhead,i,
                        queueSizeByTcid(i),NULL);
-               PRINT("wasted tmux overhead " << i);
            }
        }
    }
 
    if(isBufferTime() && !tcidEmpty(getCurrentPID())){
-       (*incr_stat)(dead_time_overhead,getCurrentPID(),1,NULL);
+       (*incr_stat)(dead_time_overhead,getCurrentPID(),
+               queueSizeByTcid(getCurrentPID()),NULL);
    }
 
-   PRINT("");
-   PRINT("==============================================================================");
-   PRINT("");
-   PRINT("");
-   PRINT("");
 
 }
 
@@ -376,6 +366,33 @@ bool CommandQueueTP::isBufferTime(){
   unsigned deadtime = (turn_start <= next_refresh && next_refresh < turn_end) ?
     refresh_deadtime( tlength ) :
     normal_deadtime( tlength );
+
+  return ccc_ >= (turn_end - deadtime);
+
+}
+
+bool CommandQueueTP::isBufferTimePure(){
+  unsigned ccc_ = currentClockCycle - offset;
+  unsigned current_tc = CommandQueueTP::getCurrentPID();
+  unsigned schedule_length = p0Period + p1Period * (num_pids - 1);
+  unsigned schedule_start = ccc_ - ( ccc_ % schedule_length );
+
+  unsigned turn_start = current_tc == 0 ?
+    schedule_start :
+    schedule_start + p0Period + p1Period * (current_tc-1);
+  unsigned turn_end = current_tc == 0 ?
+    turn_start + p0Period :
+    turn_start + p1Period;
+
+  // Time between refreshes to ANY rank.
+  unsigned refresh_period = REFRESH_PERIOD/NUM_RANKS/tCK;
+  unsigned next_refresh = ccc_ + refresh_period - (ccc_ % refresh_period);
+ 
+  unsigned tlength = current_tc == 0 ? p0Period : p1Period;
+
+  unsigned deadtime = (turn_start <= next_refresh && next_refresh < turn_end) ?
+    CommandQueueTP::refresh_deadtime( tlength ) :
+    CommandQueueTP::normal_deadtime( tlength );
 
   return ccc_ >= (turn_end - deadtime);
 

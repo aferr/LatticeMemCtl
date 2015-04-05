@@ -33,7 +33,7 @@ module RunScripts
 
         #TP
         sav_script o.merge wl_1.merge(scheme: "tp", addrpar: true)
-        sav_script o.merge wl_1.merge(scheme: "tp", addrpar: true)
+        sav_script o.merge wl_2.merge(scheme: "tp", addrpar: true)
 
         #donor
         sav_script o.merge wl_1.merge(scheme: "donor", addrpar: true)

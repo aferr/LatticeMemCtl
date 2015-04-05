@@ -17,7 +17,8 @@ CommandQueueMonotonic::CommandQueueMonotonic(vector< vector<BankState> > &states
 
 void CommandQueueMonotonic::step(){
     CommandQueueTP::step();
-    if(!isBufferTime() && CommandQueueTP::isBufferTime() && !tcidEmpty(getCurrentPID())){
+    if(!isBufferTime() && CommandQueueTP::isBufferTimePure() &&
+            !tcidEmpty(getCurrentPID())){
            (*incr_stat)(monotonic_dead_time_recovered,getCurrentPID(),
                    queueSizeByTcid(getCurrentPID()),NULL);
     }
@@ -39,8 +40,8 @@ int CommandQueueMonotonic::normal_deadtime(int tlength){
 }
 
 int CommandQueueMonotonic::refresh_deadtime(int tlength){
-    //if(current_tcid_is_top()){
+    if(current_tcid_is_top()){
         return CommandQueueTP::refresh_deadtime(tlength);
-    //}
-    //return 0;
+    }
+    return 0;
 }
