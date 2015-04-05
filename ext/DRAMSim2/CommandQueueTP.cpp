@@ -22,14 +22,20 @@ CommandQueueTP::CommandQueueTP(vector< vector<BankState> > &states,
 void
 CommandQueueTP::step(){
    SimulatorObject::step();
+   PRINT("==============================================================================");
+   PRINT("" << currentClockCycle);
+   PRINT("Current PID: " << getCurrentPID() );
+   print();
  
    for(int i=0; i < num_pids; i++){
        if( !tcidEmpty(i) && getCurrentPID()!=i ){
            (*incr_stat)(tmux_overhead,i,
-                   queueSizeByTcid(getCurrentPID()),NULL);
+                   queueSizeByTcid(i),NULL);
+           PRINT("tmux overhead " << i);
            if( tcidEmpty(getCurrentPID()) ){
                (*incr_stat)(wasted_tmux_overhead,i,
-                       queueSizeByTcid(getCurrentPID()),NULL);
+                       queueSizeByTcid(i),NULL);
+               PRINT("wasted tmux overhead " << i);
            }
        }
    }
@@ -38,15 +44,23 @@ CommandQueueTP::step(){
        (*incr_stat)(dead_time_overhead,getCurrentPID(),1,NULL);
    }
 
+   PRINT("");
+   PRINT("==============================================================================");
+   PRINT("");
+   PRINT("");
+   PRINT("");
+
 }
 
 int CommandQueueTP::normal_deadtime(int tlength){
-  int ret = tlength - (tlength - WORST_CASE_DELAY)/10;
-  return ret;
+  // int ret = tlength - (tlength - WORST_CASE_DELAY)/10;
+  // return ret;
+  return WORST_CASE_DELAY;
 }
 
 int CommandQueueTP::refresh_deadtime(int tlength){
-  return tlength - (tlength - TP_BUFFER_TIME)/10;
+  // return tlength - (tlength - TP_BUFFER_TIME)/10;
+  return WORST_CASE_DELAY;
 }
 
 void CommandQueueTP::enqueue(BusPacket *newBusPacket)
@@ -54,6 +68,12 @@ void CommandQueueTP::enqueue(BusPacket *newBusPacket)
     unsigned rank = newBusPacket->rank;
     unsigned pid = newBusPacket->threadID;
     newBusPacket->enqueueTime = currentClockCycle;
+#ifdef VALIDATE_STATS
+    PRINT("enqueueing at " << currentClockCycle << " ");
+    newBusPacket->print();
+    print();
+#endif /*VALIDATE_STATS*/
+
     queues[rank][pid].push_back(newBusPacket);
 #ifdef DEBUG_TP
     if(newBusPacket->physicalAddress == interesting)
@@ -189,23 +209,23 @@ bool CommandQueueTP::normalPopClosePage(BusPacket **busPacket, bool
     bool foundIssuable = false;
     unsigned startingRank = nextRank;
     unsigned startingBank = nextBank;
-    if(lastPID!=getCurrentPID()){
-        //if the turn changes, reset the nextRank, nextBank, and
-        //starters. It seems to have no effect on interference.
-        nextRank = nextBank =0;
-        startingRank = nextRank;
-        startingBank = nextBank;
-#ifdef DEBUG_TP
-        if( hasInteresting() ){
-        cout << endl << "==========================================="<<endl;
-        cout << "Starting turn of length 2**"<<tpTurnLength<<" with PID "<<
-            getCurrentPID() <<" at cycle "<< currentClockCycle << endl;
-        cout << endl;
-        print();
-        }
-#endif /*DEBUG_TP*/
-    }
-    lastPID = getCurrentPID();
+//     if(lastPID!=getCurrentPID()){
+//         //if the turn changes, reset the nextRank, nextBank, and
+//         //starters. It seems to have no effect on interference.
+//         nextRank = nextBank =0;
+//         startingRank = nextRank;
+//         startingBank = nextBank;
+// #ifdef DEBUG_TP
+//         if( hasInteresting() ){
+//         cout << endl << "==========================================="<<endl;
+//         cout << "Starting turn of length 2**"<<tpTurnLength<<" with PID "<<
+//             getCurrentPID() <<" at cycle "<< currentClockCycle << endl;
+//         cout << endl;
+//         print();
+//         }
+// #endif /*DEBUG_TP*/
+//     }
+//     lastPID = getCurrentPID();
 
     while(true)
     {
@@ -336,34 +356,6 @@ unsigned CommandQueueTP::getCurrentPID(){
 
 bool CommandQueueTP::isBufferTime(){
   unsigned ccc_ = currentClockCycle - offset;
-  unsigned current_tc = getCurrentPID();
-  unsigned schedule_length = p0Period + p1Period * (num_pids - 1);
-  unsigned schedule_start = ccc_ - ( ccc_ % schedule_length );
-
-  unsigned turn_start = current_tc == 0 ?
-    schedule_start :
-    schedule_start + p0Period + p1Period * (current_tc-1);
-  unsigned turn_end = current_tc == 0 ?
-    turn_start + p0Period :
-    turn_start + p1Period;
-
-  // Time between refreshes to ANY rank.
-  unsigned refresh_period = REFRESH_PERIOD/NUM_RANKS/tCK;
-  unsigned next_refresh = ccc_ + refresh_period - (ccc_ % refresh_period);
- 
-  unsigned tlength = current_tc == 0 ? p0Period : p1Period;
-
-  //TODO It returns a bool you tool
-  unsigned deadtime = (turn_start <= next_refresh && next_refresh < turn_end) ?
-    refresh_deadtime( tlength ) :
-    normal_deadtime( tlength );
-
-  return ccc_ >= (turn_end - deadtime);
-
-}
-
-bool CommandQueueTP::isBufferTimePure(){
-  unsigned ccc_ = currentClockCycle - offset;
   unsigned current_tc = CommandQueueTP::getCurrentPID();
   unsigned schedule_length = p0Period + p1Period * (num_pids - 1);
   unsigned schedule_start = ccc_ - ( ccc_ % schedule_length );
@@ -381,12 +373,12 @@ bool CommandQueueTP::isBufferTimePure(){
  
   unsigned tlength = current_tc == 0 ? p0Period : p1Period;
 
-  //TODO It returns a bool you tool
   unsigned deadtime = (turn_start <= next_refresh && next_refresh < turn_end) ?
-    CommandQueueTP::refresh_deadtime( tlength ) :
-    CommandQueueTP::normal_deadtime( tlength );
+    refresh_deadtime( tlength ) :
+    normal_deadtime( tlength );
 
   return ccc_ >= (turn_end - deadtime);
+
 }
 
 #ifdef DEBUG_TP

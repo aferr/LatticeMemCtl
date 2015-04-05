@@ -47,8 +47,7 @@ namespace DRAMSim
 			int offset;
 
             virtual unsigned getCurrentPID();
-            bool isBufferTime();
-            bool isBufferTimePure();
+            virtual bool isBufferTime();
             virtual int normal_deadtime(int tlength);
             virtual int refresh_deadtime(int tlength);
 

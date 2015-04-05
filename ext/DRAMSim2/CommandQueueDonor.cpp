@@ -21,6 +21,7 @@ void
 CommandQueueDonor::step(){
 
     SimulatorObject::step();
+    PRINT("==============================================================================");
 
     unsigned ccc_ = currentClockCycle - offset;
     unsigned schedule_time = ccc_ % (p0Period + (num_pids-1) * p1Period);
@@ -37,23 +38,43 @@ CommandQueueDonor::step(){
         donated = true;
         tcid_donated_to = nextHigherTC(nat_tcid);
         (*incr_stat)(donations,tcid_donated_to,1,NULL);
+        PRINT("DONATED");
       }
     }
+
+    PRINT("" << currentClockCycle);
+    PRINT("Current PID: " << getCurrentPID() );
+    PRINT("Natural PID: " << CommandQueueTP::getCurrentPID() );
+    print();
 
     for(int i=0; i < num_pids; i++){
         if( !tcidEmpty(i) && getCurrentPID()!=i ){
             (*incr_stat)(tmux_overhead,i,
-                    queueSizeByTcid(getCurrentPID()),NULL);
+                    queueSizeByTcid(i),NULL);
+            PRINT("tmux overhead " << i);
 
             if( tcidEmpty(getCurrentPID()) ){
                 (*incr_stat)(wasted_tmux_overhead,i,
-                        queueSizeByTcid(getCurrentPID()),NULL);
-                if( !tcidEmpty(CommandQueueTP::getCurrentPID()) )
+                        queueSizeByTcid(i),NULL);
+                PRINT("wasted tmux overhead " << i);
+                if( !tcidEmpty(CommandQueueTP::getCurrentPID()) ){
                     (*incr_stat)(donation_overhead,i,
-                            queueSizeByTcid(getCurrentPID()),NULL);
+                            queueSizeByTcid(i),NULL);
+                    PRINT("donation overhead " << i);
+                }
             }
         }
     }
+
+    if(isBufferTime() && !tcidEmpty(getCurrentPID())){
+        (*incr_stat)(dead_time_overhead,getCurrentPID(),1,NULL);
+    }
+
+   PRINT("");
+   PRINT("==============================================================================");
+   PRINT("");
+   PRINT("");
+   PRINT("");
 
 }
 

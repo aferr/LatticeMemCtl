@@ -22,7 +22,7 @@ module RunScripts
 
         o = {
             fastforward: 0,
-            maxinsts: 10**7,
+            maxinsts: 10**5,
             runmode: :local,
             debug: true,
             cacheSize: 0
@@ -30,6 +30,10 @@ module RunScripts
         #baseline
         sav_script o.merge wl_1.merge(scheme: "none")
         sav_script o.merge wl_2.merge(scheme: "none")
+
+        #TP
+        sav_script o.merge wl_1.merge(scheme: "tp", addrpar: true)
+        sav_script o.merge wl_1.merge(scheme: "tp", addrpar: true)
 
         #donor
         sav_script o.merge wl_1.merge(scheme: "donor", addrpar: true)

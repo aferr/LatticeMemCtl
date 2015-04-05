@@ -315,6 +315,13 @@ void MemoryController::update()
         (*(commandQueue->incr_stat))(commandQueue->queueing_delay,
                 pbp->threadID,currentClockCycle - pbp->enqueueTime,0);
         commandQueue->check_donor_issue();
+#ifdef VALIDATE_STATS
+        PRINT("Popped at " << currentClockCycle << " " <<
+                "with enqueue time " << pbp->enqueueTime);
+        poppedBusPacket->print();
+        commandQueue->print();
+#endif /*VALIDATE_STATS*/
+
 
 
         if (poppedBusPacket->busPacketType == WRITE || poppedBusPacket->busPacketType == WRITE_P)
