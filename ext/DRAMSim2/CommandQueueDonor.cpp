@@ -36,7 +36,7 @@ CommandQueueDonor::step(){
       if(tcidEmpty(nat_tcid)){
         donated = true;
         tcid_donated_to = nextHigherTC(nat_tcid);
-        if(tcid_donated_to == 0) (*incr_stat)(donations,0,1,NULL);
+        (*incr_stat)(donations,tcid_donated_to,1,NULL);
       }
     }
 
@@ -58,19 +58,21 @@ CommandQueueDonor::step(){
 }
 
 void CommandQueueDonor::check_donor_issue(){
-    if(CommandQueueTP::getCurrentPID() != getCurrentPID()){
+    if(donated){
         unsigned ccc_ = currentClockCycle - offset;
         unsigned schedule_length = p0Period + p1Period * (num_pids - 1);
         unsigned schedule_time = ccc_ % (p0Period + (num_pids-1) * p1Period);
         unsigned time_saved = schedule_length - schedule_time;
         (*incr_stat)(donated_issue_cycles,getCurrentPID(),
-                time_saved * queueSizeByTcid(getCurrentPID()),NULL);
+                time_saved * (queueSizeByTcid(getCurrentPID()) +1),NULL);
     }
 }
 
 unsigned
 CommandQueueDonor::getCurrentPID(){
-  if(donated) return tcid_donated_to;
+  if(donated){
+      return tcid_donated_to;
+  }
   return CommandQueueTP::getCurrentPID();
 }
 

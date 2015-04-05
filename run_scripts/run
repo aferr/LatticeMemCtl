@@ -16,9 +16,9 @@ include RunScripts
 #------------------------------------------------------------------------------
 # single_short
 # baseline_short
-secure_short
-donor_short
-monotonic_short
+# secure_short
+# donor_short
+# monotonic_short
 
 #------------------------------------------------------------------------------
 # Performance
@@ -27,3 +27,4 @@ monotonic_short
 # ncore_ntc
 # ncore_ntc_donor
 # ncore_2tc
+synthetic

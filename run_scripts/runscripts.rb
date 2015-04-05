@@ -9,6 +9,8 @@ $gem5home = Dir.new(Dir.pwd)
 $specint_dir = "benchmarks/spec2k6bin/specint"
 $specfp_dir = "benchmarks/spec2k6bin/specfloat"
 $scriptgen_dir = Dir.new(Dir.pwd+"/scriptgen")
+$synthbench_dir = "benchmarks/synthetic"
+$duration = 1
 
 #Gem5 options
 $fastforward = 10**9
@@ -127,11 +129,11 @@ $specinvoke = {
 $specint = $specinvoke.keys.sort
 
 $synthinvoke = {
-    "hardstride1" => "#{$synthbench_dir}hardstride -d #{$duration} -p 1",
-    "randmem1"    => "#{$synthbench_dir}randmem -d #{$duration} -p 1",
+    "hardstride" => "#{$synthbench_dir}/hardstride",
+    "randmem"    => "#{$synthbench_dir}/randmem",
     #"randmem10"   => "#{$synthbench_dir}randmem -d #{$duration} -p 10",
     #"randmem100"  => "#{$synthbench_dir}randmem -d #{$duration} -p 100",
-    "nothing"     => "#{$synthbench_dir}nothing"
+    "nothing"     => "#{$synthbench_dir}/nothing"
 }
 $synthb = $synthinvoke.keys.sort
 

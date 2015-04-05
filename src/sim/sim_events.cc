@@ -80,10 +80,10 @@ SimLoopExitEvent::description() const
 void
 exitSimLoop(const std::string &message, int exit_code, Tick when, Tick repeat)
 {
-    if( message.find("cpu0") == string::npos ) {
-      cout << message << " @ " << curTick() << endl;
-      return;
-    }
+    // if( message.find("cpu0") == string::npos ) {
+    //   cout << message << " @ " << curTick() << endl;
+    //   return;
+    // }
     
     Event *event = new SimLoopExitEvent(message, exit_code, repeat);
     mainEventQueue.schedule(event, when);

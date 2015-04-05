@@ -6,6 +6,41 @@ include RunScripts
 
 module RunScripts
 
+    def synthetic
+
+        wl_1 = {
+            p0: "hardstride",
+            p1: "nothing",
+            lattice_config: 1
+        }
+
+        wl_2 = {
+            p0: "nothing",
+            p1: "hardstride",
+            lattice_config: 1
+        }
+
+        o = {
+            fastforward: 0,
+            maxinsts: 10**7,
+            runmode: :local,
+            debug: true,
+            cacheSize: 0
+        }
+        #baseline
+        sav_script o.merge wl_1.merge(scheme: "none")
+        sav_script o.merge wl_2.merge(scheme: "none")
+
+        #donor
+        sav_script o.merge wl_1.merge(scheme: "donor", addrpar: true)
+        sav_script o.merge wl_2.merge(scheme: "donor", addrpar: true)
+
+        #monotonic
+        sav_script o.merge wl_1.merge(scheme: "monotonic", addrpar: true)
+        sav_script o.merge wl_2.merge(scheme: "monotonic", addrpar: true)
+        
+    end
+
     def baseline
       iterate_mp(
         scheme: "none",

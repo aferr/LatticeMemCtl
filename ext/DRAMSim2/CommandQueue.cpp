@@ -63,7 +63,7 @@ CommandQueue::CommandQueue(vector< vector<BankState> > &states, ostream &dramsim
 {
     //set here to avoid compile errors
     currentClockCycle = 0;
-    next_busPacket = new BusPacket(REFRESH, 0, 0, 0, 0, 0, 0, dramsim_log);
+    next_busPacket = new BusPacket(REFRESH, 0, 0, 0, 0, 0, 0, num_pids, dramsim_log);
 
     //use numBankQueus below to create queue structure
     size_t numBankQueues;
@@ -270,7 +270,7 @@ bool CommandQueue::pop(BusPacket **busPacket)
                     if (closeRow && currentClockCycle >= bankStates[refreshRank][b].nextPrecharge)
                     {
                         rowAccessCounters[refreshRank][b]=0;
-                        *busPacket = new BusPacket(PRECHARGE, 0, 0, 0, refreshRank, b, 0, dramsim_log);
+                        *busPacket = new BusPacket(PRECHARGE, 0, 0, 0, refreshRank, b, 0, num_pids, dramsim_log);
                         sendingREForPRE = true;
                     }
                     break;
@@ -289,7 +289,7 @@ bool CommandQueue::pop(BusPacket **busPacket)
             //	reset flags and rank pointer
             if (sendREF && bankStates[refreshRank][0].currentBankState != PowerDown)
             {
-                *busPacket = new BusPacket(REFRESH, 0, 0, 0, refreshRank, 0, 0, dramsim_log);
+                *busPacket = new BusPacket(REFRESH, 0, 0, 0, refreshRank, 0, 0, num_pids, dramsim_log);
                 refreshRank = -1;
                 refreshWaiting = false;
                 sendingREForPRE = true;
@@ -413,7 +413,7 @@ bool CommandQueue::pop(BusPacket **busPacket)
                             {
                                 sendingPRE = true;
                                 rowAccessCounters[nextRankPRE][nextBankPRE] = 0;
-                                *busPacket = new BusPacket(PRECHARGE, 0, 0, 0, nextRankPRE, nextBankPRE, 0, dramsim_log);
+                                *busPacket = new BusPacket(PRECHARGE, 0, 0, 0, nextRankPRE, nextBankPRE, 0, num_pids, dramsim_log);
                                 break;
                             }
                         }
@@ -498,7 +498,7 @@ void CommandQueue::refreshPopClosePage(BusPacket **busPacket, bool &sendingREF)
     //	reset flags and rank pointer
     if (!foundActiveOrTooEarly && bankStates[refreshRank][0].currentBankState != PowerDown)
     {
-        *busPacket = new BusPacket(REFRESH, 0, 0, 0, refreshRank, 0, 0, dramsim_log);
+        *busPacket = new BusPacket(REFRESH, 0, 0, 0, refreshRank, 0, 0, num_pids, dramsim_log);
         //PRINTN("Refresh at " << currentClockCycle << " for rank " << refreshRank << endl);
         refreshRank = -1;
         refreshWaiting = false;

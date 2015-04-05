@@ -69,15 +69,15 @@ class DRAMSim2Wrapper : public AbstractMemory
 
   public:
 
-    Stats::Scalar queueing_delay;
-    Stats::Scalar head_of_queue_delay;
-    Stats::Scalar tmux_overhead;
-    Stats::Scalar wasted_tmux_overhead;
-    Stats::Scalar donations;
-    Stats::Scalar donated_issue_cycles;
-    Stats::Scalar donation_overhead;
-    Stats::Scalar dead_time_overhead;
-    Stats::Scalar monotonic_dead_time_recovered;
+    Stats::Vector queueing_delay;
+    Stats::Vector head_of_queue_delay;
+    Stats::Vector tmux_overhead;
+    Stats::Vector wasted_tmux_overhead;
+    Stats::Vector donations;
+    Stats::Vector donated_issue_cycles;
+    Stats::Vector donation_overhead;
+    Stats::Vector dead_time_overhead;
+    Stats::Vector monotonic_dead_time_recovered;
 
     void updateDRAMSim2(){
             while ( (double)dramsim2->currentClockCycle

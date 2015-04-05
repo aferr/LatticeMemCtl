@@ -65,6 +65,7 @@ namespace DRAMSim
         CommandQueue();
         typedef CallbackBase<void,void*,int,int,void*> StatCallback_t;
         public:
+        virtual void check_donor_issue(){};
 
         StatCallback_t* incr_stat;
 

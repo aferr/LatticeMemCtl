@@ -137,7 +137,10 @@ exitGroupFunc(SyscallDesc *desc, int callnum, LiveProcess *process,
     // really should just halt all thread contexts belonging to this
     // process in case there's another process running...
     int index = 0;
-        exitSimLoop("target called exit()",
+        stringstream ss;
+        ss << tc->cpuId();
+        string cause = "cpu"+ss.str()+" called exit()";
+        exitSimLoop(cause,
                 process->getSyscallArg(tc, index) & 0xff);
     return 1;
 }
