@@ -245,7 +245,7 @@ def sav_script( options = {} )
 
     o = options
 
-    filename = "#{scheme}_#{numcpus}cpus_#{p0}#{tl0}_#{p1}#{tl1}"
+    filename = "#{scheme}_#{numcpus}cpus_#{p0}_#{p1}"
     filename = "#{scheme}_#{numcpus}cpus_#{o[:wl_name]}" unless o[:wl_name].nil?
 
     filename = "#{options[:nametag]}_"+filename if options[:nametag]
