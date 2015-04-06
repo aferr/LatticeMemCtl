@@ -103,6 +103,8 @@ class System : public MemObject
     static bool is_fast_forward;
     int num_exits;
 
+    int exit_counter;
+
     /**
      * After all objects have been created and all ports are
      * connected, check that the system port is connected.

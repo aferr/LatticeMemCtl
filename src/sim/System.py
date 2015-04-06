@@ -70,8 +70,9 @@ class System(MemObject):
     work_cpus_ckpt_count = Param.Counter(0,
         "create checkpoint when active cpu count value is reached")
     
-    numPids = Param.Int(2,
-        "number of PIDs in simulation")
+    numPids = Param.Int(2, "number of PIDs in simulation")
+
+    numCpus = Param.Int(2, "number of cpus in simulation")
 
     fast_forward = Param.Bool(False,
             "Is fastforwarding used?")

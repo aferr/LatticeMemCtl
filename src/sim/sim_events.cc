@@ -103,8 +103,9 @@ CountedDrainEvent::process()
 //
 // constructor: automatically schedules at specified time
 //
-    CountedExitEvent::CountedExitEvent(const std::string &_cause, int &counter)
-: Event(Sim_Exit_Pri), cause(_cause), downCounter(counter)
+    CountedExitEvent::CountedExitEvent(const std::string &_cause, int &counter,
+        int reset_val)
+: Event(Sim_Exit_Pri), cause(_cause), downCounter(counter), reset_val(reset_val)
 {
     // catch stupid mistakes
     assert(downCounter > 0);
@@ -117,8 +118,12 @@ CountedDrainEvent::process()
     void
 CountedExitEvent::process()
 {
+    Stats::dump();
     if (--downCounter == 0) {
+        downCounter = reset_val;
         exitSimLoop(cause, 0);
+    } else {
+        cout << cause << " @ " << curTick() << endl;
     }
 }
 

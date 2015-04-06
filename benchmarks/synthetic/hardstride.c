@@ -13,7 +13,7 @@ int main(int argc, char **argv) {
     int elapsed = 0;
     int tmp=0;
 
-    while( elapsed < DURATION ){
+    while(1) { 
         int read_addr  = count % MEM_SIZE;
         tmp += mem[read_addr];
         elapsed += DELAY_OPS;

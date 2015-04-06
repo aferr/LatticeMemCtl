@@ -95,6 +95,8 @@ System::System(Params *p)
     // add self to global system list
     systemList.push_back(this);
 
+    exit_counter = p->numCpus;
+
     is_fast_forward = p->fast_forward;
 
     int mem_end = physmem.totalSize() >> LogVMPageSize;
