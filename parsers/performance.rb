@@ -62,6 +62,29 @@ def abs_monotonic o={}
 end
 
 #------------------------------------------------------------------------------
+# Latency breakdown
+#------------------------------------------------------------------------------
+def latency_data o={}
+    o[:numcpus].times.map do |i|
+        f =  m5out_file o 
+        [
+            find_stat(f, /system.physmem.wasted_tmux_overhead::#{i}\s*(\d*.\d)/),
+            find_stat(f, /system.physmem.tmux_overhead::#{i}\s*(\d*.\d)/),
+            find_stat(f, /system.physmem.dead_time_overhead::#{i}\s*(\d*.\d)/),
+            find_stat(f, /system.physmem.queueing_delay::#{i}\s*(\d*.\d)/),
+        ]
+    end
+end
+
+def lat_test
+    puts latency_data(
+        scheme: "monotonic",
+        numcpus: 2,
+        workload: "hardstride64_nothing64" 
+    ).to_s
+end
+
+#------------------------------------------------------------------------------
 # Normalized Graphs
 #------------------------------------------------------------------------------
 def baseline o={}

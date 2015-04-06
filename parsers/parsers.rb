@@ -156,6 +156,17 @@ def find_time(filename, opts = {} )
   ticks / insts
 end
 
+def find_stat filename, regex, opts = {}
+    o = opts
+    (puts filename.red; return nil) unless File.exists? filename
+    File.open(filename,'r') do |f|
+      f.each_line.to_a.reverse.each do |l|
+          return l.match(regex)[1].to_f if l =~ regex 
+      end
+    end
+    (puts filename.blue; return nil) 
+end
+
 def get_datum( filename, regex )
     unless File.exists? filename
         return [nil, false] 
