@@ -29,9 +29,14 @@ def benchmarks_in wl
 end
 
 $mpworkloads = {
+
+  #synthetic workloads
+  nothing_hardstride: %w[nothing hardstride],
+  hardstride_nothing: %w[hardstride nothing],
+
   # integer workloads
   mcf_bz2: %w[ mcf bzip2 ],
-  #bz2_mcf: %w[ bzip2 mcf ],
+  # bz2_mcf: %w[ bzip2 mcf ],
   mcf_xln: %w[ mcf xalan ],
   mcf_mcf: %w[ mcf mcf ],
   mcf_lib: %w[mcf libquantum],
@@ -87,12 +92,12 @@ end
 
 def single_stdo( p={} )
   p={dir: "results"}.merge p
-  "#{p[:dir]}/stdout_none_1cpus_#{p[:bench]}64_#{64}.out"
+  "#{p[:dir]}/stdout_none_1cpus_#{p[:bench]}_.out"
 end
 
 def single_m5out p={}
   p={dir: "m5out"}.merge p
-  "#{p[:dir]}/none_1cpus_#{p[:bench]}64_#{64}_stats.txt"
+  "#{p[:dir]}/none_1cpus_#{p[:bench]}__stats.txt"
 end
 
 # This can be memoized or eagerly constructed later.
@@ -184,13 +189,19 @@ end
 #-------------------------------------------------------------------------------
 # System Throughput
 def stp( p={} )
-  wl = p[:workload]
-  s = p[:numcpus].times.map do |i|
-    tisp = single_time p.merge(bench: benchmarks_in(wl)[i%2], )
-    timp = find_time m5out_file(i%2 == 1 ? p.merge(workload: wl.to_s + 'r') : p)
-    (tisp.nil? || timp.nil?) ? [] : tisp/timp
-  end
-  s.include?([]) ? 0 : s.reduce(:+)
+    wl = p[:workload]
+    single_reg = /system.switch_cpus.cpi\s*(\d*\.\d*)/
+    single_times = benchmarks_in(wl).map do |b|
+        find_stat (single_m5out p.merge(bench: b)), single_reg
+    end
+    s = p[:numcpus].times.map do |i|
+        tisp = single_times[i]
+        multi_reg = /system.switch_cpus#{i}.cpi\s*(\d*\.\d*)/
+        timp = find_stat (m5out_file p.merge(bench: benchmarks_in(wl)[i])),
+          multi_reg
+        (tisp.nil? || timp.nil?) ? [] : tisp/timp
+    end
+    s.include?([]) ? 0 : s.reduce(:+)
 end
 
 # Average Normalized Turnaround Time
@@ -267,6 +278,5 @@ end
 
 if __FILE__ == $0
   include Parsers
-  p = { numcpus: 2, scheme: "tp", dir: "results", workload: :mmi}
-  puts stp p
+  puts stp(workload: :nothing_hardstride, scheme:"none", numcpus: 2)
 end
