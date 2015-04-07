@@ -69,7 +69,8 @@ if options.ruby:
 else:
     system.system_port = system.membus.slave
     system.physmem.port = system.membus.master
-    CacheConfig.config_cache(options, system)
+    #CacheConfig.config_cache(options, system)
+    CacheConfig.config_cache_l1_l2(options, system)
 
 root = Root(full_system = False, system = system)
 Simulation.run(options, root, system, FutureClass,options.numpids)
