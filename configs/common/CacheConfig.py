@@ -185,6 +185,12 @@ def connect_l2( options, system ):
             system.cpu[i].connectAllPorts(system.membus)
 
 
+def config_cache_l1_l2(options, system):
+    config_l1(options, system)
+    l3config = L3Shared(options, system)
+    for i in xrange(options.num_cpus):
+        system.cpu[i].connectAllPorts(system.tol3bus)
+
 def config_cache(options, system):
 
     #-------------------------------------------------------------------------
