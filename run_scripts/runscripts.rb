@@ -59,23 +59,23 @@ $p0periods = [64,96,128,192,256]
 #Multiprogram Workloads
 $mpworkloads = {
   # integer workloads
-  # mcf_bz2: %w[ mcf bzip2 ],
-  # mcf_xln: %w[ mcf xalan ],
+  mcf_bz2: %w[ mcf bzip2 ],
+  mcf_xln: %w[ mcf xalan ],
   mcf_mcf: %w[ mcf mcf ],
-  # mcf_lib: %w[mcf libquantum],
+  mcf_lib: %w[mcf libquantum],
   mcf_ast: %w[mcf astar],
   ast_mcf: %w[astar mcf],
-  # lib_mcf: %w[libquantum mcf],
-  # lib_lib: %w[ libquantum libquantum],
-  # lib_ast: %w[ libquantum astar ],
-  # mcf_h264: %w[ mcf h264ref ],
-  # lib_sjg: %w[ libquantum sjeng ],
-  # xln_gcc: %w[ xalan gcc ],
-  # gcc_gob: %w[ gcc gobmk ],
-  # sjg_sgj: %w[ sjeng sjeng ],
-  # ast_h264: %w[ astar h264ref ],
-  # h264_hmm: %w[ h264ref hmmer ],
-  # ast_ast: %w[ astar astar],
+  lib_mcf: %w[libquantum mcf],
+  lib_lib: %w[ libquantum libquantum],
+  lib_ast: %w[ libquantum astar ],
+  mcf_h264: %w[ mcf h264ref ],
+  lib_sjg: %w[ libquantum sjeng ],
+  xln_gcc: %w[ xalan gcc ],
+  gcc_gob: %w[ gcc gobmk ],
+  sjg_sgj: %w[ sjeng sjeng ],
+  ast_h264: %w[ astar h264ref ],
+  h264_hmm: %w[ h264ref hmmer ],
+  ast_ast: %w[ astar astar],
 
   # # Float workloads
   # milc_milc: %w[milc milc],
@@ -166,10 +166,10 @@ def sav_script( options = {} )
 
     options = {
         #TP Minimum: 
-        tl0: 64,
-        tl1: 64,
-        tl2: 64,
-        tl3: 64,
+        tl0: 44,
+        tl1: 44,
+        tl2: 44,
+        tl3: 44,
         #FA Minimum:
         # tl0: 18,
         # tl1: 18,
@@ -236,11 +236,6 @@ def sav_script( options = {} )
       end; n
     )
 
-    # cacheSize  = options[:cacheSize] || lambda { |x|
-    #     x >= 8 ? 8 :
-    #     x >= 6 ? 4 :
-    #     2
-    # }.call(numcpus)
     cacheSize = 4;
 
     o = options
@@ -366,13 +361,11 @@ def iterate_mp o={}
 
   2.upto(o[:num_wl]) do |n|
     wls = workloads_of_size n, o[:workloads]
-    wls = wls.merge(rotated_workloads wls)
     wls.keys.each do |wl|
       p = o.merge(wl_name: wl)
       wls[wl].each_with_index do |benchmark,i|
         p = p.merge( "p#{i}".to_sym => benchmark )
       end
-      p = p.merge( lattice_config: 2 ) if wl[-1]=='r'
       sav_script p unless eval("o[:skip#{n}]")
     end
   end
