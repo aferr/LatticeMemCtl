@@ -70,55 +70,55 @@ void DRAMSim2Wrapper::regStats()
         .desc( "cycles spent in the queue")
         .init(numPids+1)
         ;
-    for(int i=0; i < numPids; i++) queueing_delay.subname(i, std::to_string(i));
+    //for(int i=0; i < numPids; i++) queueing_delay.subname(i, std::to_string(i));
     head_of_queue_delay
         .name(name() + ".head_of_queue_delay" )//+ std::to_string(i))
         .desc( "currently unused")
         .init(numPids+1)
         ;
-    for(int i=0; i < numPids; i++) head_of_queue_delay.subname(i, std::to_string(i));
+    //for(int i=0; i < numPids; i++) head_of_queue_delay.subname(i, std::to_string(i));
     tmux_overhead
         .name(name() + ".tmux_overhead" )//+ std::to_string(i))
         .desc("cycles spent at head of queue wating for turn to start")
         .init(numPids+1)
         ;
-    for(int i=0; i < numPids; i++) tmux_overhead.subname(i, std::to_string(i));
+    //for(int i=0; i < numPids; i++) tmux_overhead.subname(i, std::to_string(i));
     wasted_tmux_overhead
         .name(name() + ".wasted_tmux_overhead" )//+ std::to_string(i))
         .desc( "portion of tmux_overhead while active is idle")
         .init(numPids+1)
         ;
-    for(int i=0; i < numPids; i++) wasted_tmux_overhead.subname(i, std::to_string(i));
+    //for(int i=0; i < numPids; i++) wasted_tmux_overhead.subname(i, std::to_string(i));
     donations
         .name(name() + ".donations" )//+ std::to_string(i))
         .desc( "number of turns donated")
         .init(numPids+1)
         ;
-    for(int i=0; i < numPids; i++) donations.subname(i, std::to_string(i));
+    //for(int i=0; i < numPids; i++) donations.subname(i, std::to_string(i));
     donated_issue_cycles
         .name(name() + ".donated_issue_cycles")// + std::to_string(i))
         .desc( "number of cycles consumed by issues in donated turns")
         .init(numPids+1)
         ;
-    for(int i=0; i < numPids; i++) donated_issue_cycles.subname(i, std::to_string(i));
+    //for(int i=0; i < numPids; i++) donated_issue_cycles.subname(i, std::to_string(i));
     donation_overhead
         .name(name() + ".donation_overhead")// + std::to_string(i))
         .desc("cycles wasted by donations to idle domains while the donor has work")
         .init(numPids+1)
         ;
-    for(int i=0; i < numPids; i++) donation_overhead.subname(i, std::to_string(i));
+    //for(int i=0; i < numPids; i++) donation_overhead.subname(i, std::to_string(i));
     dead_time_overhead
         .name(name() + ".dead_time_overhead")// + std::to_string(i))
         .desc("cycles each command is delayed because of dead time")
         .init(numPids)
         ;
-    for(int i=0; i < numPids; i++) dead_time_overhead.subname(i, std::to_string(i));
+    //for(int i=0; i < numPids; i++) dead_time_overhead.subname(i, std::to_string(i));
     monotonic_dead_time_recovered
         .name(name() + ".monotonic_time_recovered")
         .desc("time recovered by monotonic schedule")
         .init(numPids)
         ;
-    for(int i=0; i < numPids; i++) monotonic_dead_time_recovered.subname(i, std::to_string(i));
+    //for(int i=0; i < numPids; i++) monotonic_dead_time_recovered.subname(i, std::to_string(i));
    // }
 }
 
