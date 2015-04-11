@@ -20,14 +20,11 @@ PAPER_DIM = {
     legend_margin: 10 
 }
 
-
-
 def grouped_csv data, o={}
   o = {
     x_labels: $specint,
     legend: %w[]
   }.merge o
-  puts data
 
   "%-15s" % "bench," +  "#{o[:legend].inject("") { |s, l| s += "%-15s" % "#{l}, " }} \n" +
     data.each_with_index.inject("") do |s, (bench_data, i)|
@@ -42,22 +39,22 @@ end
 
 def grouped_bar data, o={}
     o = {
-        w: 500, 
+        w: 700, 
         h: 300,
-        left: 30,
+        left: 55,
+        right: 40,
         
         value_format: "%.2f",
         font: "16px sans-serif",
 
-        legend: %w[base bad_scheme fabricated berkeley_thing],
-        x_labels: %w[mcf bing mtgo],
         y_label: "Overhead",
         num_ticks: 8,
         
-        lower_text_margin: 20,
+        lower_text_margin: 30,
         group_space: 20,
         dot_size: 20,
-        legend_margin: 18
+        legend_margin: 18,
+
     }.merge o
 
     h = o[:h]
@@ -67,7 +64,8 @@ def grouped_bar data, o={}
     vis = pv.Panel.new.
         width(w).
         height(h).
-        left(o[:left])
+        left(o[:left]).
+        right(o[:right])
 
     colors = pv.Colors.category20()
     data_max = data.flatten.max
@@ -75,14 +73,15 @@ def grouped_bar data, o={}
         ( w - data[0].size * o[:group_space] ) / data.flatten.size.to_f
     group_width = data.size * bar_width + o[:group_space]
     bar_scale = (o[:h] - o[:legend_margin] - o[:dot_size] -
-                 o[:lower_text_margin]*2 )/ data_max.to_f
+                 o[:lower_text_margin]*2 )/ (o[:max_scale].to_f || data_max.to_f)
 
     #Outer Labels
     vis.add(pv.Label).
-        data(data).
-        bottom(o[:lower_text_margin]).
+        data(data[0]).
+        bottom(0).#o[:lower_text_margin]).
         text(lambda { o[:x_labels][index] } ).
         font(o[:font]).
+        text_angle(-Math::PI/6).
         left(lambda { group_width * index +
                      (group_width - o[:group_space] - bar_width)/2.0 } )
 
@@ -95,10 +94,12 @@ def grouped_bar data, o={}
             bottom(o[:lower_text_margin] * 2).
             fillStyle(lambda {colors.scale(group) } )
 
-        bar.anchor("top").add(pv.Label).
-            text_style("white").
-            font(o[:font]).
-            text(lambda { |d| o[:value_format] % d } )
+        if o[:numeric_labels]
+          bar.anchor("top").add(pv.Label).
+              text_style("white").
+              font(o[:font]).
+              text(lambda { |d| o[:value_format] % d } )
+        end
     end
 
 
@@ -117,7 +118,7 @@ def grouped_bar data, o={}
     end
     
     # Y-Axis Ticks
-    y = pv.Scale.linear(0, data_max).
+    y = pv.Scale.linear(0, o[:max_scale] || data_max).
         range(o[:lower_text_margin]*2, o[:h] - o[:legend_margin] -
              o[:dot_size])
     vis.add(pv.Rule).
@@ -139,7 +140,6 @@ def grouped_bar data, o={}
         text_align("center").
         font(o[:font]).
         text_angle(-Math::PI/2)
-
 
     vis.render
     vis.to_svg

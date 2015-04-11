@@ -31,8 +31,8 @@ end
 $mpworkloads = {
 
   #synthetic workloads
-  nothing_hardstride: %w[nothing hardstride],
-  hardstride_nothing: %w[hardstride nothing],
+  # nothing_hardstride: %w[nothing hardstride],
+  # hardstride_nothing: %w[hardstride nothing],
 
   # integer workloads
   mcf_bz2: %w[ mcf bzip2 ],
@@ -161,12 +161,18 @@ def find_time(filename, opts = {} )
   ticks / insts
 end
 
+
+#Memoization hash
+#@@stats = Hash.new
 def find_stat filename, regex, opts = {}
-    o = opts
+    #s=@@stats[[filename,regex]]; return s unless s.nil?
     (puts filename.red; return nil) unless File.exists? filename
     File.open(filename,'r') do |f|
       f.each_line.to_a.reverse.each do |l|
-          return l.match(regex)[1].to_f if l =~ regex 
+        return l.match(regex)[1].to_f if l =~ regex
+        # if l =~ regex
+        #   return @@stats[[filename,regex]] = l.match(regex)[1].to_f
+        # end
       end
     end
     (puts filename.blue; return nil) 
@@ -191,13 +197,13 @@ end
 def stp( p={} )
     wl = p[:workload]
     single_reg = /system.switch_cpus.cpi\s*(\d*\.\d*)/
-    single_times = benchmarks_in(wl).map do |b|
+    single_times = (benchmarks_in(wl).map do |b|
         find_stat (single_m5out p.merge(bench: b)), single_reg
-    end
+    end * (p[:numcpus]/2)).flatten
     s = p[:numcpus].times.map do |i|
         tisp = single_times[i]
         multi_reg = /system.switch_cpus#{i}.cpi\s*(\d*\.\d*)/
-        timp = find_stat (m5out_file p.merge(bench: benchmarks_in(wl)[i])),
+        timp = find_stat (m5out_file p.merge(bench: benchmarks_in(wl)[i%2])),
           multi_reg
         (tisp.nil? || timp.nil?) ? [] : tisp/timp
     end
@@ -218,10 +224,8 @@ end
 def data_of p={}
   p[:core_set].inject([]) do |a1,cores|
     a1 << $mpworkloads.keys.inject([]) do |a2,wl|
-      a2 << yield(p.merge(numcpus: cores, workload: wl))
-      a2
-    end
-    a1
+      a2 << yield(p.merge(numcpus: cores, workload: wl)); a2
+    end; a1
   end
 end
 
