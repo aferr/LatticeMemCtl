@@ -73,7 +73,7 @@ def grouped_bar data, o={}
         ( w - data[0].size * o[:group_space] ) / data.flatten.size.to_f
     group_width = data.size * bar_width + o[:group_space]
     bar_scale = (o[:h] - o[:legend_margin] - o[:dot_size] -
-                 o[:lower_text_margin]*2 )/ (o[:max_scale].to_f || data_max.to_f)
+                 o[:lower_text_margin]*2 )/ (o[:max_scale] || data_max).to_f
 
     #Outer Labels
     vis.add(pv.Label).
@@ -82,7 +82,7 @@ def grouped_bar data, o={}
         text(lambda { o[:x_labels][index] } ).
         font(o[:font]).
         text_angle(-Math::PI/6).
-        left(lambda { group_width * index +
+        left(lambda { group_width * (index-0.5) +
                      (group_width - o[:group_space] - bar_width)/2.0 } )
 
     data.size.times do |group|
