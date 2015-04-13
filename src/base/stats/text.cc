@@ -214,6 +214,11 @@ ScalarPrint::operator()(ostream &stream) const
         (flags.isSet(nonan) && std::isnan(value)))
         return;
 
+    if (descriptions) {
+        if (!desc.empty())
+            ccprintf(stream, " # %s\n", desc);
+    }
+
     stringstream pdfstr, cdfstr;
 
     if (!std::isnan(pdf))
@@ -225,10 +230,6 @@ ScalarPrint::operator()(ostream &stream) const
     ccprintf(stream, "%-40s %12s %10s %10s", name,
              ValueToString(value, precision), pdfstr, cdfstr);
 
-    if (descriptions) {
-        if (!desc.empty())
-            ccprintf(stream, " # %s", desc);
-    }
     stream << endl;
 }
 
