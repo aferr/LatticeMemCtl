@@ -45,20 +45,20 @@
 using namespace DRAMSim;
 using namespace std;
 
-BusPacket::BusPacket(BusPacketType packtype, uint64_t physicalAddr, 
-		unsigned col, unsigned rw, unsigned r, unsigned b, void *dat,
-		ostream &dramsim_log_) :
-	dramsim_log(dramsim_log_),
-	busPacketType(packtype),
-	column(col),
-	row(rw),
-	bank(b),
-	rank(r),
-	physicalAddress(physicalAddr),
-	data(dat),
-	//index(0),
-	returnTime(0)
-{}
+// BusPacket::BusPacket(BusPacketType packtype, uint64_t physicalAddr, 
+// 		unsigned col, unsigned rw, unsigned r, unsigned b, void *dat,
+// 		ostream &dramsim_log_) :
+// 	dramsim_log(dramsim_log_),
+// 	busPacketType(packtype),
+// 	column(col),
+// 	row(rw),
+// 	bank(b),
+// 	rank(r),
+// 	physicalAddress(physicalAddr),
+// 	data(dat),
+// 	//index(0),
+// 	returnTime(0)
+// {}
 
 BusPacket::BusPacket(BusPacketType packtype, uint64_t physicalAddr, 
 		unsigned col, unsigned rw, unsigned r, unsigned b, void *dat, unsigned pid,

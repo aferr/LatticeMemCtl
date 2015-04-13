@@ -182,7 +182,7 @@ void CommandQueueTP::refreshPopClosePage(BusPacket **busPacket, bool &
             != PowerDown)
     {
         *busPacket = new BusPacket(REFRESH, 0, 0, 0, refreshRank, 0, 0, 
-                num_pids, dramsim_log);
+                getCurrentPID(), dramsim_log);
 #ifdef DEBUG_TP
         // PRINTN("Refresh at " << currentClockCycle << " for rank " 
         //         << refreshRank << endl);

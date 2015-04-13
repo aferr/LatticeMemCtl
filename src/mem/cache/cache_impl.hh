@@ -962,10 +962,8 @@ Cache<TagStore>::handleResponse(PacketPtr pkt)
                 assert(!target->pkt->req->isUncacheable());
 
                 assert(target->pkt->req->masterId() < system->maxMasters());
-                if(pkt->threadID==0){
-                    missLatency[target->pkt->cmdToIndex()][target->pkt->req->masterId()] +=
-                        completion_time - target->recvTime;
-                }
+                missLatency[target->pkt->cmdToIndex()][target->pkt->req->masterId()] +=
+                    completion_time - target->recvTime;
             } else if (pkt->cmd == MemCmd::UpgradeFailResp) {
                 // failed StoreCond upgrade
                 assert(target->pkt->cmd == MemCmd::StoreCondReq ||
