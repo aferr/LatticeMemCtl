@@ -150,6 +150,12 @@ MemorySystem::MemorySystem(unsigned id, unsigned int megsOfMemory,
             new MemoryControllerDonor(this, csvOut, dramsim_log, 
                     outputFilename, tpTurnLength, genTrace, traceFilename, num_pids, fixAddr, diffPeriod, p0Period, p1Period, offset,
                     lattice_config);
+    } else if(timingProtection == InvPrio){
+        use_TP = true;
+        memoryController = 
+            new MemoryControllerInvPrio(this, csvOut, dramsim_log, 
+                    outputFilename, tpTurnLength, genTrace, traceFilename, num_pids, fixAddr, diffPeriod, p0Period, p1Period, offset,
+                    lattice_config);
     } else if(timingProtection == Monotonic ){
 		use_TP = true;
         memoryController = 

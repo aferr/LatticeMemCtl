@@ -11,7 +11,7 @@ module RunScripts
     $test_opts = {
         debug: true,
         fastforward: 10,
-        maxinsts: 100,
+        maxinsts: 10**5,
         num_wl: 8,
         runmode: :local
     }
@@ -56,6 +56,16 @@ module RunScripts
             num_wl: 2,
             addrpar: true
         )
+    end
+    
+    def inv_prio_short 
+      iterate_mp $test_opts.merge(
+        scheme: "invprio",
+        maxinsts: 10**5,
+        fastforward: 10,
+        num_wl: 2,
+        addrpar: true
+      )
     end
 
 end

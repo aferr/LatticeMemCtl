@@ -1,4 +1,7 @@
-#include "MemoryControllerTPD.h"
+#ifndef memorycontrollertp
+#include "MemoryControllerTP.h"
+#define memorycontrollertp
+#endif
 
 using namespace std;
 

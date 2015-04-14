@@ -3,15 +3,14 @@
 #define memorycontrollertp
 #endif
 
-
 using namespace std;
 
 namespace DRAMSim
 {
-    class MemoryControllerDonor : public MemoryControllerTP
+    class MemoryControllerInvPrio: public MemoryControllerTP
     {
         public:
-            MemoryControllerDonor(MemorySystem* ms, CSVWriter &csvOut_, 
+            MemoryControllerInvPrio(MemorySystem* ms, CSVWriter &csvOut_, 
                     ostream &dramsim_log_, 
                     const string &outputFilename_,
                     unsigned tpTurnLength_,

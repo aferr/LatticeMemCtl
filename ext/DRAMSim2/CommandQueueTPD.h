@@ -1,4 +1,7 @@
-#include "CommandQueueFA.h"
+#ifndef cctp
+#include "CommandQueueTP.h"
+#define cctp
+#endif
 
 #define BLOCK_TIME 12
 // #define DEBUG_TP

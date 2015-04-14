@@ -595,6 +595,9 @@ void IniReader::InitEnumsFromStrings()
     } else if(TIMING_PROTECTION == "fixed_timing"){
         timingProtection = FixedTiming;
         queuingStructure = PerRankPerThread;
+    } else if(TIMING_PROTECTION == "invprio"){
+        timingProtection = InvPrio;
+        queuingStructure = PerRankPerThread;
     } else if(TIMING_PROTECTION == "donor"){
         timingProtection = Donor;
         queuingStructure = PerRankPerThread;

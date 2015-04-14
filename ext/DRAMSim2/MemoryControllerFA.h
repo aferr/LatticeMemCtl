@@ -1,5 +1,9 @@
+#ifndef memorycontrollertp
 #include "MemoryControllerTP.h"
-#include "CommandQueueTPD.h"
+#define memorycontrollertp
+#endif
+
+#include "CommandQueueFA.h"
 
 using namespace std;
 
