@@ -54,7 +54,7 @@ def abs_monotonic o={}
   puts "abs_monotonic".green
   puts r
   gb = grouped_bar r, o #.merge(legend: [8])
-  csv = grouped_bar r.transpose, o #.merge(legend: [8])
+  csv = grouped_csv  r.transpose, o #.merge(legend: [8])
   string_to_f gb, "#{o[:out_dir]}/monotonic_#{o[:mname]}.svg"
   string_to_f csv, "#{o[:out_dir]}/monotonic_#{o[:mname]}.csv"
 end
@@ -130,6 +130,13 @@ end
 # Latency breakdown
 #------------------------------------------------------------------------------
 def latency_data o={}
+    f =  m5out_file o 
+    num_requests = o[:numcpus].times.map do |i|
+        ireg=/system.l3.overall_misses::switch_cpus#{i}.inst\s*(\d*.\d*)/
+        dreg=/system.l3.overall_misses::switch_cpus#{i}.data\s*(\d*.\d*)/
+        (find_stat f, ireg) + (find_stat f, dreg)
+    end.flatten.reduce(:+)
+
     o[:numcpus].times.map do |i|
         f =  m5out_file o 
         [
@@ -137,22 +144,15 @@ def latency_data o={}
             (find_stat f, /system.physmem.tmux_overhead::#{i}\s*(\d*.\d)/),
             (find_stat f, /system.physmem.dead_time_overhead::#{i}\s*(\d*.\d)/),
             (find_stat f, /system.physmem.queueing_delay::#{i}\s*(\d*.\d)/),
-        ].map do |l|
-            ireg=/system.l3.overall_misses::switch_cpus#{i}.inst\s*(\d*.\d*)/
-            dreg=/system.l3.overall_misses::switch_cpus#{i}.data\s*(\d*.\d*)/
-            l / ((find_stat f, ireg) + (find_stat f, dreg))
-        end
+        ]
+    end.transpose.map { |i| i.reduce(:+) }.map do |lat|
+        lat / num_requests
     end
 end
-
-def latency_data_reduced_of(p={})
-  data_of(p) do |o|
-    (latency_data o).transpose.map { |i| i.reduce(:+) }
-  end
-end
+def latency_data_of(p={}) data_of(p){|o| latency_data o} end
 
 def baseline_latency o={}
-  r = (latency_data_reduced_of o)[0]
+  r = (latency_data_of o)[0]
   gb = grouped_bar r.transpose, o.merge( legend: %w[wtmux tmux dead queueing])
   csv = grouped_csv r, o.merge( legend: %w[wtmux tmux dead queueing])
   string_to_f gb, "#{o[:out_dir]}/baseline_latency.svg"
@@ -160,7 +160,7 @@ def baseline_latency o={}
 end
 
 def tp_latency o={}
-  r = (latency_data_reduced_of (o.merge scheme: "tp"))[0]
+  r = (latency_data_of (o.merge scheme: "tp"))[0]
   gb = grouped_bar r.transpose, o.merge( legend: %w[wtmux tmux dead queueing])
   csv = grouped_csv r, o.merge( legend: %w[wtmux tmux dead queueing])
   string_to_f gb, "#{o[:out_dir]}/tp_latency.svg"
@@ -168,7 +168,7 @@ def tp_latency o={}
 end
 
 def donor_latency o={}
-  r = (latency_data_reduced_of (o.merge scheme: "donor"))[0]
+  r = (latency_data_of (o.merge scheme: "donor"))[0]
   gb = grouped_bar r.transpose, o.merge( legend: %w[wtmux tmux dead queueing])
   csv = grouped_csv r, o.merge( legend: %w[wtmux tmux dead queueing])
   string_to_f gb, "#{o[:out_dir]}/donor_latency.svg"
@@ -176,7 +176,7 @@ def donor_latency o={}
 end
 
 def monotonic_latency o={}
-  r = (latency_data_reduced_of (o.merge scheme: "monotonic"))[0]
+  r = (latency_data_of (o.merge scheme: "monotonic"))[0]
   gb = grouped_bar r.transpose, o.merge( legend: %w[wtmux tmux dead queueing])
   csv = grouped_csv r, o.merge( legend: %w[wtmux tmux dead queueing])
   string_to_f gb, "#{o[:out_dir]}/monotonic_latency.svg"
@@ -184,15 +184,9 @@ def monotonic_latency o={}
 end
 
 def donor_latency_norm o={}
-  # r = (data_of o do |p|
-  #   normalized(
-  #     (latency_data p.merge(scheme: "donor")),
-  #     (latency_data p.merge(scheme: "tp"))
-  #   ).transpose.map { |i| i.reduce { |x, y| 0.5 * (x + y) } }
-  # end)[0]
   r = normalized(
-   (latency_data_reduced_of (o.merge scheme: "donor"))[0],
-   (latency_data_reduced_of (o.merge scheme: "tp"))[0]
+    (latency_data_of (o.merge scheme: "donor"))[0],
+    (latency_data_of (o.merge scheme: "tp"))[0]
   )
   gb = grouped_bar r.transpose, o.merge( legend: %w[wtmux tmux dead queueing])
   csv = grouped_csv r, o.merge( legend: %w[wtmux tmux dead queueing])
@@ -201,22 +195,15 @@ def donor_latency_norm o={}
 end
 
 def monotonic_latency_norm o={}
-  # r = (data_of o do |p|
-  #   normalized(
-  #     (latency_data p.merge(scheme: "donor")),
-  #     (latency_data p.merge(scheme: "tp"))
-  #   ).transpose.map { |i| i.reduce { |x, y| 0.5 * (x + y) } }
-  # end)[0]
   r = normalized(
-   (latency_data_reduced_of (o.merge scheme: "monotonic"))[0],
-   (latency_data_reduced_of (o.merge scheme: "tp"))[0]
+    (latency_data_of (o.merge scheme: "monotonic"))[0],
+    (latency_data_of (o.merge scheme: "tp"))[0]
   )
   gb = grouped_bar r.transpose, o.merge( legend: %w[wtmux tmux dead queueing])
   csv = grouped_csv r, o.merge( legend: %w[wtmux tmux dead queueing])
   string_to_f gb, "#{o[:out_dir]}/monotonic_norm.svg"
   string_to_f csv, "#{o[:out_dir]}/monotonic_norm.csv"
 end
-
 
 #------------------------------------------------------------------------------
 # "Main"
@@ -249,10 +236,10 @@ if __FILE__ == $0
       # font: "18px arial"
   }
 
-  abs_baseline abs_o
-  abs_tp abs_o
-  abs_donor abs_o
-  abs_monotonic abs_o
+  # abs_baseline abs_o
+  # abs_tp abs_o
+  # abs_donor abs_o
+  # abs_monotonic abs_o
 
   latency_o = abs_o.merge(
     group_space: 15,
@@ -263,18 +250,18 @@ if __FILE__ == $0
     y_label: "Normalized Avg Latency"
   )
 
-  baseline_latency latency_o
-  tp_latency latency_o
-  donor_latency latency_o
-  monotonic_latency latency_o
+  # baseline_latency latency_o
+  # tp_latency latency_o
+  # donor_latency latency_o
+  # monotonic_latency latency_o
 
   latency_norm_o = latency_o.merge(
     max_scale: nil,
     group_space: 15,
   )
 
-  donor_latency_norm latency_norm_o
-  monotonic_latency_norm latency_norm_o
+  # donor_latency_norm latency_norm_o
+  # monotonic_latency_norm latency_norm_o
   
   normo = {
       x_labels: $new_names,
@@ -288,16 +275,8 @@ if __FILE__ == $0
       mname: "stp",
   }
 
-  safe_schemes normo
-  safe_schemes_norm_tp normo
-
-  # norm_ntc normo
-  # norm_2tc normo
-  # norm_breakdown normo
-  
-  # paramo = normo.merge(bar_width: 1)
-  # norm_params paramo
-  # norm_params_nocwf paramo
+  # safe_schemes normo
+  # safe_schemes_norm_tp normo
 
   # svg2pdf out_dir
 
