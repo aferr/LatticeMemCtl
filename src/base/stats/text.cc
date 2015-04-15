@@ -216,7 +216,7 @@ ScalarPrint::operator()(ostream &stream) const
 
     if (descriptions) {
         if (!desc.empty())
-            ccprintf(stream, " # %s\n", desc);
+            ccprintf(stream, "\n# %s\n", desc);
     }
 
     stringstream pdfstr, cdfstr;
