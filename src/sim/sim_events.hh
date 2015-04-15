@@ -82,6 +82,7 @@ class CountedExitEvent : public Event
     std::string cause;  // string explaining why we're terminating
     int &downCounter;   // decrement & terminate if zero
     int reset_val; // reset downCounter when this reaches 0
+    bool has_reset;
 
   public:
     CountedExitEvent(const std::string &_cause, int &_downCounter, int reset_val=0);

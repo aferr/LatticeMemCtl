@@ -55,6 +55,7 @@ Stats::Formula simSeconds;
 Stats::Value simTicks;
 Stats::Value finalTick;
 Stats::Value simFreq;
+int term_cpu_val;
 
 namespace Stats {
 
@@ -104,9 +105,12 @@ struct Global
 
     Stats::Value simInsts;
     Stats::Value simOps;
+    Stats::Value termCPU;
 
     Global();
 };
+
+int term_cpu(){ return term_cpu_val; }
 
 Global::Global()
 {
@@ -135,6 +139,12 @@ Global::Global()
         .scalar(SimClock::Frequency)
         .name("sim_freq")
         .desc("Frequency of simulated ticks")
+        ;
+
+    termCPU
+        .functor(term_cpu)
+        .name("term_cpu")
+        .desc("CPU that terminated causing this dump")
         ;
 
     simTicks
@@ -204,17 +214,20 @@ class StatEvent : public Event
     bool dump;
     bool reset;
     Tick repeat;
+    int term;
 
   public:
-    StatEvent(bool _dump, bool _reset, Tick _repeat)
+    StatEvent(bool _dump, bool _reset, Tick _repeat, int term=-1)
         : Event(Stat_Event_Pri, AutoDelete),
-          dump(_dump), reset(_reset), repeat(_repeat)
+          dump(_dump), reset(_reset), repeat(_repeat), term(term)
     {
     }
 
+    
     virtual void
     process()
     {
+        term_cpu_val = term;
         if (dump)
             Stats::dump();
 
@@ -224,13 +237,14 @@ class StatEvent : public Event
         if (repeat) {
             Stats::schedStatEvent(dump, reset, curTick() + repeat, repeat);
         }
+        term_cpu_val = -1;
     }
 };
 
 void
-schedStatEvent(bool dump, bool reset, Tick when, Tick repeat)
+schedStatEvent(bool dump, bool reset, Tick when, Tick repeat, int term)
 {
-    Event *event = new StatEvent(dump, reset, repeat);
+    Event *event = new StatEvent(dump, reset, repeat, term);
     mainEventQueue.schedule(event, when);
 }
 

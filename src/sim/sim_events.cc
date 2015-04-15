@@ -39,6 +39,7 @@
 #include "sim/global_exit_count.hh"
 
 using namespace std;
+extern int term_cpu_val;
 
     SimLoopExitEvent::SimLoopExitEvent(const std::string &_cause, int c, Tick r)
 : Event(Sim_Exit_Pri, IsExitEvent), cause(_cause), code(c), repeat(r)
@@ -111,6 +112,17 @@ CountedDrainEvent::process()
     assert(downCounter > 0);
 }
 
+int cpu_match(const std::string &message){
+    if(message.find("cpu0") != string::npos) return 0;
+    else if(message.find("cpu1") != string::npos) return 1;
+    else if(message.find("cpu2") != string::npos) return 2;
+    else if(message.find("cpu3") != string::npos) return 3;
+    else if(message.find("cpu4") != string::npos) return 4;
+    else if(message.find("cpu5") != string::npos) return 5;
+    else if(message.find("cpu6") != string::npos) return 6;
+    else if(message.find("cpu7") != string::npos) return 7;
+    return -1;
+}
 
 //
 // handle termination event
@@ -118,7 +130,9 @@ CountedDrainEvent::process()
     void
 CountedExitEvent::process()
 {
+    term_cpu_val = cpu_match(cause);
     Stats::dump();
+    term_cpu_val = -1;
     if (--downCounter == 0) {
         downCounter = reset_val;
         exitSimLoop(cause, 0);
@@ -126,7 +140,6 @@ CountedExitEvent::process()
         cout << cause << " @ " << curTick() << endl;
     }
 }
-
 
 const char *
 CountedExitEvent::description() const
