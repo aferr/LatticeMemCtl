@@ -41,6 +41,7 @@
 #include "MemorySystem.h"
 #include "AddressMapping.h"
 #include <iomanip>
+#include <cassert>
 
 #define SEQUENTIAL(rank,bank) (rank*NUM_BANKS)+bank
 
@@ -312,9 +313,13 @@ void MemoryController::update()
     {
         poppedBusPacket->popTime = currentClockCycle;
         BusPacket* pbp = poppedBusPacket;
-        (*(commandQueue->incr_stat))(commandQueue->queueing_delay,
-                pbp->threadID,currentClockCycle - pbp->enqueueTime,0);
-        commandQueue->check_donor_issue();
+        if(pbp->busPacketType != REFRESH){
+            assert(pbp->enqueueTimeisSet);
+            assert(pbp->enqueueTime <= currentClockCycle);
+            (*(commandQueue->incr_stat))(commandQueue->queueing_delay,
+                    pbp->threadID, currentClockCycle - pbp->enqueueTime,0);
+            commandQueue->check_donor_issue();
+        }
 #ifdef VALIDATE_STATS
         PRINT("Popped at " << currentClockCycle << " " <<
                 "with enqueue time " << pbp->enqueueTime);

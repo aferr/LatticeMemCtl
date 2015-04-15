@@ -61,6 +61,7 @@ void CommandQueueTP::enqueue(BusPacket *newBusPacket)
     unsigned rank = newBusPacket->rank;
     unsigned pid = newBusPacket->threadID;
     newBusPacket->enqueueTime = currentClockCycle;
+    newBusPacket->enqueueTimeisSet = true;
 #ifdef VALIDATE_STATS
     PRINT("enqueueing at " << currentClockCycle << " ");
     newBusPacket->print();

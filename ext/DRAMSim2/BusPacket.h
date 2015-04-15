@@ -69,6 +69,7 @@ public:
 	unsigned returnTime;
 
     unsigned enqueueTime;
+    bool enqueueTimeisSet;
     unsigned beginHeadTime;
     unsigned popTime;
 

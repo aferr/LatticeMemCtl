@@ -73,7 +73,9 @@ BusPacket::BusPacket(BusPacketType packtype, uint64_t physicalAddr,
 	data(dat),
 	threadID(pid)
 	//index(0)
-{}
+{
+    enqueueTimeisSet = false;
+}
 
 void BusPacket::print(uint64_t currentClockCycle, bool dataStart)
 {
