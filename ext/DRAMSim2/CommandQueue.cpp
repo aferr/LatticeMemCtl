@@ -144,6 +144,7 @@ void CommandQueue::enqueue(BusPacket *newBusPacket)
     unsigned rank = newBusPacket->rank;
     unsigned bank = newBusPacket->bank;
     newBusPacket->enqueueTime = currentClockCycle;
+    newBusPacket->enqueueTimeisSet = true;
     if (queuingStructure==PerRank)
     {
         queues[rank][0].push_back(newBusPacket);

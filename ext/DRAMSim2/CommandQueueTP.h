@@ -52,6 +52,8 @@ namespace DRAMSim
             virtual int normal_deadtime(int tlength);
             virtual int refresh_deadtime(int tlength);
 
+            virtual void update_stats();
+
             // Tell the donor scheme child to check if an issue was allowed 
             // because of a donated turn
 

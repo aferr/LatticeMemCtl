@@ -40,27 +40,18 @@ CommandQueueDonor::step(){
       }
     }
 
-    for(int i=0; i < num_pids; i++){
-        if( !tcidEmpty(i) && getCurrentPID()!=i ){
-            (*incr_stat)(tmux_overhead,i,
-                    queueSizeByTcid(i),NULL);
+}
 
-            if( tcidEmpty(getCurrentPID()) ){
-                (*incr_stat)(wasted_tmux_overhead,i,
-                        queueSizeByTcid(i),NULL);
-                if( !tcidEmpty(CommandQueueTP::getCurrentPID()) ){
+void CommandQueueDonor::update_stats(){
+    CommandQueueTP::update_stats();
+    for(int i=0; i < num_pids; i++){
+        if( !tcidEmpty(i) && getCurrentPID()!=i &&
+            tcidEmpty(getCurrentPID()) &&
+            !tcidEmpty(CommandQueueTP::getCurrentPID()) ){
                     (*incr_stat)(donation_overhead,i,
                             queueSizeByTcid(i),NULL);
-                }
-            }
         }
     }
-
-    if(isBufferTime() && !tcidEmpty(getCurrentPID())){
-        (*incr_stat)(dead_time_overhead,getCurrentPID(),
-                queueSizeByTcid(getCurrentPID()),NULL);
-    }
-
 }
 
 void CommandQueueDonor::check_donor_issue(){

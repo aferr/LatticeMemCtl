@@ -22,7 +22,12 @@ CommandQueueTP::CommandQueueTP(vector< vector<BankState> > &states,
 void
 CommandQueueTP::step(){
    SimulatorObject::step();
- 
+   update_stats();
+
+}
+
+void
+CommandQueueTP::update_stats(){
    for(int i=0; i < num_pids; i++){
        if( !tcidEmpty(i) && getCurrentPID()!=i ){
            (*incr_stat)(tmux_overhead,i,
@@ -35,11 +40,9 @@ CommandQueueTP::step(){
    }
 
    if(isBufferTime() && !tcidEmpty(getCurrentPID())){
-       (*incr_stat)(dead_time_overhead,getCurrentPID(),
+       (*incr_stat)(dead_time_overhead, getCurrentPID(),
                queueSizeByTcid(getCurrentPID()),NULL);
    }
-
-
 }
 
 int CommandQueueTP::normal_deadtime(int tlength){
@@ -58,6 +61,7 @@ void CommandQueueTP::enqueue(BusPacket *newBusPacket)
     unsigned rank = newBusPacket->rank;
     unsigned pid = newBusPacket->threadID;
     newBusPacket->enqueueTime = currentClockCycle;
+    newBusPacket->enqueueTimeisSet = true;
 #ifdef VALIDATE_STATS
     PRINT("enqueueing at " << currentClockCycle << " ");
     newBusPacket->print();
