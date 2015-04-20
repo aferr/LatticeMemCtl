@@ -127,14 +127,15 @@ int cpu_match(const std::string &message){
 //
 // handle termination event
 //
-    void
-CountedExitEvent::process()
+bool has_reset = false;
+void CountedExitEvent::process()
 {
     term_cpu_val = cpu_match(cause);
-    Stats::dump();
+    if(has_reset) Stats::dump();
     term_cpu_val = -1;
     if (--downCounter == 0) {
         downCounter = reset_val;
+        has_reset = true;
         exitSimLoop(cause, 0);
     } else {
         cout << cause << " @ " << curTick() << endl;
