@@ -34,11 +34,14 @@ namespace DRAMSim
         virtual unsigned select_turn_owner();
         virtual unsigned getCurrentPID();
 
-        int next_higher_tc(unsigned tcid);
-        int next_higher_tc_config1(unsigned tcid);
-        int next_higher_tc_config2(unsigned tcid);
+        unsigned next_higher_tc(unsigned tcid);
+        unsigned next_higher_tc_config1(unsigned tcid);
+        unsigned next_higher_tc_config2(unsigned tcid);
         bool is_top(unsigned tcid);
         unsigned bottom();
+
+        virtual int normal_deadtime(int);
+        virtual int refresh_deadtime(int);
 
     };
 

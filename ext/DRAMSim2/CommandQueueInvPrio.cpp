@@ -73,7 +73,7 @@ unsigned CommandQueueInvPrio::getCurrentPID(){
     return turn_owner;
 }
 
-int CommandQueueInvPrio::next_higher_tc(unsigned tcid){
+unsigned CommandQueueInvPrio::next_higher_tc(unsigned tcid){
     switch (lattice_config){
         case 1: return next_higher_tc_config1(tcid);
         case 2: return next_higher_tc_config2(tcid);
@@ -81,8 +81,7 @@ int CommandQueueInvPrio::next_higher_tc(unsigned tcid){
     }
 }
 
-int
-CommandQueueInvPrio::next_higher_tc_config1(unsigned tcid){
+unsigned CommandQueueInvPrio::next_higher_tc_config1(unsigned tcid){
     if(tcid==0){
         return 0;
     } else {
@@ -91,8 +90,7 @@ CommandQueueInvPrio::next_higher_tc_config1(unsigned tcid){
     }
 }
 
-int
-CommandQueueInvPrio::next_higher_tc_config2(unsigned tcid){
+unsigned CommandQueueInvPrio::next_higher_tc_config2(unsigned tcid){
     if( tcid == num_pids - 1 ){
         return num_pids-1;
     } else {
@@ -101,8 +99,7 @@ CommandQueueInvPrio::next_higher_tc_config2(unsigned tcid){
     }
 }
 
-unsigned
-CommandQueueInvPrio::bottom(){
+unsigned CommandQueueInvPrio::bottom(){
     switch (lattice_config){
         case 1: return num_pids - 1;
         case 2: return 0;
@@ -110,11 +107,20 @@ CommandQueueInvPrio::bottom(){
     }
 }
 
-bool
-CommandQueueInvPrio::is_top(unsigned int i){
+bool CommandQueueInvPrio::is_top(unsigned int i){
     switch (lattice_config){
         case 1: return i==0;
         case 2: return i == (num_pids - 1);
         default: return i==0;
     }
 }
+
+int CommandQueueInvPrio::normal_deadtime(int tlength){
+    return 0;
+}
+
+int CommandQueueInvPrio::refresh_deadtime(int tlength){
+    //return 0;
+    return CommandQueueTP::refresh_deadtime(tlength);
+}
+

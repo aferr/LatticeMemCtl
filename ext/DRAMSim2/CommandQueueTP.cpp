@@ -14,16 +14,21 @@ CommandQueueTP::CommandQueueTP(vector< vector<BankState> > &states,
     p0Period = p0Period_;
     p1Period = p1Period_;
 	offset = offset_;
-#ifdef DEBUG_TP
-    cout << "TP Debugging is on." <<endl;
-#endif
+
+    // Implement TC.
+    turnAllocationTimer = new TurnStartAllocationTimer(this);
+    deadTimeCalc = new StrictDeadTimeCalc();
+    turnAllocator = new TDMTurnAllocator(this);
+    current_tc = turnAllocator->allocate_turn();
 }
 
 void
 CommandQueueTP::step(){
    SimulatorObject::step();
    update_stats();
-
+   if( turnAllocationTimer->is_reallocation_time() ){
+       current_tc = turnAllocator->allocate_turn();
+   } 
 }
 
 void
@@ -46,14 +51,11 @@ CommandQueueTP::update_stats(){
 }
 
 int CommandQueueTP::normal_deadtime(int tlength){
-  // int ret = tlength - (tlength - WORST_CASE_DELAY)/10;
-  // return ret;
-  return WORST_CASE_DELAY;
+    return deadTimeCalc->normal_deadtime();
 }
 
 int CommandQueueTP::refresh_deadtime(int tlength){
-  // return tlength - (tlength - TP_BUFFER_TIME)/10;
-  return WORST_CASE_DELAY;
+    return deadTimeCalc->refresh_deadtime();
 }
 
 void CommandQueueTP::enqueue(BusPacket *newBusPacket)
@@ -69,10 +71,6 @@ void CommandQueueTP::enqueue(BusPacket *newBusPacket)
 #endif /*VALIDATE_STATS*/
 
     queues[rank][pid].push_back(newBusPacket);
-#ifdef DEBUG_TP
-    if(newBusPacket->physicalAddress == interesting)
-        cout << "Enqueued interesting @ "<< currentClockCycle <<endl;
-#endif /*DEBUG_TP*/
     if (queues[rank][pid].size()>CMD_QUEUE_DEPTH)
     {
         ERROR("== Error - Enqueued more than allowed in command queue");
@@ -105,7 +103,7 @@ bool CommandQueueTP::tcidEmpty(int tcid)
 
 int CommandQueueTP::queueSizeByTcid(unsigned tcid){
     int r = 0;
-    for( int i=0; i<NUM_RANKS; i++)
+    for(int i=0; i<NUM_RANKS; i++)
         r += queues[i][tcid].size();
     return r;
 }
@@ -129,12 +127,6 @@ void CommandQueueTP::refreshPopClosePage(BusPacket **busPacket, bool &
         if (bankStates[refreshRank][b].currentBankState == RowActive)
         {
             foundActiveOrTooEarly = true;
-#ifdef DEBUG_TP
-            cout << "TooEarly because row is active with pid " << getCurrentPID()
-                << " at time " << currentClockCycle <<endl;
-            bankStates[refreshRank][b].print();
-            print();
-#endif /*DEBUG_TP*/
             //if the bank is open, make sure there is nothing else
             // going there before we close it
             for (size_t j=0;j<queue.size();j++)
@@ -170,11 +162,6 @@ void CommandQueueTP::refreshPopClosePage(BusPacket **busPacket, bool &
                 currentClockCycle)
         {
             foundActiveOrTooEarly = true;
-#ifdef DEBUG_TP
-            cout << "TooEarly because nextActivate is "
-                <<bankStates[refreshRank][b].nextActivate
-                << " at time " << currentClockCycle <<endl;
-#endif /*DEBUG_TP*/
             break;
         }
         //}
@@ -187,10 +174,6 @@ void CommandQueueTP::refreshPopClosePage(BusPacket **busPacket, bool &
     {
         *busPacket = new BusPacket(REFRESH, 0, 0, 0, refreshRank, 0, 0, 
                 getCurrentPID(), dramsim_log);
-#ifdef DEBUG_TP
-        // PRINTN("Refresh at " << currentClockCycle << " for rank " 
-        //         << refreshRank << endl);
-#endif /*DEBUG_TP*/
         refreshRank = -1;
         refreshWaiting = false;
         sendingREF = true;
@@ -203,23 +186,6 @@ bool CommandQueueTP::normalPopClosePage(BusPacket **busPacket, bool
     bool foundIssuable = false;
     unsigned startingRank = nextRank;
     unsigned startingBank = nextBank;
-//     if(lastPID!=getCurrentPID()){
-//         //if the turn changes, reset the nextRank, nextBank, and
-//         //starters. It seems to have no effect on interference.
-//         nextRank = nextBank =0;
-//         startingRank = nextRank;
-//         startingBank = nextBank;
-// #ifdef DEBUG_TP
-//         if( hasInteresting() ){
-//         cout << endl << "==========================================="<<endl;
-//         cout << "Starting turn of length 2**"<<tpTurnLength<<" with PID "<<
-//             getCurrentPID() <<" at cycle "<< currentClockCycle << endl;
-//         cout << endl;
-//         print();
-//         }
-// #endif /*DEBUG_TP*/
-//     }
-//     lastPID = getCurrentPID();
 
     while(true)
     {
@@ -231,12 +197,6 @@ bool CommandQueueTP::normalPopClosePage(BusPacket **busPacket, bool
         //	the
         //		refresh logic above has sent one out (ie, letting banks close)
 
-#ifdef DEBUG_TP
-        if(hasInteresting()){
-            printf("nextRank %u refreshRank %u currentPID %u\n",nextRank,refreshRank,getCurrentPID());
-        }
-#endif /*DEBUG_TP*/
-
         if (!queue.empty() && !((nextRank == refreshRank) && refreshWaiting))
         {
 
@@ -246,16 +206,6 @@ bool CommandQueueTP::normalPopClosePage(BusPacket **busPacket, bool
 
                 if (isIssuable(queue[i]))
                 {
-#ifdef DEBUG_TP
-                    if(lastPopTime!=currentClockCycle &&
-                            queue[i]->physicalAddress == interesting){
-                        string bptype = (queue[i]->busPacketType==ACTIVATE) ?
-                            "activate" : "r/w";
-                        cout << "popped interesting "<< bptype << " @ "
-                            << currentClockCycle << endl;
-                        lastPopTime = currentClockCycle;
-                    }
-#endif /*DEBUG_TP*/
                     //If a turn change is about to happen, don't
                     //issue any activates
                     
@@ -272,38 +222,14 @@ bool CommandQueueTP::normalPopClosePage(BusPacket **busPacket, bool
                         continue;
 
                     *busPacket = queue[i];
-					//cout << "popped " << queue[i]->physicalAddress << " @ " << currentClockCycle << endl;
 
                     queue.erase(queue.begin()+i);
                     (*queue.begin())->beginHeadTime = currentClockCycle;
                     foundIssuable = true;
                     break;
                 }
-#ifdef DEBUG_TP
-                else if( queue[i]->physicalAddress==interesting
-                        && lastPopTime!= currentClockCycle )
-                {
-                    string bptype = (queue[i]->busPacketType==ACTIVATE) ?
-                        "activate" : "r/w";
-                    cout << "interesting couldn't issue @ "<<
-                        currentClockCycle << " as a "<<bptype <<endl;
-                    cout << "nextRank "<<nextRank<< " nextBank "<<nextBank
-                        << endl << "startingRank "<<startingRank
-                        <<" startingBank " << startingBank << endl;
-                    printf("refreshRank %u\n",refreshRank);
-                    bankStates[queue[i]->rank][queue[i]->bank].print();
-                    print();
-                    lastPopTime = currentClockCycle;
-                }
-#endif /*DEBUG_TP*/
             }
         }
-#ifdef DEBUG_TP 
-        // else if(hasInteresting() && refreshWaiting && nextRank ==refreshRank){
-        //     PRINTN("Blocked by refreshRank at "<<currentClockCycle<<
-        //              " with turn "<<currentPID<<endl);
-        // }
-#endif /*DEBUG_TP*/
 
         //if we found something, break out of do-while
         if (foundIssuable){
@@ -342,10 +268,11 @@ void CommandQueueTP::print()
 }
 
 unsigned CommandQueueTP::getCurrentPID(){
-  unsigned ccc_ = currentClockCycle - offset;
-  unsigned schedule_time = ccc_ % (p0Period + (num_pids-1) * p1Period);
-  if( schedule_time < p0Period ) return 0;
-  return (schedule_time - p0Period) / p1Period + 1;
+  // unsigned ccc_ = currentClockCycle - offset;
+  // unsigned schedule_time = ccc_ % (p0Period + (num_pids-1) * p1Period);
+  // if( schedule_time < p0Period ) return 0;
+  // return (schedule_time - p0Period) / p1Period + 1;
+    return current_tc;
 }
 
 bool CommandQueueTP::isBufferTime(){
@@ -402,14 +329,37 @@ bool CommandQueueTP::isBufferTimePure(){
 
 }
 
-#ifdef DEBUG_TP
-bool CommandQueueTP::hasInteresting(){
-    vector<BusPacket *> &queue = getCommandQueue(nextRank, 1);
-    for(size_t i=0; i<queue.size(); i++){
-        if (queue[i]->physicalAddress == interesting)
-            return true;
-    }
-    return false;
+//-----------------------------------------------------------------------------
+// Turn Ownership Timers
+//-----------------------------------------------------------------------------
+bool CommandQueueTP::TurnStartAllocationTimer::is_reallocation_time(){
+    unsigned ccc_ = cc->currentClockCycle - cc->offset;
+    unsigned schedule_time = ccc_ %
+        (cc->p0Period + (cc->num_pids-1) * cc->p1Period);
+    bool is_turn_start = schedule_time==0 ||
+        ((schedule_time-cc->p0Period)%cc->p1Period==0);
+    return is_turn_start;
 }
-#endif /*DEBUG_TP*/
+
+//-----------------------------------------------------------------------------
+// Dead Time Calculators
+//-----------------------------------------------------------------------------
+int CommandQueueTP::StrictDeadTimeCalc::normal_deadtime(){
+    return WORST_CASE_DELAY;
+}
+
+int CommandQueueTP::StrictDeadTimeCalc::refresh_deadtime(){
+    return TP_BUFFER_TIME;
+}
+
+//-----------------------------------------------------------------------------
+// Turn Ownership Decision
+//-----------------------------------------------------------------------------
+unsigned CommandQueueTP::TDMTurnAllocator::allocate_turn(){
+    unsigned ccc_ = cc->currentClockCycle - cc->offset;
+    unsigned schedule_time = ccc_ %
+        (cc->p0Period + (cc->num_pids-1) * cc->p1Period);
+    if( schedule_time < cc->p0Period ) return 0;
+    return (schedule_time - cc->p0Period) / cc->p1Period + 1;
+}
 
