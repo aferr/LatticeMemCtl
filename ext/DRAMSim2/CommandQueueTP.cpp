@@ -18,7 +18,8 @@ CommandQueueTP::CommandQueueTP(vector< vector<BankState> > &states,
     // Implement TC.
     securityPolicy = new TOLattice(this);
     turnAllocationTimer = new TurnStartAllocationTimer(this);
-    deadTimeCalc = new StrictDeadTimeCalc();
+    //deadTimeCalc = new StrictDeadTimeCalc(this);
+    deadTimeCalc = new MonotonicDeadTimeCalc(this);
     //turnAllocator = new TDMTurnAllocator(this);
     turnAllocator = new PreemptingTurnAllocator(this);
 }
@@ -353,6 +354,18 @@ int CommandQueueTP::StrictDeadTimeCalc::normal_deadtime(){
 
 int CommandQueueTP::StrictDeadTimeCalc::refresh_deadtime(){
     return TP_BUFFER_TIME;
+}
+
+int CommandQueueTP::MonotonicDeadTimeCalc::normal_deadtime(){
+    return cc->securityPolicy->isLabelLEQ(
+            cc->turnAllocator->current(),
+            cc->turnAllocator->next()) ? 0 : WORST_CASE_DELAY;
+}
+
+int CommandQueueTP::MonotonicDeadTimeCalc::refresh_deadtime(){
+    return cc->securityPolicy->isLabelLEQ(
+            cc->turnAllocator->current(),
+            cc->turnAllocator->next()) ? 0 : TP_BUFFER_TIME;
 }
 
 //-----------------------------------------------------------------------------

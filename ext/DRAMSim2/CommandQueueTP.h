@@ -92,21 +92,27 @@ class CommandQueueTP : public CommandQueue
     class DeadTimeCalc
     {
         public:
+        CommandQueueTP *cc;
+        DeadTimeCalc(CommandQueueTP *cc) : cc(cc) {}
         virtual int normal_deadtime() = 0;
         virtual int refresh_deadtime() = 0;
     };
 
     class StrictDeadTimeCalc : public DeadTimeCalc
     {
+        public:
+        StrictDeadTimeCalc(CommandQueueTP *cc) : DeadTimeCalc(cc) {}
         virtual int normal_deadtime();
         virtual int refresh_deadtime();
     };
 
-    // class MonotonicDeadTimeCalc : public MonotonicDeadTimeCalc
-    // {
-    //     virtual int normal_deadtime();
-    //     virtual int refresh_deadtime();
-    // }
+    class MonotonicDeadTimeCalc : public DeadTimeCalc
+    {
+        public:
+        MonotonicDeadTimeCalc(CommandQueueTP *cc) : DeadTimeCalc(cc) {}
+        virtual int normal_deadtime();
+        virtual int refresh_deadtime();
+    };
     
     DeadTimeCalc *deadTimeCalc;
 
