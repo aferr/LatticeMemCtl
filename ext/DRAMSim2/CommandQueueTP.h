@@ -79,10 +79,13 @@ class CommandQueueTP : public CommandQueue
         virtual bool is_reallocation_time();
     };
 
-    // class DeadTimeAllocator : public TurnAllocationTimer
-    // {
-    //     virtual bool is_reallocation_time();
-    // }
+    class DeadTimeAllocationTimer: public TurnAllocationTimer
+    {
+        public:
+            DeadTimeAllocationTimer(CommandQueueTP *cc) :
+                TurnAllocationTimer(cc) {}
+        virtual bool is_reallocation_time();
+    };
     
     TurnAllocationTimer *turnAllocationTimer;
 

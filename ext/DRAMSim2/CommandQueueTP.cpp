@@ -17,7 +17,8 @@ CommandQueueTP::CommandQueueTP(vector< vector<BankState> > &states,
 
     // Implement TC.
     securityPolicy = new TOLattice(this);
-    turnAllocationTimer = new TurnStartAllocationTimer(this);
+    //turnAllocationTimer = new TurnStartAllocationTimer(this);
+    turnAllocationTimer = new DeadTimeAllocationTimer(this);
     //deadTimeCalc = new StrictDeadTimeCalc(this);
     deadTimeCalc = new MonotonicDeadTimeCalc(this);
     //turnAllocator = new TDMTurnAllocator(this);
@@ -342,6 +343,33 @@ bool CommandQueueTP::TurnStartAllocationTimer::is_reallocation_time(){
     bool is_turn_start = schedule_time==0 ||
         ((schedule_time-cc->p0Period)%cc->p1Period==0);
     return is_turn_start;
+}
+
+bool CommandQueueTP::DeadTimeAllocationTimer::is_reallocation_time(){
+    unsigned ccc_ = cc->currentClockCycle - cc->offset + 1;
+    unsigned current_tc = cc->getCurrentPID();
+    unsigned schedule_length = cc->p0Period + cc->p1Period * (cc->num_pids - 1);
+    unsigned schedule_start = ccc_ - ( ccc_ % schedule_length );
+
+    unsigned turn_start = current_tc == 0 ?
+      schedule_start :
+      schedule_start + cc->p0Period + cc->p1Period * (current_tc-1);
+    unsigned turn_end = current_tc == 0 ?
+      turn_start + cc->p0Period :
+      turn_start + cc->p1Period;
+
+    // Time between refreshes to ANY rank.
+    unsigned refresh_period = REFRESH_PERIOD/NUM_RANKS/tCK;
+    unsigned next_refresh = ccc_ + refresh_period - (ccc_ % refresh_period);
+ 
+    unsigned tlength = current_tc == 0 ? cc->p0Period : cc->p1Period;
+
+    unsigned deadtime = (turn_start <= next_refresh && next_refresh < turn_end)?
+        TP_BUFFER_TIME:
+        WORST_CASE_DELAY;
+
+    return ccc_ == (turn_end - deadtime);
+
 }
 
 
