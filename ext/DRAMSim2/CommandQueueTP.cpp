@@ -17,12 +17,13 @@ CommandQueueTP::CommandQueueTP(vector< vector<BankState> > &states,
 
     // Implement TC.
     securityPolicy = new TOLattice(this);
-    //turnAllocationTimer = new TurnStartAllocationTimer(this);
+    // turnAllocationTimer = new TurnStartAllocationTimer(this);
     turnAllocationTimer = new DeadTimeAllocationTimer(this);
-    //deadTimeCalc = new StrictDeadTimeCalc(this);
+    // deadTimeCalc = new StrictDeadTimeCalc(this);
     deadTimeCalc = new MonotonicDeadTimeCalc(this);
-    //turnAllocator = new TDMTurnAllocator(this);
-    turnAllocator = new PreemptingTurnAllocator(this);
+    turnAllocator = new TDMTurnAllocator(this);
+    // turnAllocator = new PreemptingTurnAllocator(this);
+    // turnAllocator = new PriorityTurnAllocator(this);
 }
 
 void
@@ -362,8 +363,6 @@ bool CommandQueueTP::DeadTimeAllocationTimer::is_reallocation_time(){
     unsigned refresh_period = REFRESH_PERIOD/NUM_RANKS/tCK;
     unsigned next_refresh = ccc_ + refresh_period - (ccc_ % refresh_period);
  
-    unsigned tlength = current_tc == 0 ? cc->p0Period : cc->p1Period;
-
     unsigned deadtime = (turn_start <= next_refresh && next_refresh < turn_end)?
         TP_BUFFER_TIME:
         WORST_CASE_DELAY;
@@ -396,8 +395,12 @@ int CommandQueueTP::MonotonicDeadTimeCalc::refresh_deadtime(){
             cc->turnAllocator->next()) ? 0 : TP_BUFFER_TIME;
 }
 
-//-----------------------------------------------------------------------------
+//=============================================================================
 // Turn Ownership Decision
+//=============================================================================
+
+//-----------------------------------------------------------------------------
+// TDM Turn Allocator
 //-----------------------------------------------------------------------------
 void CommandQueueTP::TDMTurnAllocator::allocate_turn(){}
 void CommandQueueTP::TDMTurnAllocator::allocate_next(){}
@@ -415,6 +418,9 @@ unsigned CommandQueueTP::TDMTurnAllocator::next(){
     return current()+1;
 }
 
+//-----------------------------------------------------------------------------
+// Preempting Turn Allocator
+//-----------------------------------------------------------------------------
 void CommandQueueTP::PreemptingTurnAllocator::allocate_turn(){
     turn_owner = next_owner;
     next_owner = TDMTurnAllocator::next();
@@ -433,9 +439,65 @@ void CommandQueueTP::PreemptingTurnAllocator::allocate_next(){
 unsigned CommandQueueTP::PreemptingTurnAllocator::current(){ return turn_owner; }
 unsigned CommandQueueTP::PreemptingTurnAllocator::next(){ return next_owner; }
 
-//-------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+// Priority Turn Allocator
+//-----------------------------------------------------------------------------
+CommandQueueTP::PriorityTurnAllocator::PriorityTurnAllocator(CommandQueueTP *cc)
+    : TurnAllocator(cc)
+{
+    int num_pids = cc->num_pids;
+    epoch_length = num_pids*(num_pids+1)/2;
+    epoch_remaining = epoch_length;
+
+    bandwidth_limit = ((int*) malloc(sizeof(int) * num_pids));
+    // For now assume total order with 0 as bottom.
+    bandwidth_limit[0] = num_pids;
+    for(int i=1; i < num_pids; i++){
+        bandwidth_limit[i] = bandwidth_limit[i] + num_pids - i;
+    }
+
+    bandwidth_remaining = ((int*) malloc(sizeof(int) * num_pids));
+    for(int i=1; i < num_pids; i++) bandwidth_remaining[i]=bandwidth_limit[i];
+    turn_owner = cc->securityPolicy->bottom();
+}
+
+void CommandQueueTP::PriorityTurnAllocator::allocate_next(){
+    int num_pids = cc->num_pids;
+    //Reset bandwidth limits on an epoch change
+    if(epoch_remaining == 0){
+        epoch_remaining = epoch_length;
+        for(int i=0; i<num_pids; i++){
+            bandwidth_remaining[i] = bandwidth_limit[i];
+        }
+    }
+
+    // Find the highest priority domain with  bandwidth left
+    unsigned tcid_candidate = cc->securityPolicy->bottom();
+    while(tcid_candidate != cc->securityPolicy->top()){
+        bool has_bw = bandwidth_remaining[tcid_candidate] != 0;
+        if(!cc->tcidEmpty(tcid_candidate) && has_bw) break;
+        else tcid_candidate = cc->securityPolicy->nextHigherTC(tcid_candidate); 
+    }
+    next_owner = tcid_candidate;
+
+    // Deduct bandwidth from the candidate and all those above it
+    for(int i=tcid_candidate; i < num_pids - 1; i++){
+        bandwidth_remaining[i] -= 1;
+    }
+
+}
+
+void CommandQueueTP::PriorityTurnAllocator::allocate_turn(){
+    turn_owner = next_owner;
+    next_owner = cc->securityPolicy->top();
+}
+
+unsigned CommandQueueTP::PriorityTurnAllocator::current(){ return turn_owner; }
+unsigned CommandQueueTP::PriorityTurnAllocator::next(){ return next_owner; }
+
+//=============================================================================
 // Lattice
-//-------------------------------------------------------------------------
+//=============================================================================
 unsigned CommandQueueTP::TOLattice::nextHigherTC(unsigned tcid){
     if(tcid == num_pids - 1){
         return tcid;
@@ -447,4 +509,12 @@ unsigned CommandQueueTP::TOLattice::nextHigherTC(unsigned tcid){
 
 bool CommandQueueTP::TOLattice::isLabelLEQ(unsigned tc1, unsigned tc2){
     return tc1 <= tc2;
+}
+
+unsigned CommandQueueTP::TOLattice::bottom(){
+    return 0;
+}
+
+unsigned CommandQueueTP::TOLattice::top(){
+    return cc->num_pids - 1;
 }

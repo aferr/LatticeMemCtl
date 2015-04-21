@@ -158,12 +158,24 @@ class CommandQueueTP : public CommandQueue
         unsigned next_owner;
     };
 
-    // class PriorityTurnOwner : public PriorityTurnOwner
-    // {
-    //     virtual unsigned getCurrentPID();
-    //     virtual unsigned getNextPID();
-    // }
+    class PriorityTurnAllocator : public TurnAllocator
+    {
+        public:
+        PriorityTurnAllocator(CommandQueueTP *cc);
+        virtual void allocate_turn();
+        virtual void allocate_next();
+        virtual unsigned current();
+        virtual unsigned next();
 
+        private:
+        int epoch_length;
+        int epoch_remaining;
+        int *bandwidth_limit;
+        int *bandwidth_remaining;
+        unsigned turn_owner;
+        unsigned next_owner;
+    };
+   
     TurnAllocator *turnAllocator;
 
     //-------------------------------------------------------------------------
@@ -177,6 +189,8 @@ class CommandQueueTP : public CommandQueue
         Lattice(CommandQueueTP* cc) : num_pids(cc->num_pids), cc(cc) {}
         virtual unsigned nextHigherTC(unsigned tcid) = 0;
         virtual bool isLabelLEQ(unsigned tc1, unsigned tc2) = 0;
+        virtual unsigned top() = 0;
+        virtual unsigned bottom() = 0;
     };
 
     class TOLattice : public Lattice
@@ -185,6 +199,9 @@ class CommandQueueTP : public CommandQueue
         TOLattice(CommandQueueTP* cc) : Lattice(cc) {}
         virtual unsigned nextHigherTC(unsigned tcid);
         virtual bool isLabelLEQ(unsigned tc1, unsigned tc2);
+        virtual unsigned top();
+        virtual unsigned bottom();
+
     };
 
     Lattice *securityPolicy;
