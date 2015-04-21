@@ -53,7 +53,12 @@ class CommandQueueTP : public CommandQueue
         // Tell the donor scheme child to check if an issue was allowed 
         // because of a donated turn
     
-    private:
+    bool is_turn_start(){
+        unsigned ccc_ = currentClockCycle - offset;
+        unsigned schedule_time = ccc_ %
+            (p0Period + (num_pids-1) * p1Period);
+        return schedule_time==0 || ((schedule_time - p0Period)%p1Period==0);
+    }
 
     //-------------------------------------------------------------------------
     // Turn Ownership Timer
@@ -111,10 +116,12 @@ class CommandQueueTP : public CommandQueue
     class TurnAllocator
     {
         public:
-        unsigned current_tc;
         CommandQueueTP *cc;
         TurnAllocator(CommandQueueTP *cc) : cc(cc) {}
-        virtual unsigned allocate_turn() = 0;
+        virtual void allocate_turn() = 0;
+        virtual void allocate_next() = 0;
+        virtual unsigned current() = 0;
+        virtual unsigned next() = 0;
     };
 
     class TDMTurnAllocator : public TurnAllocator
@@ -122,23 +129,57 @@ class CommandQueueTP : public CommandQueue
         public:
         TDMTurnAllocator(CommandQueueTP *cc) :
             TurnAllocator(cc) {}
-        virtual unsigned allocate_turn();
+        virtual void allocate_turn();
+        virtual void allocate_next();
+        virtual unsigned current();
+        virtual unsigned next();
     };
 
-    //  class PreemptingTurnOwner : public TDMTurnOwner
-    //  {
-    //      virtual unsigned getCurrentPID();
-    //      virtual unsigned getNextPID();
-    //  }
+    class PreemptingTurnAllocator : public TDMTurnAllocator
+    {
+        public:
+        PreemptingTurnAllocator(CommandQueueTP *cc) :
+            TDMTurnAllocator(cc) {}
+        virtual void allocate_turn();
+        virtual void allocate_next();
+        virtual unsigned current();
+        virtual unsigned next();
+        private:
+        unsigned turn_owner;
+        unsigned next_owner;
+    };
 
-    //  class PriorityTurnOwner : public PriorityTurnOwner
-    //  {
-    //      virtual unsigned getCurrentPID();
-    //      virtual unsigned getNextPID();
-    //  }
+    // class PriorityTurnOwner : public PriorityTurnOwner
+    // {
+    //     virtual unsigned getCurrentPID();
+    //     virtual unsigned getNextPID();
+    // }
 
     TurnAllocator *turnAllocator;
-    unsigned current_tc;
+
+    //-------------------------------------------------------------------------
+    // Lattice
+    //-------------------------------------------------------------------------
+    class Lattice
+    {
+        public:
+        int num_pids;
+        CommandQueueTP* cc;
+        Lattice(CommandQueueTP* cc) : num_pids(cc->num_pids), cc(cc) {}
+        virtual unsigned nextHigherTC(unsigned tcid) = 0;
+        virtual bool isLabelLEQ(unsigned tc1, unsigned tc2) = 0;
+    };
+
+    class TOLattice : public Lattice
+    {
+        public: 
+        TOLattice(CommandQueueTP* cc) : Lattice(cc) {}
+        virtual unsigned nextHigherTC(unsigned tcid);
+        virtual bool isLabelLEQ(unsigned tc1, unsigned tc2);
+    };
+
+    Lattice *securityPolicy;
+
 
 };
 

@@ -16,19 +16,23 @@ CommandQueueTP::CommandQueueTP(vector< vector<BankState> > &states,
 	offset = offset_;
 
     // Implement TC.
+    securityPolicy = new TOLattice(this);
     turnAllocationTimer = new TurnStartAllocationTimer(this);
     deadTimeCalc = new StrictDeadTimeCalc();
-    turnAllocator = new TDMTurnAllocator(this);
-    current_tc = turnAllocator->allocate_turn();
+    //turnAllocator = new TDMTurnAllocator(this);
+    turnAllocator = new PreemptingTurnAllocator(this);
 }
 
 void
 CommandQueueTP::step(){
    SimulatorObject::step();
-   update_stats();
    if( turnAllocationTimer->is_reallocation_time() ){
-       current_tc = turnAllocator->allocate_turn();
-   } 
+       turnAllocator->allocate_next();
+   }
+   if( is_turn_start() ){
+       turnAllocator->allocate_turn();
+   }
+   update_stats();
 }
 
 void
@@ -268,11 +272,7 @@ void CommandQueueTP::print()
 }
 
 unsigned CommandQueueTP::getCurrentPID(){
-  // unsigned ccc_ = currentClockCycle - offset;
-  // unsigned schedule_time = ccc_ % (p0Period + (num_pids-1) * p1Period);
-  // if( schedule_time < p0Period ) return 0;
-  // return (schedule_time - p0Period) / p1Period + 1;
-    return current_tc;
+  return turnAllocator->current();
 }
 
 bool CommandQueueTP::isBufferTime(){
@@ -333,13 +333,16 @@ bool CommandQueueTP::isBufferTimePure(){
 // Turn Ownership Timers
 //-----------------------------------------------------------------------------
 bool CommandQueueTP::TurnStartAllocationTimer::is_reallocation_time(){
-    unsigned ccc_ = cc->currentClockCycle - cc->offset;
+    // Offset current clock by 1 so that allocation happens one cycle before the 
+    // start of the turn.
+    unsigned ccc_ = cc->currentClockCycle - cc->offset + 1;
     unsigned schedule_time = ccc_ %
         (cc->p0Period + (cc->num_pids-1) * cc->p1Period);
     bool is_turn_start = schedule_time==0 ||
         ((schedule_time-cc->p0Period)%cc->p1Period==0);
     return is_turn_start;
 }
+
 
 //-----------------------------------------------------------------------------
 // Dead Time Calculators
@@ -355,7 +358,10 @@ int CommandQueueTP::StrictDeadTimeCalc::refresh_deadtime(){
 //-----------------------------------------------------------------------------
 // Turn Ownership Decision
 //-----------------------------------------------------------------------------
-unsigned CommandQueueTP::TDMTurnAllocator::allocate_turn(){
+void CommandQueueTP::TDMTurnAllocator::allocate_turn(){}
+void CommandQueueTP::TDMTurnAllocator::allocate_next(){}
+
+unsigned CommandQueueTP::TDMTurnAllocator::current(){
     unsigned ccc_ = cc->currentClockCycle - cc->offset;
     unsigned schedule_time = ccc_ %
         (cc->p0Period + (cc->num_pids-1) * cc->p1Period);
@@ -363,3 +369,41 @@ unsigned CommandQueueTP::TDMTurnAllocator::allocate_turn(){
     return (schedule_time - cc->p0Period) / cc->p1Period + 1;
 }
 
+unsigned CommandQueueTP::TDMTurnAllocator::next(){
+    if(current() == cc->num_pids -1) return 0;
+    return current()+1;
+}
+
+void CommandQueueTP::PreemptingTurnAllocator::allocate_turn(){
+    turn_owner = next_owner;
+    next_owner = TDMTurnAllocator::next();
+}
+
+void CommandQueueTP::PreemptingTurnAllocator::allocate_next(){
+    unsigned  nat_tcid = TDMTurnAllocator::next();
+    if(cc->tcidEmpty(nat_tcid)){
+        next_owner = cc->securityPolicy->nextHigherTC(nat_tcid);
+        (*(cc->incr_stat))(cc->donations,next_owner,1,NULL);
+    } else {
+        next_owner = nat_tcid;
+    }
+}
+
+unsigned CommandQueueTP::PreemptingTurnAllocator::current(){ return turn_owner; }
+unsigned CommandQueueTP::PreemptingTurnAllocator::next(){ return next_owner; }
+
+//-------------------------------------------------------------------------
+// Lattice
+//-------------------------------------------------------------------------
+unsigned CommandQueueTP::TOLattice::nextHigherTC(unsigned tcid){
+    if(tcid == num_pids - 1){
+        return tcid;
+    } else {
+        if(cc->tcidEmpty(tcid+1)) return nextHigherTC(tcid+1);
+        else return tcid+1;
+    }
+}
+
+bool CommandQueueTP::TOLattice::isLabelLEQ(unsigned tc1, unsigned tc2){
+    return tc1 <= tc2;
+}
