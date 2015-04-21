@@ -37,6 +37,9 @@
  */
 #include "Callback.h"
 #include <string>
+#include<map>
+
+using std::map;
 using std::string;
 
 namespace DRAMSim 
@@ -67,7 +70,7 @@ namespace DRAMSim
     MultiChannelMemorySystem *getMemorySystemInstance(const string &dev, 
             const string &sys, unsigned tpTurnLength, bool genTrance,
             const string &pwd, const string &trc, unsigned megsOfMemory, 
-            std::string *visfilename=NULL);
+            std::string *visfilename=NULL, map<int,int>* tp_config);
 }
 
 #endif

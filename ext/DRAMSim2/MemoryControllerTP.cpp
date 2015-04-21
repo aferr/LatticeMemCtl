@@ -19,7 +19,9 @@ MemoryControllerTP::MemoryControllerTP(MemorySystem *parent,
         bool diffPeriod,
         int p0Period,
         int p1Period,
-        int offset) :
+        int offset,
+        map<int,int>* tp_config
+        ) :
     MemoryController(
         parent,csvOut_,
         dramsim_log_,outputFilename_,
@@ -29,7 +31,9 @@ MemoryControllerTP::MemoryControllerTP(MemorySystem *parent,
         fixAddr)
 {
 
-    commandQueue = new CommandQueueTP(bankStates,dramsim_log_,tpTurnLength,num_pids_, fixAddr, diffPeriod, p0Period, p1Period, offset); 
+    commandQueue = new CommandQueueTP(bankStates,dramsim_log_,tpTurnLength,
+            num_pids_, fixAddr, diffPeriod, p0Period, p1Period, offset,
+            tp_config); 
 
     // reserve for each process
     transactionQueues = new vector<Transaction *>[num_pids];
@@ -37,6 +41,23 @@ MemoryControllerTP::MemoryControllerTP(MemorySystem *parent,
         transactionQueues[i].reserve(TRANS_QUEUE_DEPTH);
     }
 }
+
+MemoryControllerTP::MemoryControllerTP(MemorySystem *parent, 
+        CSVWriter &csvOut_, ostream &dramsim_log_, 
+        const string &outputFilename_,
+        unsigned tpTurnLength,
+        bool genTrace_,
+        const string &traceFilename_,
+        int num_pids_,
+        bool fixAddr,
+        bool diffPeriod,
+        int p0Period,
+        int p1Period,
+        int offset
+        ) : MemoryControllerTP(parent, csvOut_, dramsim_log_,
+            outputFilename_, tpTurnLength, genTrace_, traceFilename_,
+            num_pids, fixAddr, diffPeriod, p0Period, p1Period, offset,
+            new map<int,int>()) {}
 
 
 bool MemoryControllerTP::addTransaction(Transaction *trans)

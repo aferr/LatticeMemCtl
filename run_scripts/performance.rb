@@ -21,35 +21,62 @@ module RunScripts
         }
 
         o = {
-            fastforward: 0,
+            fastforward: 10,
             maxinsts: 10**5,
             runmode: :local,
             debug: true,
-            cacheSize: 0
+            nametag: "tdm"
         }
-        #baseline
-        sav_script o.merge wl_1.merge(scheme: "none")
-        sav_script o.merge wl_2.merge(scheme: "none")
+
+        #single
+        # sav_script o.merge(p0: "hardstride", scheme: "none")
+        # sav_script o.merge(p0: "nothing", scheme: "none")
+
+        # #baseline
+        # sav_script o.merge wl_1.merge(scheme: "none")
+        # sav_script o.merge wl_2.merge(scheme: "none")
 
         #TP
         sav_script o.merge wl_1.merge(scheme: "tp", addrpar: true)
         sav_script o.merge wl_2.merge(scheme: "tp", addrpar: true)
 
-        #donor
-        sav_script o.merge wl_1.merge(scheme: "donor", addrpar: true)
-        sav_script o.merge wl_2.merge(scheme: "donor", addrpar: true)
+        # #donor
+        # sav_script o.merge wl_1.merge(scheme: "donor", addrpar: true)
+        # sav_script o.merge wl_2.merge(scheme: "donor", addrpar: true)
 
-        #monotonic
-        sav_script o.merge wl_1.merge(scheme: "monotonic", addrpar: true)
-        sav_script o.merge wl_2.merge(scheme: "monotonic", addrpar: true)
+        # #monotonic
+        # sav_script o.merge wl_1.merge(scheme: "monotonic", addrpar: true)
+        # sav_script o.merge wl_2.merge(scheme: "monotonic", addrpar: true)
+       
+        #invprio 
+        # sav_script o.merge wl_1.merge(scheme: "invprio", addrpar: true)
+        # sav_script o.merge wl_2.merge(scheme: "invprio", addrpar: true)
         
     end
+
+    $some_workloads = {
+      mcf_bz2: %w[ mcf bzip2 ],
+      mcf_ast: %w[mcf astar],
+      ast_mcf: %w[astar mcf],
+    }
 
     def baseline
       iterate_mp(
         scheme: "none",
-        skip3: false,
         num_wl: 2,
+        debug: true,
+        runmode: :local,
+        workloads: $some_workloads,
+        nametag: "longrun"
+      )
+    end
+
+    def single_core
+      single(
+        debug: true,
+        runmode: :local,
+        benchmarks: %w[mcf bzip2 astar],
+        nametag: "longrun"
       )
     end
     

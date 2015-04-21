@@ -130,6 +130,7 @@ $specint = $specinvoke.keys.sort
 
 $synthinvoke = {
     "hardstride" => "#{$synthbench_dir}/hardstride",
+    "sleepy_hardstride" => "#{$synthbench_dir}/sleepy_hardstride",
     "randmem"    => "#{$synthbench_dir}/randmem",
     #"randmem10"   => "#{$synthbench_dir}randmem -d #{$duration} -p 10",
     #"randmem100"  => "#{$synthbench_dir}randmem -d #{$duration} -p 100",
@@ -182,6 +183,12 @@ def sav_script( options = {} )
         result_dir: "results",
         cpu: "detailed",
         scheme: "none",
+
+        #TP Defaults
+        security_policy: 0,
+        turn_allocation_time: 0,
+        turn_allocation_policy: 0,
+        dead_time_policy: 0
     }.merge options
 
     cpu = options[:cpu]
@@ -273,6 +280,12 @@ def sav_script( options = {} )
 
     #Protection Mechanisms
     script.puts("    --fixaddr \\")       if scheme == "fa" || options[:addrpar]
+
+    #Memory Configuration
+    script.puts("    --security_policy #{options[:security_policy]} \\")
+    script.puts("    --turn_allocation_policy #{options[:turn_allocation_policy]} \\")
+    script.puts("    --turn_allocation_time #{options[:turn_allocation_time]} \\")
+    script.puts("    --dead_time_policy #{options[:dead_time_policy]} \\")
 
     #Security Policy
     options[:numpids] = options[:numcpus] if options[:numpids].nil?

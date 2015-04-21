@@ -166,6 +166,11 @@ def add_options():
         parser.add_option("--lattice_config", type="int", default=1,
                 help="Lattice configuration number")
 
+        parser.add_option("--security_policy", type="int", default=0,help="")
+        parser.add_option("--dead_time_policy", type="int", default=0, help="")
+        parser.add_option("--turn_allocation_policy", type="int", default=0, help="")
+        parser.add_option("--turn_allocation_time", type="int", default=0, help="")
+
         (options, args) = parser.parse_args()
 
         if '--ruby' in sys.argv:
@@ -230,7 +235,13 @@ def setup_dramsim(options):
                             trace_file  = options.mem_trace_file,
                             addr_trace  = options.addr_trace,
                             trace_addr  = options.trace_addr,
-                            lattice_config = options.lattice_config
+                            lattice_config = options.lattice_config,
+
+                            #TP Configuration
+                            security_policy = options.security_policy,
+                            turn_allocation_time = options.turn_allocation_time,
+                            dead_time_policy = options.dead_time_policy,
+                            turn_allocation_policy = options.turn_allocation_policy
                         );
     else: # or we just use the original memory model
         DRAM = SimpleMemory( range = AddrRange(memorysize) )

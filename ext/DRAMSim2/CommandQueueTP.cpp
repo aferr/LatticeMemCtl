@@ -1,12 +1,14 @@
 #include "CommandQueueTP.h"
+#include "SystemConfiguration.h"
 
 using namespace DRAMSim;
 
 CommandQueueTP::CommandQueueTP(vector< vector<BankState> > &states, 
         ostream &dramsim_log_, unsigned tpTurnLength_,
         int num_pids_, bool fixAddr_,
-        bool diffPeriod_, int p0Period_, int p1Period_, int offset_):
-    CommandQueue(states,dramsim_log_,num_pids_)
+        bool diffPeriod_, int p0Period_, int p1Period_, int offset_,
+        map<int,int>* tp_config_
+        ) : CommandQueue(states,dramsim_log_,num_pids_)
 {
     fixAddr = fixAddr_;
     tpTurnLength = tpTurnLength_;
@@ -15,16 +17,36 @@ CommandQueueTP::CommandQueueTP(vector< vector<BankState> > &states,
     p1Period = p1Period_;
 	offset = offset_;
 
-    // Implement TC.
     securityPolicy = new TOLattice(this);
-    // turnAllocationTimer = new TurnStartAllocationTimer(this);
-    turnAllocationTimer = new DeadTimeAllocationTimer(this);
-    // deadTimeCalc = new StrictDeadTimeCalc(this);
-    deadTimeCalc = new MonotonicDeadTimeCalc(this);
-    turnAllocator = new TDMTurnAllocator(this);
-    // turnAllocator = new PreemptingTurnAllocator(this);
-    // turnAllocator = new PriorityTurnAllocator(this);
+
+    map<int,int> tp_config = *tp_config_;
+    switch(tp_config[1]){
+        case 0: turnAllocationTimer = new TurnStartAllocationTimer(this); break;
+        case 1: turnAllocationTimer = new DeadTimeAllocationTimer(this); break;
+        default: turnAllocationTimer = new TurnStartAllocationTimer(this);
+    }
+
+    switch(tp_config[2]){
+        case 0: turnAllocator = new TDMTurnAllocator(this); break;
+        case 1: turnAllocator = new PreemptingTurnAllocator(this); break;
+        case 2: turnAllocator = new PriorityTurnAllocator(this); break;
+        default: turnAllocator = new TDMTurnAllocator(this);
+    }
+   
+    switch(tp_config[3]){
+        case 0: deadTimeCalc = new StrictDeadTimeCalc(this); break;
+        case 1: deadTimeCalc = new MonotonicDeadTimeCalc(this); break;
+        default: deadTimeCalc = new StrictDeadTimeCalc(this);
+    }
 }
+
+CommandQueueTP::CommandQueueTP(vector< vector<BankState> > &states, 
+        ostream &dramsim_log_, unsigned tpTurnLength_,
+        int num_pids_, bool fixAddr_,
+        bool diffPeriod_, int p0Period_, int p1Period_, int offset_
+        ) : CommandQueueTP(states, dramsim_log_, tpTurnLength_,
+            num_pids_, fixAddr_, diffPeriod, p0Period_, p1Period_,
+            offset_, new map<int,int>()) {}
 
 void
 CommandQueueTP::step(){

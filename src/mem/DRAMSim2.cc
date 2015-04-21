@@ -42,8 +42,11 @@
 
 #include <cstdlib>
 #include <iomanip>
+#include <map>
 
 #include "mem/DRAMSim2.hh"
+
+using namespace std;
 
 std::string
 hexstr( int i ){
@@ -75,10 +78,16 @@ DRAMSim2::DRAMSim2(const Params *p) : DRAMSim2Wrapper(p)
     std::cout << "device file: " << p->deviceConfigFile << std::endl;
     std::cout << "system file: " << p->systemConfigFile << std::endl;
     std::cout << "output file: " << p->outputFile << std::endl;
-    //dramsim2 = new DRAMSim::MultiChannelMemorySystem(p->deviceConfigFile, p->systemConfigFile, p->cwd, p->traceFile, memoryCapacity, "./results/output", NULL, NULL);
+    map<int,int> tp_config = *(new map<int,int>());
+    tp_config[0] = p->security_policy;
+    tp_config[1] = p->turn_allocation_time;
+    tp_config[2] = p->turn_allocation_policy;
+    tp_config[3] = p->dead_time_policy;
     dramsim2 = new DRAMSim::MultiChannelMemorySystem(p->deviceConfigFile, 
-            p->systemConfigFile, atoi((p->tpTurnLength).c_str()), p->genTrace, p->cwd, p->traceFile, 
-            memoryCapacity, p->outputFile, NULL, NULL, p->numPids, p->fixAddr, p->diffPeriod, p->p0Period, p->p1Period, p->offset, p->lattice_config);
+            p->systemConfigFile, atoi((p->tpTurnLength).c_str()), p->genTrace, p->cwd,
+            p->traceFile, memoryCapacity, p->outputFile, NULL, NULL,
+            p->numPids, p->fixAddr, p->diffPeriod, p->p0Period, p->p1Period,
+            p->offset, p->lattice_config, &tp_config);
     // intentionally set CPU:Memory clock ratio as 1, we do the synchronization later
     dramsim2->setCPUClockSpeed(0);
     num_pids = p->numPids;

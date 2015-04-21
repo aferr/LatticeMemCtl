@@ -6,6 +6,8 @@
 
 #define BLOCK_TIME 12
 
+#include <map>
+
 using namespace std;
 
 namespace DRAMSim
@@ -18,6 +20,13 @@ class CommandQueueTP : public CommandQueue
                 ostream &dramsim_log_,unsigned tpTurnLength,
                 int num_pids, bool fixAddr_,
                 bool diffPeriod_, int p0Period_, int p1Period_, int offset_);
+
+        CommandQueueTP(vector< vector<BankState> > &states,
+                ostream &dramsim_log_,unsigned tpTurnLength,
+                int num_pids, bool fixAddr_,
+                bool diffPeriod_, int p0Period_, int p1Period_, int offset_,
+                map<int,int>* tp_config);
+
         virtual void enqueue(BusPacket *newBusPacket);
         virtual bool hasRoomFor(unsigned numberToEnqueue, unsigned rank, 
                 unsigned bank, unsigned pid);

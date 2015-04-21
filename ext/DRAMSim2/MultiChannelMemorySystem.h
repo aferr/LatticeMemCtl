@@ -34,8 +34,9 @@
 #include "IniReader.h"
 #include "ClockDomain.h"
 #include "CSVWriter.h"
+#include <map>
 
-
+using namespace std;
 namespace DRAMSim {
 
     class MultiChannelMemorySystem : public SimulatorObject 
@@ -49,7 +50,7 @@ namespace DRAMSim {
                     const IniReader::OverrideMap *paramOverrides=NULL,
                     int num_pids=2, bool fixAddr=false,
                     bool diffPeriod=false, int p0Period=64, int p1Period=64, int offset=0,
-                    int lattice_config=1);
+                    int lattice_config=1, map<int,int>* tp_config = new map<int,int>());
             virtual ~MultiChannelMemorySystem();
             bool addTransaction(Transaction *trans);
             bool addTransaction(const Transaction &trans);
