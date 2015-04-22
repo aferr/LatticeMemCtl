@@ -52,10 +52,25 @@ void
 CommandQueueTP::step(){
    SimulatorObject::step();
    if( turnAllocationTimer->is_reallocation_time() ){
+       // fprintf(stderr, "reallocation time:%lu\n", currentClockCycle);
        turnAllocator->allocate_next();
+       // fprintf(stderr, "post-allocation current %lu next %d\n",
+       //         turnAllocator->current(), turnAllocator->next());
    }
    if( is_turn_start() ){
+       // fprintf(stderr, "turn start:%lu\n", currentClockCycle);
+       // fprintf(stderr, "before start of turn current %d next %d\n",
+       //         turnAllocator->current(), turnAllocator->next());
        turnAllocator->allocate_turn();
+       // fprintf(stderr, "after start of turn current %d next %d\n",
+       //         turnAllocator->current(), turnAllocator->next());
+       PRINT("-----------------------------------------------------------------------------");
+       PRINT("start of turn " << currentClockCycle << endl
+               << "current" << getCurrentPID());
+       print();
+       PRINT("-----------------------------------------------------------------------------");
+       PRINT("");
+       PRINT("");
    }
    update_stats();
 }
@@ -354,23 +369,28 @@ bool CommandQueueTP::isBufferTimePure(){
 
 }
 
-//-----------------------------------------------------------------------------
+//=============================================================================
 // Turn Ownership Timers
+//=============================================================================
+
+//-----------------------------------------------------------------------------
+// Turn Start
 //-----------------------------------------------------------------------------
 bool CommandQueueTP::TurnStartAllocationTimer::is_reallocation_time(){
-    // Offset current clock by 1 so that allocation happens one cycle before the 
-    // start of the turn.
-    unsigned ccc_ = cc->currentClockCycle - cc->offset + 1;
-    unsigned schedule_time = ccc_ %
+    unsigned ccc_ = cc->currentClockCycle - cc->offset;
+    int schedule_time = ccc_ %
         (cc->p0Period + (cc->num_pids-1) * cc->p1Period);
     bool is_turn_start = schedule_time==0 ||
         ((schedule_time-cc->p0Period)%cc->p1Period==0);
     return is_turn_start;
 }
 
+//-----------------------------------------------------------------------------
+// Dead Time
+//-----------------------------------------------------------------------------
 bool CommandQueueTP::DeadTimeAllocationTimer::is_reallocation_time(){
-    unsigned ccc_ = cc->currentClockCycle - cc->offset + 1;
-    unsigned current_tc = cc->getCurrentPID();
+    unsigned ccc_ = cc->currentClockCycle - cc->offset;
+    unsigned current_tc = (new TDMTurnAllocator(cc))->current();
     unsigned schedule_length = cc->p0Period + cc->p1Period * (cc->num_pids - 1);
     unsigned schedule_start = ccc_ - ( ccc_ % schedule_length );
 
@@ -394,8 +414,12 @@ bool CommandQueueTP::DeadTimeAllocationTimer::is_reallocation_time(){
 }
 
 
-//-----------------------------------------------------------------------------
+//=============================================================================
 // Dead Time Calculators
+//=============================================================================
+
+//-----------------------------------------------------------------------------
+// Strict
 //-----------------------------------------------------------------------------
 int CommandQueueTP::StrictDeadTimeCalc::normal_deadtime(){
     return WORST_CASE_DELAY;
@@ -405,7 +429,14 @@ int CommandQueueTP::StrictDeadTimeCalc::refresh_deadtime(){
     return TP_BUFFER_TIME;
 }
 
+//-----------------------------------------------------------------------------
+// Monotonic
+//-----------------------------------------------------------------------------
 int CommandQueueTP::MonotonicDeadTimeCalc::normal_deadtime(){
+    // fprintf(stderr, "asked for dead time at time %lu with current %d"
+    //         "and next %d\n",  cc->currentClockCycle,
+    //         cc->turnAllocator->current(),
+    //         cc->turnAllocator->next())
     return cc->securityPolicy->isLabelLEQ(
             cc->turnAllocator->current(),
             cc->turnAllocator->next()) ? 0 : WORST_CASE_DELAY;
@@ -492,6 +523,7 @@ void CommandQueueTP::PriorityTurnAllocator::allocate_next(){
             bandwidth_remaining[i] = bandwidth_limit[i];
         }
     }
+    epoch_remaining -= 1;
 
     // Find the highest priority domain with  bandwidth left
     unsigned tcid_candidate = cc->securityPolicy->bottom();

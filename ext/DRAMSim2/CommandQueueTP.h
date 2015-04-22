@@ -64,9 +64,9 @@ class CommandQueueTP : public CommandQueue
     
     bool is_turn_start(){
         unsigned ccc_ = currentClockCycle - offset;
-        unsigned schedule_time = ccc_ %
+        int schedule_time = ccc_ %
             (p0Period + (num_pids-1) * p1Period);
-        return schedule_time==0 || ((schedule_time - p0Period)%p1Period==0);
+        return (schedule_time==0) || (((schedule_time - p0Period)%p1Period)==0);
     }
 
     //-------------------------------------------------------------------------
