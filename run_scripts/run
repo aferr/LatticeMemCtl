@@ -20,7 +20,7 @@ include RunScripts
 # donor_short
 # monotonic_short
 # inv_prio_short
-tp_config_test
+# tp_config_test
 
 #------------------------------------------------------------------------------
 # Performance
@@ -31,3 +31,4 @@ tp_config_test
 # ncore_ntc_donor
 # ncore_2tc
 # synthetic
+synthetic

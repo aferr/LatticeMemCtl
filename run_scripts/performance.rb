@@ -7,50 +7,90 @@ include RunScripts
 module RunScripts
 
     def synthetic
-
-        wl_1 = {
-            p0: "hardstride",
-            p1: "nothing",
-            lattice_config: 1
-        }
-
-        wl_2 = {
-            p0: "nothing",
-            p1: "hardstride",
-            lattice_config: 1
-        }
-
         o = {
-            fastforward: 10,
-            maxinsts: 10**5,
+            addrpar: true,
+            scheme: "tp",
+            workloads: {
+                nothing_hardstride: %w[nothing hardstride],
+                hardstride_nothing: %w[hardstride nothing],
+            },
+            maxinsts: 10**6,
+            fastforward: 10**4 ,
+            num_wl: 8,
+            skip4: true,
+            skip6: true,
             runmode: :local,
-            debug: true,
-            nametag: "tdm"
+            debug: true
         }
 
-        #single
-        # sav_script o.merge(p0: "hardstride", scheme: "none")
-        # sav_script o.merge(p0: "nothing", scheme: "none")
+        # baseline
+        iterate_mp o.merge(
+            scheme: "none",
+        )
 
-        # #baseline
-        # sav_script o.merge wl_1.merge(scheme: "none")
-        # sav_script o.merge wl_2.merge(scheme: "none")
+        # TDM, strict, turn start
+        iterate_mp o.merge(
+            turn_allocation_policy: 0,
+            turn_allocatrion_time: 0,
+            dead_time_policy: 0,
+            nametag: "tdm_strict_start"
+        )
 
-        #TP
-        sav_script o.merge wl_1.merge(scheme: "tp", addrpar: true)
-        sav_script o.merge wl_2.merge(scheme: "tp", addrpar: true)
+        # TDM, Monotonic, turn start
+        iterate_mp o.merge(
+            turn_allocation_policy: 0,
+            turn_allocatrion_time: 0,
+            dead_time_policy: 1,
+            nametag: "tdm_monotonic_start"
+        )
+        
+        # Preempting, Strict, turn start
+        iterate_mp o.merge(
+            turn_allocation_policy: 1,
+            turn_allocation_time: 0,
+            dead_time_policy: 0,
+            nametag: "preempting_strict_start"
+        )
 
-        # #donor
-        # sav_script o.merge wl_1.merge(scheme: "donor", addrpar: true)
-        # sav_script o.merge wl_2.merge(scheme: "donor", addrpar: true)
+        #Preempting,  Monotonic, Turn Start
+        iterate_mp o.merge(
+            turn_allocation_policy: 1,
+            turn_allocation_time: 0,
+            dead_time_policy: 1,
+            nametag: "preempting_monotonic_start"
+        )
+        
+        #Preempting,  Monotonic, Dead Time
+        iterate_mp o.merge(
+            turn_allocation_policy: 1,
+            turn_allocation_time: 1,
+            dead_time_policy: 1,
+            nametag: "preempting_monotonic_dead"
+        )
 
-        # #monotonic
-        # sav_script o.merge wl_1.merge(scheme: "monotonic", addrpar: true)
-        # sav_script o.merge wl_2.merge(scheme: "monotonic", addrpar: true)
-       
-        #invprio 
-        # sav_script o.merge wl_1.merge(scheme: "invprio", addrpar: true)
-        # sav_script o.merge wl_2.merge(scheme: "invprio", addrpar: true)
+        # Priority, Strict, turn start
+        iterate_mp o.merge(
+            turn_allocation_policy: 2,
+            turn_allocation_time: 0,
+            dead_time_policy: 0,
+            nametag: "priority_strict_start"
+        )
+
+        # Priority, Monotonic, turn start
+        iterate_mp o.merge(
+            turn_allocation_policy: 2,
+            turn_allocation_time: 0,
+            dead_time_policy: 1,
+            nametag: "priority_monotonic_start"
+        )
+
+        # Priority, Monotonic, Dead Time
+        iterate_mp o.merge(
+            turn_allocation_policy: 2,
+            turn_allocation_time: 0,
+            dead_time_policy: 1,
+            nametag: "priority_monotonic_dead"
+        )
         
     end
 

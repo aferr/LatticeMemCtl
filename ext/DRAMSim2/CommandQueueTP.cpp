@@ -553,7 +553,6 @@ void CommandQueueTP::PreemptingTurnAllocator::allocate_next(){
     unsigned  nat_tcid = TDMTurnAllocator::next();
     next_owner = next_nonempty(nat_tcid);
     if(cc->tcidEmpty(nat_tcid)){
-        PRINT("DONATED");
         (*(cc->incr_stat))(cc->donations,next_owner,1,NULL);
     } 
 }

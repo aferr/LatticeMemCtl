@@ -103,7 +103,7 @@ module RunScripts
         iterate_mp o.merge(
             turn_allocation_policy: 2,
             turn_allocation_time: 0,
-            dead_time_policy: 0,
+            dead_time_policy: 1,
             nametag: "priority_monotonic_dead"
         )
 
