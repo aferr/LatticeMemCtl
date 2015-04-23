@@ -14,14 +14,20 @@ module RunScripts
                 nothing_hardstride: %w[nothing hardstride],
                 hardstride_nothing: %w[hardstride nothing],
             },
-            maxinsts: 10**6,
-            fastforward: 10**4 ,
+            maxinsts: 10**5,
+            fastforward: 10**3 ,
             num_wl: 8,
             skip4: true,
             skip6: true,
             runmode: :local,
             debug: true
         }
+
+        # single
+        single o.merge(
+            scheme: "none",
+            benchmarks: %w[nothing hardstride]
+        )
 
         # baseline
         iterate_mp o.merge(
@@ -36,7 +42,7 @@ module RunScripts
             nametag: "tdm_strict_start"
         )
 
-        # TDM, Monotonic, turn start
+        # # TDM, Monotonic, turn start
         iterate_mp o.merge(
             turn_allocation_policy: 0,
             turn_allocatrion_time: 0,

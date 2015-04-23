@@ -154,7 +154,7 @@ int CommandQueueTP::qsbytc_ignore_ref(unsigned tcid){
     int r = 0;
     for(int i=0; i<NUM_RANKS; i++){
         BusPacket1D q = queues[i][tcid];
-        for(int j=0; i<q.size(); j++){
+        for(int j=0; j<q.size(); j++){
             if(q[j]->busPacketType!=REFRESH) r+=1;
         }
     }
@@ -371,7 +371,7 @@ bool CommandQueueTP::isBufferTimePure(){
   unsigned refresh_period = REFRESH_PERIOD/NUM_RANKS/tCK;
   unsigned next_refresh = ccc_ + refresh_period - (ccc_ % refresh_period);
  
-  unsigned tlength = current_tc == 0 ? p0Period : p1Period;
+  //unsigned tlength = current_tc == 0 ? p0Period : p1Period;
 
   unsigned deadtime = (turn_start <= next_refresh && next_refresh < turn_end) ?
     TP_BUFFER_TIME:

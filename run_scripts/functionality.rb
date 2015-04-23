@@ -41,7 +41,7 @@ module RunScripts
             workloads: {
                 nothing_hardstride: %w[nothing hardstride],
                 # hardstride_hardstride: %w[nothing hardstride],
-                # hardstride_nothing: %w[hardstride nothing],
+                hardstride_nothing: %w[hardstride nothing],
             },
             maxinsts: 100
         )

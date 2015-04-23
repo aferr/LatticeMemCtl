@@ -161,6 +161,21 @@ def find_time(filename, opts = {} )
   ticks / insts
 end
 
+def find_time_cpu(filename, n, opts={})
+    term_reg = /term_cpu\s*#{n}/
+    multi_reg = /system.switch_cpus#{n}.cpi\s*(\d*\.\d*)/
+    found_term = false
+    File.open(filename, 'r') do |f|
+        f.each_line do |l|
+            found_term = true if l =~ term_reg
+            if l =~ multi_reg && found_term
+                return (l.match multi_reg)[1].to_f
+            end
+        end
+    end
+    (puts filename.to_s.red; return nil) 
+end
+
 
 #Memoization hash
 #@@stats = Hash.new
@@ -197,14 +212,14 @@ end
 def stp( p={} )
     wl = p[:workload]
     single_reg = /system.switch_cpus.cpi\s*(\d*\.\d*)/
-    single_times = (benchmarks_in(wl).map do |b|
+    single_times = ((p[:workloads][wl]).map do |b|
         find_stat (single_m5out p.merge(bench: b)), single_reg
     end * (p[:numcpus]/2)).flatten
+    puts single_times.to_s.yellow
     s = p[:numcpus].times.map do |i|
         tisp = single_times[i]
-        multi_reg = /system.switch_cpus#{i}.cpi\s*(\d*\.\d*)/
-        timp = find_stat (m5out_file p.merge(bench: benchmarks_in(wl)[i%2])),
-          multi_reg
+        timp = find_time_cpu (m5out_file p), i
+        puts timp.to_s.blue
         (tisp.nil? || timp.nil?) ? [] : tisp/timp
     end
     s.include?([]) ? 0 : s.reduce(:+)
@@ -223,7 +238,7 @@ end
 
 def data_of p={}
   p[:core_set].inject([]) do |a1,cores|
-    a1 << $mpworkloads.keys.inject([]) do |a2,wl|
+    a1 << p[:workloads].keys.inject([]) do |a2,wl|
       a2 << yield(p.merge(numcpus: cores, workload: wl)); a2
     end; a1
   end
