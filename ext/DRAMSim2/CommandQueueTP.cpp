@@ -52,14 +52,14 @@ void
 CommandQueueTP::step(){
    SimulatorObject::step();
    turnAllocationTimer->step();
-   // PRINT("-----------------------------------------------------------------------------");
-   // PRINT("Time" <<  currentClockCycle);
-   // PRINT("Current pid" << getCurrentPID());
-   // if(isBufferTime()) PRINT("It is buffer time\n");
-   // print();
-   // PRINT("-----------------------------------------------------------------------------");
-   // PRINT("");
-   // PRINT("");
+   PRINT("-----------------------------------------------------------------------------");
+   PRINT("Time" <<  currentClockCycle);
+   PRINT("Current pid" << getCurrentPID());
+   if(isBufferTime()) PRINT("It is buffer time\n");
+   print();
+   PRINT("-----------------------------------------------------------------------------");
+   PRINT("");
+   PRINT("");
    update_stats();
 }
 
@@ -470,7 +470,6 @@ void CommandQueueTP::DeadTimeAllocationTimer::step(){
          cc->turnAllocator->allocate_next();
     }
     
-    //fprintf(stderr, "current: %d\n", cc->getCurrentPID());
 }
 
 
@@ -544,7 +543,7 @@ unsigned CommandQueueTP::PreemptingTurnAllocator::next_nonempty(unsigned tcid){
     unsigned next = tcid;
     unsigned top = cc->securityPolicy->top();
     while(cc->tcidEmpty(next) && next!=top){
-        next = cc->securityPolicy->nextHigherTC(tcid);
+        next = cc->securityPolicy->nextHigherTC(next);
     }
     return next;
 }
@@ -567,15 +566,17 @@ CommandQueueTP::PriorityTurnAllocator::PriorityTurnAllocator(CommandQueueTP *cc)
     : TurnAllocator(cc)
 {
     int num_pids = cc->num_pids;
-    epoch_length = num_pids*(num_pids+1)/2;
+    // epoch_length = num_pids*(num_pids+1)/2;
+    epoch_length = num_pids;
     epoch_remaining = epoch_length;
 
     bandwidth_limit = ((int*) malloc(sizeof(int) * num_pids));
     // For now assume total order with 0 as bottom.
-    bandwidth_limit[0] = num_pids;
-    for(int i=1; i < num_pids; i++){
-        bandwidth_limit[i] = bandwidth_limit[i-1] + num_pids - i;
-    }
+    // bandwidth_limit[0] = num_pids;
+    // for(int i=1; i < num_pids; i++){
+    //     bandwidth_limit[i] = bandwidth_limit[i-1] + num_pids - i;
+    // }
+    for(int i=0; i< num_pids; i++){ bandwidth_limit[i] = i + 1; }
 
     bandwidth_remaining = ((int*) malloc(sizeof(int) * num_pids));
     for(int i=0; i < num_pids; i++) bandwidth_remaining[i]=bandwidth_limit[i];
@@ -598,8 +599,8 @@ unsigned CommandQueueTP::PriorityTurnAllocator::highest_nonempty_wbw(){
 }
 
 void CommandQueueTP::PriorityTurnAllocator::allocate_next(){
-   // PRINT("-----------------------------------------------------------------------------");
-   // PRINT("Priority Allocation time" << cc->currentClockCycle);
+   PRINT("-----------------------------------------------------------------------------");
+   PRINT("Priority Allocation time" << cc->currentClockCycle);
     int num_pids = cc->num_pids;
     //Reset bandwidth limits on an epoch change
     if(epoch_remaining == 0){
@@ -609,19 +610,20 @@ void CommandQueueTP::PriorityTurnAllocator::allocate_next(){
         }
     }
     epoch_remaining -= 1;
-    // PRINT("epoch remaining " << epoch_remaining);
+    PRINT("epoch remaining " << epoch_remaining);
 
-    // for(int i=0; i<num_pids; i++)
-    //     PRINT("bandwidth_remaining[" << i << "] " <<
-    //            bandwidth_remaining[i])
+    for(int i=0; i<num_pids; i++)
+        PRINT("bandwidth_remaining[" << i << "] " <<
+               bandwidth_remaining[i])
     
     next_owner =  highest_nonempty_wbw();
 
     // Deduct bandwidth from the next owner and all those above it 
+    // TODO Assumes lattice is TO
     for(int i=next_owner; i < num_pids; i++){
         bandwidth_remaining[i] -= 1;
     }
-    //PRINT("-----------------------------------------------------------------------------");
+    PRINT("-----------------------------------------------------------------------------");
 
 }
 
