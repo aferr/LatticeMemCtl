@@ -78,6 +78,7 @@ class CommandQueueTP : public CommandQueue
         CommandQueueTP *cc;
         TurnAllocationTimer(CommandQueueTP *cc) : cc(cc) {}
         virtual bool is_reallocation_time() = 0;
+        virtual void step() = 0;
     };
 
     class TurnStartAllocationTimer : public TurnAllocationTimer
@@ -86,6 +87,7 @@ class CommandQueueTP : public CommandQueue
         TurnStartAllocationTimer(CommandQueueTP *cc) :
             TurnAllocationTimer(cc) {}
         virtual bool is_reallocation_time();
+        virtual void step();
     };
 
     class DeadTimeAllocationTimer: public TurnAllocationTimer
@@ -94,6 +96,7 @@ class CommandQueueTP : public CommandQueue
             DeadTimeAllocationTimer(CommandQueueTP *cc) :
                 TurnAllocationTimer(cc) {}
         virtual bool is_reallocation_time();
+        virtual void step();
     };
     
     TurnAllocationTimer *turnAllocationTimer;
@@ -157,12 +160,16 @@ class CommandQueueTP : public CommandQueue
     {
         public:
         PreemptingTurnAllocator(CommandQueueTP *cc) :
-            TDMTurnAllocator(cc) {}
+            TDMTurnAllocator(cc) {
+                turn_owner = cc->securityPolicy->bottom();
+                next_owner = cc->securityPolicy->bottom();
+            }
         virtual void allocate_turn();
         virtual void allocate_next();
         virtual unsigned current();
         virtual unsigned next();
         private:
+        unsigned next_nonempty(unsigned tcid);
         unsigned turn_owner;
         unsigned next_owner;
     };
@@ -177,6 +184,7 @@ class CommandQueueTP : public CommandQueue
         virtual unsigned next();
 
         private:
+        unsigned highest_nonempty_wbw();
         int epoch_length;
         int epoch_remaining;
         int *bandwidth_limit;
