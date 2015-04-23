@@ -68,10 +68,10 @@ CommandQueueTP::update_stats(){
    for(int i=0; i < num_pids; i++){
        if( !tcidEmpty(i) && getCurrentPID()!=i ){
            (*incr_stat)(tmux_overhead,i,
-                   queueSizeByTcid(i),NULL);
+                   qsbytc_ignore_ref(i),NULL);
            if( tcidEmpty(getCurrentPID()) ){
                (*incr_stat)(wasted_tmux_overhead,i,
-                       queueSizeByTcid(i),NULL);
+                       qsbytc_ignore_ref(i),NULL);
            }
        }
    }
@@ -80,6 +80,16 @@ CommandQueueTP::update_stats(){
        (*incr_stat)(dead_time_overhead, getCurrentPID(),
                queueSizeByTcid(getCurrentPID()),NULL);
    }
+
+    for(int i=0; i < num_pids; i++){
+        if( qsbytc_has_nonref(i) && getCurrentPID()!=i &&
+            !qsbytc_has_nonref(getCurrentPID()) &&
+            qsbytc_has_nonref((new TDMTurnAllocator(this))->current()) ){
+                    (*incr_stat)(donation_overhead,i,
+                            qsbytc_ignore_ref(i),NULL);
+        }
+    }
+
 }
 
 int CommandQueueTP::normal_deadtime(int tlength){
@@ -138,6 +148,21 @@ int CommandQueueTP::queueSizeByTcid(unsigned tcid){
     for(int i=0; i<NUM_RANKS; i++)
         r += queues[i][tcid].size();
     return r;
+}
+
+int CommandQueueTP::qsbytc_ignore_ref(unsigned tcid){
+    int r = 0;
+    for(int i=0; i<NUM_RANKS; i++){
+        BusPacket1D q = queues[i][tcid];
+        for(int j=0; i<q.size(); j++){
+            if(q[j]->busPacketType!=REFRESH) r+=1;
+        }
+    }
+    return r;
+}
+
+bool CommandQueueTP::qsbytc_has_nonref(unsigned tcid){
+    return qsbytc_ignore_ref(tcid) != 0;
 }
 
 vector<BusPacket *> &CommandQueueTP::getCommandQueue(unsigned rank, unsigned 
@@ -349,8 +374,8 @@ bool CommandQueueTP::isBufferTimePure(){
   unsigned tlength = current_tc == 0 ? p0Period : p1Period;
 
   unsigned deadtime = (turn_start <= next_refresh && next_refresh < turn_end) ?
-    CommandQueueTP::refresh_deadtime( tlength ) :
-    CommandQueueTP::normal_deadtime( tlength );
+    TP_BUFFER_TIME:
+    WORST_CASE_DELAY;
 
   return ccc_ >= (turn_end - deadtime);
 

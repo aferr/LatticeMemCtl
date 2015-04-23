@@ -31,7 +31,9 @@ class CommandQueueTP : public CommandQueue
         virtual bool hasRoomFor(unsigned numberToEnqueue, unsigned rank, 
                 unsigned bank, unsigned pid);
         virtual bool isEmpty(unsigned rank);
+        int qsbytc_ignore_ref(unsigned tcid);
         int queueSizeByTcid(unsigned tcid);
+        bool qsbytc_has_nonref(unsigned tcid);
         virtual bool tcidEmpty(int tcid);
         virtual vector<BusPacket *> &getCommandQueue(unsigned rank, 
                 unsigned pid);
