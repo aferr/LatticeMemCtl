@@ -40,26 +40,18 @@ CommandQueueTP::CommandQueueTP(vector< vector<BankState> > &states,
     }
 }
 
-CommandQueueTP::CommandQueueTP(vector< vector<BankState> > &states, 
-        ostream &dramsim_log_, unsigned tpTurnLength_,
-        int num_pids_, bool fixAddr_,
-        bool diffPeriod_, int p0Period_, int p1Period_, int offset_
-        ) : CommandQueueTP(states, dramsim_log_, tpTurnLength_,
-            num_pids_, fixAddr_, diffPeriod, p0Period_, p1Period_,
-            offset_, new map<int,int>()) {}
-
 void
 CommandQueueTP::step(){
    SimulatorObject::step();
    turnAllocationTimer->step();
-   PRINT("-----------------------------------------------------------------------------");
-   PRINT("Time" <<  currentClockCycle);
-   PRINT("Current pid" << getCurrentPID());
-   if(isBufferTime()) PRINT("It is buffer time\n");
-   print();
-   PRINT("-----------------------------------------------------------------------------");
-   PRINT("");
-   PRINT("");
+   // PRINT("-----------------------------------------------------------------------------");
+   // PRINT("Time" <<  currentClockCycle);
+   // PRINT("Current pid" << getCurrentPID());
+   // if(isBufferTime()) PRINT("It is buffer time\n");
+   // print();
+   // PRINT("-----------------------------------------------------------------------------");
+   // PRINT("");
+   // PRINT("");
    update_stats();
 }
 
@@ -599,8 +591,8 @@ unsigned CommandQueueTP::PriorityTurnAllocator::highest_nonempty_wbw(){
 }
 
 void CommandQueueTP::PriorityTurnAllocator::allocate_next(){
-   PRINT("-----------------------------------------------------------------------------");
-   PRINT("Priority Allocation time" << cc->currentClockCycle);
+   // PRINT("-----------------------------------------------------------------------------");
+   // PRINT("Priority Allocation time" << cc->currentClockCycle);
     int num_pids = cc->num_pids;
     //Reset bandwidth limits on an epoch change
     if(epoch_remaining == 0){
@@ -610,11 +602,11 @@ void CommandQueueTP::PriorityTurnAllocator::allocate_next(){
         }
     }
     epoch_remaining -= 1;
-    PRINT("epoch remaining " << epoch_remaining);
+    // PRINT("epoch remaining " << epoch_remaining);
 
-    for(int i=0; i<num_pids; i++)
-        PRINT("bandwidth_remaining[" << i << "] " <<
-               bandwidth_remaining[i])
+    // for(int i=0; i<num_pids; i++)
+    //     PRINT("bandwidth_remaining[" << i << "] " <<
+    //            bandwidth_remaining[i])
     
     next_owner =  highest_nonempty_wbw();
 
@@ -623,7 +615,7 @@ void CommandQueueTP::PriorityTurnAllocator::allocate_next(){
     for(int i=next_owner; i < num_pids; i++){
         bandwidth_remaining[i] -= 1;
     }
-    PRINT("-----------------------------------------------------------------------------");
+    //PRINT("-----------------------------------------------------------------------------");
 
 }
 

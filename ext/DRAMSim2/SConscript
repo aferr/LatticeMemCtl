@@ -12,22 +12,9 @@ main.SharedObject('MemorySystem.cpp'),
 main.SharedObject('MultiChannelMemorySystem.cpp'), 
 main.SharedObject('Rank.cpp'), main.SharedObject('SimulatorObject.cpp'), 
 main.SharedObject('Transaction.cpp'), 
-main.SharedObject('MemoryControllerFT.cpp'), 
 main.SharedObject('MemoryControllerTP.cpp'), 
-main.SharedObject('MemoryControllerDonor.cpp'), 
-main.SharedObject('MemoryControllerInvPrio.cpp'), 
-main.SharedObject('MemoryControllerMonotonic.cpp'), 
-main.SharedObject('MemoryControllerFA.cpp'),
-main.SharedObject('MemoryControllerFR.cpp'),
-main.SharedObject('MemoryControllerTPD.cpp'), 
-main.SharedObject('CommandQueueFT.cpp'),
 main.SharedObject('CommandQueueTP.cpp'),
-main.SharedObject('CommandQueueDonor.cpp'),
-main.SharedObject('CommandQueueInvPrio.cpp'),
-main.SharedObject('CommandQueueMonotonic.cpp'),
-main.SharedObject('CommandQueueFA.cpp'),
-main.SharedObject('CommandQueueFR.cpp'),
-main.SharedObject('CommandQueueTPD.cpp'),])
+])
 
 main.Prepend(CPPPATH=Dir('.'))
 main.Append(LIBS=['dramsim2'])

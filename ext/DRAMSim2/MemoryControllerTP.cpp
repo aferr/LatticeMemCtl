@@ -2,6 +2,7 @@
 #include "CommandQueueTP.h"
 #include "AddressMapping.h"
 #include <iomanip>
+#include <map>
 using namespace DRAMSim;
 
 bool isInteresting( Transaction* trans ){
@@ -42,23 +43,23 @@ MemoryControllerTP::MemoryControllerTP(MemorySystem *parent,
     }
 }
 
-MemoryControllerTP::MemoryControllerTP(MemorySystem *parent, 
-        CSVWriter &csvOut_, ostream &dramsim_log_, 
-        const string &outputFilename_,
-        unsigned tpTurnLength,
-        bool genTrace_,
-        const string &traceFilename_,
-        int num_pids_,
-        bool fixAddr,
-        bool diffPeriod,
-        int p0Period,
-        int p1Period,
-        int offset
-        ) : MemoryControllerTP(parent, csvOut_, dramsim_log_,
-            outputFilename_, tpTurnLength, genTrace_, traceFilename_,
-            num_pids, fixAddr, diffPeriod, p0Period, p1Period, offset,
-            new map<int,int>()) {}
-
+// MemoryControllerTP::MemoryControllerTP(MemorySystem *parent, 
+//         CSVWriter &csvOut_, ostream &dramsim_log_, 
+//         const string &outputFilename_,
+//         unsigned tpTurnLength,
+//         bool genTrace_,
+//         const string &traceFilename_,
+//         int num_pids_,
+//         bool fixAddr,
+//         bool diffPeriod,
+//         int p0Period,
+//         int p1Period,
+//         int offset
+//         ) : MemoryControllerTP(parent, csvOut_, dramsim_log_,
+//             outputFilename_, tpTurnLength, genTrace_, traceFilename_,
+//             num_pids, fixAddr, diffPeriod, p0Period, p1Period, offset,
+//             new map<int,int>()) {}
+// 
 
 bool MemoryControllerTP::addTransaction(Transaction *trans)
 {

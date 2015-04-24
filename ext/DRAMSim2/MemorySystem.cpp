@@ -136,44 +136,12 @@ MemorySystem::MemorySystem(unsigned id, unsigned int megsOfMemory,
 
 
     use_TP = false;
-	if(timingProtection == FixedTiming){
-        memoryController = 
-            new MemoryControllerFT(this, csvOut, dramsim_log, 
-                    outputFilename, genTrace, traceFilename, num_pids, fixAddr);
-    } else if(timingProtection == TimingPartitioning){
+    if(timingProtection == TimingPartitioning){
 		use_TP = true;
-        memoryController = 
-            new MemoryControllerTP(this, csvOut, dramsim_log, 
-                    outputFilename, tpTurnLength, genTrace, traceFilename, num_pids, fixAddr, diffPeriod, p0Period, p1Period, offset, tp_config);
-    } else if(timingProtection == Donor){
-		use_TP = true;
-        memoryController = 
-            new MemoryControllerDonor(this, csvOut, dramsim_log, 
-                    outputFilename, tpTurnLength, genTrace, traceFilename, num_pids, fixAddr, diffPeriod, p0Period, p1Period, offset,
-                    lattice_config);
-    } else if(timingProtection == InvPrio){
-        use_TP = true;
-        memoryController = 
-            new MemoryControllerInvPrio(this, csvOut, dramsim_log, 
-                    outputFilename, tpTurnLength, genTrace, traceFilename, num_pids, fixAddr, diffPeriod, p0Period, p1Period, offset,
-                    lattice_config);
-    } else if(timingProtection == Monotonic ){
-		use_TP = true;
-        memoryController = 
-            new MemoryControllerMonotonic(this, csvOut, dramsim_log, 
-                    outputFilename, tpTurnLength, genTrace, traceFilename, num_pids, fixAddr, diffPeriod, p0Period, p1Period, offset, lattice_config);
-    } else if(timingProtection == FixedAddress){
-    	memoryController = 
-            new MemoryControllerFA(this, csvOut, dramsim_log, 
-                    outputFilename, tpTurnLength, genTrace, traceFilename, num_pids, fixAddr, diffPeriod, p0Period, p1Period, offset);
-	} else if(timingProtection == FR_FCFS){
-    	memoryController = 
-            new MemoryControllerFR(this, csvOut, dramsim_log, 
-                    outputFilename, genTrace, traceFilename, num_pids, fixAddr);
-	} else if(timingProtection == TimingPartitioningD){
-        memoryController = 
-            new MemoryControllerTPD(this, csvOut, dramsim_log, 
-                    outputFilename, tpTurnLength, genTrace, traceFilename, num_pids, fixAddr, diffPeriod, p0Period, p1Period, offset);
+        memoryController = new MemoryControllerTP(this, csvOut, dramsim_log, 
+                    outputFilename, tpTurnLength, genTrace, traceFilename,
+                    num_pids, fixAddr, diffPeriod, p0Period, p1Period, offset,
+                    tp_config);
 	} else {
         memoryController = 
             new MemoryController(this, csvOut, dramsim_log, 
