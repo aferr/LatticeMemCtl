@@ -57,6 +57,17 @@ CommandQueueTP::step(){
 
 void
 CommandQueueTP::update_stats(){
+   #ifdef VALIDATE_STATS
+   PRINT("-----------------------------------------------------------------------------");
+   PRINT("Time" <<  currentClockCycle);
+   PRINT("Current pid" << getCurrentPID());
+   if(isBufferTime()) PRINT("It is buffer time\n");
+   print();
+   PRINT("-----------------------------------------------------------------------------");
+   PRINT("");
+   PRINT("");
+   #endif
+
    for(int i=0; i < num_pids; i++){
        if( !tcidEmpty(i) && getCurrentPID()!=i ){
            (*incr_stat)(tmux_overhead,i,
@@ -68,9 +79,9 @@ CommandQueueTP::update_stats(){
        }
    }
 
-   if(isBufferTime() && !tcidEmpty(getCurrentPID())){
+   if(isBufferTime() && qsbytc_has_nonref(getCurrentPID())){
        (*incr_stat)(dead_time_overhead, getCurrentPID(),
-               queueSizeByTcid(getCurrentPID()),NULL);
+               qsbytc_ignore_ref(getCurrentPID()),NULL);
    }
 
     for(int i=0; i < num_pids; i++){

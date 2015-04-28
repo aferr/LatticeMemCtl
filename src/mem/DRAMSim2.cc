@@ -67,6 +67,10 @@ isInteresting(PacketPtr pkt ){
 
 void
 DRAMSim2::incr_stat(void* v,int pid, int num_inc, void*){
+        #ifdef VALIDATE_STATS
+        printf("Incrementing %s by %d\n",
+                ((Stats::Vector*)v)->name().c_str(),num_inc);
+        #endif
         (*((Stats::Vector*)v))[pid] += num_inc;
 }
 
