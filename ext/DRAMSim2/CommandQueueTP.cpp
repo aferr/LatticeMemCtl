@@ -76,7 +76,7 @@ CommandQueueTP::update_stats(){
     for(int i=0; i < num_pids; i++){
         if( qsbytc_has_nonref(i) && getCurrentPID()!=i &&
             !qsbytc_has_nonref(getCurrentPID()) &&
-            qsbytc_has_nonref((new TDMTurnAllocator(this))->current()) ){
+            qsbytc_has_nonref(TDMTurnAllocator::natural_turn(this)) ){
                     (*incr_stat)(donation_overhead,i,
                             qsbytc_ignore_ref(i),NULL);
         }
@@ -322,7 +322,7 @@ unsigned CommandQueueTP::getCurrentPID(){
 
 bool CommandQueueTP::isBufferTime(){
   unsigned ccc_ = currentClockCycle - offset;
-  unsigned current_tc = (new TDMTurnAllocator(this))->current();
+  unsigned current_tc = (TDMTurnAllocator::natural_turn(this));
   unsigned schedule_length = p0Period + p1Period * (num_pids - 1);
   unsigned schedule_start = ccc_ - ( ccc_ % schedule_length );
 
@@ -411,7 +411,7 @@ void CommandQueueTP::TurnStartAllocationTimer::step(){
 //-----------------------------------------------------------------------------
 bool CommandQueueTP::DeadTimeAllocationTimer::is_reallocation_time(){
     unsigned ccc_ = cc->currentClockCycle - cc->offset + 1;
-    unsigned current_tc = (new TDMTurnAllocator(cc))->current();
+    unsigned current_tc = TDMTurnAllocator::natural_turn(cc);
     unsigned schedule_length = cc->p0Period + cc->p1Period * (cc->num_pids - 1);
     unsigned schedule_start = ccc_ - ( ccc_ % schedule_length );
 
@@ -439,7 +439,7 @@ void CommandQueueTP::DeadTimeAllocationTimer::step(){
     }
     
     unsigned ccc_ = cc->currentClockCycle - cc->offset;
-    unsigned current_tc = (new TDMTurnAllocator(cc))->current();
+    unsigned current_tc = TDMTurnAllocator::natural_turn(cc);
     unsigned schedule_length = cc->p0Period + cc->p1Period * (cc->num_pids - 1);
     unsigned schedule_start = ccc_ - ( ccc_ % schedule_length );
 
@@ -506,15 +506,18 @@ int CommandQueueTP::MonotonicDeadTimeCalc::refresh_deadtime(){
 //-----------------------------------------------------------------------------
 // TDM Turn Allocator
 //-----------------------------------------------------------------------------
-void CommandQueueTP::TDMTurnAllocator::allocate_turn(){}
-void CommandQueueTP::TDMTurnAllocator::allocate_next(){}
-
-unsigned CommandQueueTP::TDMTurnAllocator::current(){
+unsigned CommandQueueTP::TDMTurnAllocator::natural_turn(CommandQueueTP* cc){
     unsigned ccc_ = cc->currentClockCycle - cc->offset;
     unsigned schedule_time = ccc_ %
         (cc->p0Period + (cc->num_pids-1) * cc->p1Period);
     if( schedule_time < cc->p0Period ) return 0;
     return (schedule_time - cc->p0Period) / cc->p1Period + 1;
+}
+void CommandQueueTP::TDMTurnAllocator::allocate_turn(){}
+void CommandQueueTP::TDMTurnAllocator::allocate_next(){}
+
+unsigned CommandQueueTP::TDMTurnAllocator::current(){
+    return natural_turn(cc);
 }
 
 unsigned CommandQueueTP::TDMTurnAllocator::next(){

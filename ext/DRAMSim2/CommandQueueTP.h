@@ -144,6 +144,7 @@ class CommandQueueTP : public CommandQueue
     class TDMTurnAllocator : public TurnAllocator
     {
         public:
+        static unsigned natural_turn(CommandQueueTP *cc);
         TDMTurnAllocator(CommandQueueTP *cc) :
             TurnAllocator(cc) {}
         virtual void allocate_turn();
@@ -159,7 +160,7 @@ class CommandQueueTP : public CommandQueue
             TDMTurnAllocator(cc) {
                 turn_owner = cc->securityPolicy->bottom();
                 next_owner = cc->securityPolicy->bottom();
-            }
+        }
         virtual void allocate_turn();
         virtual void allocate_next();
         virtual unsigned current();
