@@ -259,6 +259,7 @@ def sav_script( options = {} )
     script.puts("#!/bin/bash")
     script.puts("build/ARM/gem5.fast \\") unless debug
     script.puts("build/ARM/gem5.debug \\") if debug 
+    script.puts("--remote-gdb-port=0 \\")
     script.puts("--debug-flags=Cache \\") if cacheDebug
     script.puts("--debug-flags=MMU \\") if mmuDebug
     script.puts("--debug-flags=Bus,MMU,Cache\\") if options[:memdebug]
