@@ -38,6 +38,14 @@ CommandQueueTP::CommandQueueTP(vector< vector<BankState> > &states,
         case 1: deadTimeCalc = new MonotonicDeadTimeCalc(this); break;
         default: deadTimeCalc = new StrictDeadTimeCalc(this);
     }
+
+    switch(tp_config[4]){
+        case 0: partitioning = false; break;
+        case 1: partitioning = true; break;
+        default: partitioning = false;
+    }
+
+    pid_last_pop = 0;
 }
 
 void
@@ -247,16 +255,81 @@ bool CommandQueueTP::normalPopClosePage(BusPacket **busPacket, bool
     unsigned startingRank = nextRank;
     unsigned startingBank = nextBank;
 
+    if(pid_last_pop!= getCurrentPID()){
+        last_pid = pid_last_pop;
+    }
+
+    pid_last_pop = getCurrentPID();
+
     while(true)
     {
         //Only get the queue for the PID with the current turn.
         vector<BusPacket *> &queue = getCommandQueue(nextRank, getCurrentPID());
+        vector<BusPacket *> &queue_last = getCommandQueue(nextRank, last_pid);
         //make sure there is something in this queue first
         //	also make sure a rank isn't waiting for a refresh
         //	if a rank is waiting for a refesh, don't issue anything to it until 
         //	the
         //		refresh logic above has sent one out (ie, letting banks close)
 
+
+        if (!((nextRank == refreshRank) && refreshWaiting))
+        {
+
+            //search from beginning to find first issuable bus packet
+            for (size_t i=0;i<queue_last.size();i++)
+            {
+
+                if (isIssuable(queue_last[i]))
+                {
+#ifdef DEBUG_TP
+                    if(lastPopTime!=currentClockCycle &&
+                            queue_last[i]->physicalAddress == interesting){
+                        string bptype = (queue_last[i]->busPacketType==ACTIVATE) ?
+                            "activate" : "r/w";
+                        cout << "popped interesting "<< bptype << " @ "
+                            << currentClockCycle << endl;
+                        lastPopTime = currentClockCycle;
+                    }
+#endif /*DEBUG_TP*/
+                    //If a turn change is about to happen, don't
+                    //issue any activates
+
+                    if(queue_last[i]->busPacketType==ACTIVATE)
+                        continue;
+
+                    //check to make sure we aren't removing a read/write that 
+                    //is paired with an activate
+                    // if (i>0 && queue[i-1]->busPacketType==ACTIVATE &&
+//                             queue[i-1]->physicalAddress == 
+//                             queue[i]->physicalAddress)
+//                         continue;
+
+                    *busPacket = queue_last[i];
+
+                    queue_last.erase(queue_last.begin()+i);
+                    foundIssuable = true;
+                    break;
+                }
+#ifdef DEBUG_TP
+                else if(queue_last[i]->physicalAddress==interesting)
+                {
+                    string bptype = (queue_last[i]->busPacketType==ACTIVATE) ?
+                        "activate" : "r/w";
+                    cout << "interesting couldn't issue @ "<<
+                        currentClockCycle << " as a "<<bptype <<endl;
+                    cout << "nextRank "<<nextRank<< " nextBank "<<nextBank
+                        << endl << "startingRank "<<startingRank
+                        <<" startingBank " << startingBank << endl;
+                    printf("refreshRank %u\n",refreshRank);
+                    bankStates[queue_last[i]->rank][queue_last[i]->bank].print();
+                    //lastPopTime = currentClockCycle;
+                }
+#endif /*DEBUG_TP*/
+            }
+        }
+        
+        if(!foundIssuable){    
         if (!queue.empty() && !((nextRank == refreshRank) && refreshWaiting))
         {
 
@@ -302,6 +375,7 @@ bool CommandQueueTP::normalPopClosePage(BusPacket **busPacket, bool
         {
             break;
         }
+    }
     }
 
     return foundIssuable;
@@ -374,11 +448,9 @@ bool CommandQueueTP::isBufferTimePure(){
   unsigned refresh_period = REFRESH_PERIOD/NUM_RANKS/tCK;
   unsigned next_refresh = ccc_ + refresh_period - (ccc_ % refresh_period);
  
-  //unsigned tlength = current_tc == 0 ? p0Period : p1Period;
-
   unsigned deadtime = (turn_start <= next_refresh && next_refresh < turn_end) ?
-    TP_BUFFER_TIME:
-    WORST_CASE_DELAY;
+    refresh_worst_case_time(): 
+    worst_case_time();
 
   return ccc_ >= (turn_end - deadtime);
 
@@ -438,8 +510,8 @@ bool CommandQueueTP::DeadTimeAllocationTimer::is_reallocation_time(){
     unsigned next_refresh = ccc_ + refresh_period - (ccc_ % refresh_period);
  
     unsigned deadtime = (turn_start <= next_refresh && next_refresh < turn_end)?
-        TP_BUFFER_TIME:
-        WORST_CASE_DELAY;
+        cc->refresh_worst_case_time():
+        cc->worst_case_time();
 
     return ccc_ == (turn_end - deadtime);
 }
@@ -466,8 +538,8 @@ void CommandQueueTP::DeadTimeAllocationTimer::step(){
     unsigned next_refresh = ccc_ + refresh_period - (ccc_ % refresh_period);
  
     unsigned deadtime = (turn_start <= next_refresh && next_refresh < turn_end)?
-        TP_BUFFER_TIME:
-        WORST_CASE_DELAY;
+        cc->refresh_worst_case_time():
+        cc->worst_case_time();
 
     if( ccc_ == (turn_end - deadtime -1)){
          cc->turnAllocator->allocate_next();
@@ -477,6 +549,25 @@ void CommandQueueTP::DeadTimeAllocationTimer::step(){
 
 
 //=============================================================================
+// Partitioning
+//=============================================================================
+int CommandQueueTP::worst_case_time(){
+    if(partitioning){
+        return WORST_CASE_DELAY;
+    } else {
+        return FIX_WORST_CASE_DELAY;
+    }
+}
+
+int CommandQueueTP::refresh_worst_case_time(){
+    if(partitioning){
+        return TP_BUFFER_TIME;
+    } else {
+        return FIX_TP_BUFFER_TIME;
+    }
+}
+
+//=============================================================================
 // Dead Time Calculators
 //=============================================================================
 
@@ -484,11 +575,11 @@ void CommandQueueTP::DeadTimeAllocationTimer::step(){
 // Strict
 //-----------------------------------------------------------------------------
 int CommandQueueTP::StrictDeadTimeCalc::normal_deadtime(){
-    return WORST_CASE_DELAY;
+    return cc->worst_case_time();
 }
 
 int CommandQueueTP::StrictDeadTimeCalc::refresh_deadtime(){
-    return TP_BUFFER_TIME;
+    return cc->refresh_worst_case_time();
 }
 
 //-----------------------------------------------------------------------------
