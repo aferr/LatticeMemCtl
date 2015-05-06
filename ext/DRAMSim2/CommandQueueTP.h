@@ -54,7 +54,7 @@ class CommandQueueTP : public CommandQueue
 
         virtual unsigned getCurrentPID();
         virtual bool isBufferTime();
-        virtual bool isBufferTimePure();
+        // virtual bool isBufferTimePure();
         virtual int normal_deadtime(int tlength);
         virtual int refresh_deadtime(int tlength);
 
