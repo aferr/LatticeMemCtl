@@ -125,6 +125,9 @@ extern unsigned NUM_DEVICES;
 #define FIX_WORST_CASE_DELAY (WL + BL +tWTR) //18
 #define FIX_TP_BUFFER_TIME (tFAW-3*tRRD+tRFC) //
 
+#define WC_RANK_BANK_PART (BL*2 + tRTRS) //17
+#define REF_WC_RANK_BANK_PART (tFAW-3*tRRD+tRFC)
+
 extern unsigned JEDEC_DATA_BUS_BITS;
 
 //Memory Controller related parameters

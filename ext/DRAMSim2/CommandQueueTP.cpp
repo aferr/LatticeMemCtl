@@ -553,9 +553,9 @@ void CommandQueueTP::DeadTimeAllocationTimer::step(){
 //=============================================================================
 int CommandQueueTP::worst_case_time(){
     if(partitioning){
-        return WORST_CASE_DELAY;
+        return WC_RANK_BANK_PART;
     } else {
-        return FIX_WORST_CASE_DELAY;
+        return REF_WC_RANK_BANK_PART;
     }
 }
 
