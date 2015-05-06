@@ -46,6 +46,7 @@ CommandQueueTP::CommandQueueTP(vector< vector<BankState> > &states,
     }
 
     pid_last_pop = 0;
+    last_pid = 0;
 }
 
 void
@@ -266,44 +267,17 @@ bool CommandQueueTP::normalPopClosePage(BusPacket **busPacket, bool
         //Only get the queue for the PID with the current turn.
         vector<BusPacket *> &queue = getCommandQueue(nextRank, getCurrentPID());
         vector<BusPacket *> &queue_last = getCommandQueue(nextRank, last_pid);
-        //make sure there is something in this queue first
-        //	also make sure a rank isn't waiting for a refresh
-        //	if a rank is waiting for a refesh, don't issue anything to it until 
-        //	the
-        //		refresh logic above has sent one out (ie, letting banks close)
 
-
-        if (!((nextRank == refreshRank) && refreshWaiting))
+        if (partitioning && !((nextRank == refreshRank) && refreshWaiting))
         {
-
             //search from beginning to find first issuable bus packet
             for (size_t i=0;i<queue_last.size();i++)
             {
 
                 if (isIssuable(queue_last[i]))
                 {
-#ifdef DEBUG_TP
-                    if(lastPopTime!=currentClockCycle &&
-                            queue_last[i]->physicalAddress == interesting){
-                        string bptype = (queue_last[i]->busPacketType==ACTIVATE) ?
-                            "activate" : "r/w";
-                        cout << "popped interesting "<< bptype << " @ "
-                            << currentClockCycle << endl;
-                        lastPopTime = currentClockCycle;
-                    }
-#endif /*DEBUG_TP*/
-                    //If a turn change is about to happen, don't
-                    //issue any activates
-
                     if(queue_last[i]->busPacketType==ACTIVATE)
                         continue;
-
-                    //check to make sure we aren't removing a read/write that 
-                    //is paired with an activate
-                    // if (i>0 && queue[i-1]->busPacketType==ACTIVATE &&
-//                             queue[i-1]->physicalAddress == 
-//                             queue[i]->physicalAddress)
-//                         continue;
 
                     *busPacket = queue_last[i];
 
@@ -311,71 +285,52 @@ bool CommandQueueTP::normalPopClosePage(BusPacket **busPacket, bool
                     foundIssuable = true;
                     break;
                 }
-#ifdef DEBUG_TP
-                else if(queue_last[i]->physicalAddress==interesting)
-                {
-                    string bptype = (queue_last[i]->busPacketType==ACTIVATE) ?
-                        "activate" : "r/w";
-                    cout << "interesting couldn't issue @ "<<
-                        currentClockCycle << " as a "<<bptype <<endl;
-                    cout << "nextRank "<<nextRank<< " nextBank "<<nextBank
-                        << endl << "startingRank "<<startingRank
-                        <<" startingBank " << startingBank << endl;
-                    printf("refreshRank %u\n",refreshRank);
-                    bankStates[queue_last[i]->rank][queue_last[i]->bank].print();
-                    //lastPopTime = currentClockCycle;
-                }
-#endif /*DEBUG_TP*/
             }
         }
         
-        if(!foundIssuable){    
-        if (!queue.empty() && !((nextRank == refreshRank) && refreshWaiting))
-        {
-
-            //search from beginning to find first issuable bus packet
-            for (size_t i=0;i<queue.size();i++)
+        if(!(partitioning && foundIssuable)){    
+            if (!queue.empty() && !((nextRank == refreshRank) && refreshWaiting))
             {
 
-                if (isIssuable(queue[i]))
+                //search from beginning to find first issuable bus packet
+                for (size_t i=0;i<queue.size();i++)
                 {
-                    //If a turn change is about to happen, don't
-                    //issue any activates
-                    
-                    if(queue[i]->busPacketType==ACTIVATE){
-                        if(isBufferTime())
+
+                    if (isIssuable(queue[i]))
+                    {
+                        if(queue[i]->busPacketType==ACTIVATE){
+                            if(isBufferTime()) continue;
+                        }
+
+                        //check to make sure we aren't removing a read/write that 
+                        //is paired with an activate
+                        if (i>0 && queue[i-1]->busPacketType==ACTIVATE &&
+                                queue[i-1]->physicalAddress == 
+                                queue[i]->physicalAddress){
                             continue;
+                        }
+
+                        *busPacket = queue[i];
+
+                        queue.erase(queue.begin()+i);
+                        (*queue.begin())->beginHeadTime = currentClockCycle;
+                        foundIssuable = true;
+                        break;
                     }
-
-                    //check to make sure we aren't removing a read/write that 
-                    //is paired with an activate
-                    if (i>0 && queue[i-1]->busPacketType==ACTIVATE &&
-                            queue[i-1]->physicalAddress == 
-                            queue[i]->physicalAddress)
-                        continue;
-
-                    *busPacket = queue[i];
-
-                    queue.erase(queue.begin()+i);
-                    (*queue.begin())->beginHeadTime = currentClockCycle;
-                    foundIssuable = true;
-                    break;
                 }
             }
-        }
 
-        //if we found something, break out of do-while
-        if (foundIssuable){
-            check_donor_issue();
-            break;
-        }
+            //if we found something, break out of do-while
+            if (foundIssuable){
+                break;
+            }
 
-        nextRankAndBank(nextRank, nextBank);
-        if (startingRank == nextRank && startingBank == nextBank)
-        {
-            break;
+            nextRankAndBank(nextRank, nextBank);
+            if (startingRank == nextRank && startingBank == nextBank)
+            {
+                break;
+            }
         }
-    }
     }
 
     return foundIssuable;

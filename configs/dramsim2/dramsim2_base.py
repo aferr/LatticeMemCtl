@@ -242,7 +242,7 @@ def setup_dramsim(options):
                             security_policy = options.security_policy,
                             turn_allocation_time = options.turn_allocation_time,
                             dead_time_policy = options.dead_time_policy,
-                            turn_allocation_policy = options.turn_allocation_policy
+                            turn_allocation_policy = options.turn_allocation_policy,
                             rank_bank_partitioning = options.rank_bank_partitioning
                         );
     else: # or we just use the original memory model
