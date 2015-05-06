@@ -572,16 +572,10 @@ CommandQueueTP::PriorityTurnAllocator::PriorityTurnAllocator(CommandQueueTP *cc)
     : TurnAllocator(cc)
 {
     int num_pids = cc->num_pids;
-    // epoch_length = num_pids*(num_pids+1)/2;
     epoch_length = num_pids;
     epoch_remaining = epoch_length;
 
     bandwidth_limit = ((int*) malloc(sizeof(int) * num_pids));
-    // For now assume total order with 0 as bottom.
-    // bandwidth_limit[0] = num_pids;
-    // for(int i=1; i < num_pids; i++){
-    //     bandwidth_limit[i] = bandwidth_limit[i-1] + num_pids - i;
-    // }
     for(int i=0; i< num_pids; i++){ bandwidth_limit[i] = i + 1; }
 
     bandwidth_remaining = ((int*) malloc(sizeof(int) * num_pids));
@@ -598,7 +592,8 @@ unsigned CommandQueueTP::PriorityTurnAllocator::highest_nonempty_wbw(){
     while(tcid_candidate !=top){
         has_bw = bandwidth_remaining[tcid_candidate];
         is_empty = cc->tcidEmpty(tcid_candidate);
-        if(has_bw && !is_empty) break;
+        //if(has_bw && !is_empty) break;
+        if(!is_empty) break;
         tcid_candidate = cc->securityPolicy->nextHigherTC(tcid_candidate);
     }
     return tcid_candidate;
@@ -627,7 +622,7 @@ void CommandQueueTP::PriorityTurnAllocator::allocate_next(){
     // Deduct bandwidth from the next owner and all those above it 
     // TODO Assumes lattice is TO
     for(int i=next_owner; i < num_pids; i++){
-        bandwidth_remaining[i] -= 1;
+        //bandwidth_remaining[i] -= 1;
     }
     //PRINT("-----------------------------------------------------------------------------");
 
