@@ -30,7 +30,7 @@ def grouped_csv data, o={}
     data.each_with_index.inject("") do |s, (bench_data, i)|
         s += "%-15s" % "#{o[:x_labels][i]}: " +
           bench_data.inject("") do |si, legend_data|
-              si += "%.11f" % legend_data + ", "; si
+              si += "%-13f" % legend_data + ", "; si
           end + "\n"
         s
     end
