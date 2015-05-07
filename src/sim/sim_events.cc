@@ -37,15 +37,19 @@
 #include "sim/sim_exit.hh"
 #include "sim/stats.hh"
 #include "sim/global_exit_count.hh"
+#ifndef HAS_RESET
+#include "sim/has_reset.cc"
+#define HAS_RESET
+#endif
 
 using namespace std;
 extern int term_cpu_val;
+extern bool has_reset;
 
     SimLoopExitEvent::SimLoopExitEvent(const std::string &_cause, int c, Tick r)
 : Event(Sim_Exit_Pri, IsExitEvent), cause(_cause), code(c), repeat(r)
 {
 }
-
 
 //
 // handle termination event
@@ -127,7 +131,6 @@ int cpu_match(const std::string &message){
 //
 // handle termination event
 //
-bool has_reset = false;
 void CountedExitEvent::process()
 {
     term_cpu_val = cpu_match(cause);

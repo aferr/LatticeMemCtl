@@ -41,6 +41,7 @@
 #include "MultiChannelMemorySystem.h"
 
 extern DRAMSim::MultiChannelMemorySystem *dramsim2;
+extern bool has_reset;
 
 /** Simulate for num_cycles additional cycles.  If num_cycles is -1
  * (the default), do not limit simulation; some other event must
@@ -65,14 +66,20 @@ simulate(Tick num_cycles, int numPids)
     //Dump stats every million cycles starting after a million cycles
     // Stats::schedStatEvent(true, false, 50000000000, 50000000000);
 
+    bool has_reset_last = false;
     while (1) {
         // if there is DRAMsim2
-        if (dramsim2) {
+        if (dramsim2 && has_reset) {
             while ((dramsim2->currentClockCycle-1) * tCK * 1000
                     < mainEventQueue.nextTick()) {
                 dramsim2->update();
             }
         }
+        if(has_reset && !has_reset_last){
+            dramsim2->currentClockCycle = mainEventQueue.nextTick() /
+                tCK / 1000 - 1;
+        }
+        has_reset_last = has_reset;
         // there should always be at least one event (the SimLoopExitEvent
         // we just scheduled) in the queue
         assert(!mainEventQueue.empty());
