@@ -38,6 +38,15 @@ CommandQueueTP::CommandQueueTP(vector< vector<BankState> > &states,
         case 1: deadTimeCalc = new MonotonicDeadTimeCalc(this); break;
         default: deadTimeCalc = new StrictDeadTimeCalc(this);
     }
+
+    switch(tp_config[4]){
+        case 0: partitioning = false; break;
+        case 1: partitioning = true; break;
+        default: partitioning = false;
+    }
+
+    pid_last_pop = 0;
+    last_pid = 0;
 }
 
 void
@@ -247,53 +256,85 @@ bool CommandQueueTP::normalPopClosePage(BusPacket **busPacket, bool
     unsigned startingRank = nextRank;
     unsigned startingBank = nextBank;
 
+    if(pid_last_pop!= getCurrentPID()){
+        last_pid = pid_last_pop;
+    }
+
+    pid_last_pop = getCurrentPID();
+
     while(true)
     {
         //Only get the queue for the PID with the current turn.
         vector<BusPacket *> &queue = getCommandQueue(nextRank, getCurrentPID());
-        //make sure there is something in this queue first
-        //	also make sure a rank isn't waiting for a refresh
-        //	if a rank is waiting for a refesh, don't issue anything to it until 
-        //	the
-        //		refresh logic above has sent one out (ie, letting banks close)
+        vector<BusPacket *> &queue_last = getCommandQueue(nextRank, last_pid);
 
-        if (!queue.empty() && !((nextRank == refreshRank) && refreshWaiting))
+        if (partitioning &&!((nextRank == refreshRank) && refreshWaiting) &&
+                !queue_last.empty())
         {
-
             //search from beginning to find first issuable bus packet
-            for (size_t i=0;i<queue.size();i++)
+            for (size_t i=0; i<queue_last.size(); i++)
             {
 
-                if (isIssuable(queue[i]))
+                if (isIssuable(queue_last[i]))
                 {
-                    //If a turn change is about to happen, don't
-                    //issue any activates
-                    
-                    if(queue[i]->busPacketType==ACTIVATE){
-                        if(isBufferTime())
-                            continue;
+                    queue_last[i]->print();
+                    if(queue_last[i]->busPacketType==ACTIVATE){
+                        continue;
+                    }
+                   
+                    // Make sure a read/write that hasn't been activated yet 
+                    // isn't removed. 
+                    if (i>0 && queue_last[i-1]->busPacketType==ACTIVATE &&
+                            queue_last[i-1]->physicalAddress == 
+                            queue_last[i]->physicalAddress){
+                        continue;
                     }
 
-                    //check to make sure we aren't removing a read/write that 
-                    //is paired with an activate
-                    if (i>0 && queue[i-1]->busPacketType==ACTIVATE &&
-                            queue[i-1]->physicalAddress == 
-                            queue[i]->physicalAddress)
-                        continue;
+                    *busPacket = queue_last[i];
 
-                    *busPacket = queue[i];
-
-                    queue.erase(queue.begin()+i);
-                    (*queue.begin())->beginHeadTime = currentClockCycle;
+                    queue_last.erase(queue_last.begin()+i);
+                    (*queue_last.begin())->beginHeadTime = currentClockCycle;
                     foundIssuable = true;
                     break;
+                }
+            }
+        }
+        
+        if(!(partitioning && foundIssuable)){
+            if (!queue.empty() && !((nextRank == refreshRank) && refreshWaiting))
+            {
+
+                //search from beginning to find first issuable bus packet
+                for (size_t i=0;i<queue.size();i++)
+                {
+
+                    if (isIssuable(queue[i]))
+                    {
+                        if(queue[i]->busPacketType==ACTIVATE){
+                            if(isBufferTime()) continue;
+                        }
+
+                        //check to make sure we aren't removing a read/write that 
+                        //is paired with an activate
+                        if (i>0 && queue[i-1]->busPacketType==ACTIVATE &&
+                                queue[i-1]->physicalAddress == 
+                                queue[i]->physicalAddress){
+                            continue;
+                        }
+
+                        *busPacket = queue[i];
+
+                        queue.erase(queue.begin()+i);
+                        (*queue.begin())->beginHeadTime = currentClockCycle;
+                        foundIssuable = true;
+                        break;
+                    }
                 }
             }
         }
 
         //if we found something, break out of do-while
         if (foundIssuable){
-            check_donor_issue();
             break;
         }
 
@@ -357,32 +398,30 @@ bool CommandQueueTP::isBufferTime(){
   return ccc_ >= (turn_end - deadtime);
 }
 
-bool CommandQueueTP::isBufferTimePure(){
-  unsigned ccc_ = currentClockCycle - offset;
-  unsigned current_tc = CommandQueueTP::getCurrentPID();
-  unsigned schedule_length = p0Period + p1Period * (num_pids - 1);
-  unsigned schedule_start = ccc_ - ( ccc_ % schedule_length );
-
-  unsigned turn_start = current_tc == 0 ?
-    schedule_start :
-    schedule_start + p0Period + p1Period * (current_tc-1);
-  unsigned turn_end = current_tc == 0 ?
-    turn_start + p0Period :
-    turn_start + p1Period;
-
-  // Time between refreshes to ANY rank.
-  unsigned refresh_period = REFRESH_PERIOD/NUM_RANKS/tCK;
-  unsigned next_refresh = ccc_ + refresh_period - (ccc_ % refresh_period);
- 
-  //unsigned tlength = current_tc == 0 ? p0Period : p1Period;
-
-  unsigned deadtime = (turn_start <= next_refresh && next_refresh < turn_end) ?
-    TP_BUFFER_TIME:
-    WORST_CASE_DELAY;
-
-  return ccc_ >= (turn_end - deadtime);
-
-}
+// bool CommandQueueTP::isBufferTimePure(){
+//   unsigned ccc_ = currentClockCycle - offset;
+//   unsigned current_tc = CommandQueueTP::getCurrentPID();
+//   unsigned schedule_length = p0Period + p1Period * (num_pids - 1);
+//   unsigned schedule_start = ccc_ - ( ccc_ % schedule_length );
+// 
+//   unsigned turn_start = current_tc == 0 ?
+//     schedule_start :
+//     schedule_start + p0Period + p1Period * (current_tc-1);
+//   unsigned turn_end = current_tc == 0 ?
+//     turn_start + p0Period :
+//     turn_start + p1Period;
+// 
+//   // Time between refreshes to ANY rank.
+//   unsigned refresh_period = REFRESH_PERIOD/NUM_RANKS/tCK;
+//   unsigned next_refresh = ccc_ + refresh_period - (ccc_ % refresh_period);
+//  
+//   unsigned deadtime = (turn_start <= next_refresh && next_refresh < turn_end) ?
+//     refresh_worst_case_time(): 
+//     worst_case_time();
+// 
+//   return ccc_ >= (turn_end - deadtime);
+// 
+// }
 
 //=============================================================================
 // Turn Ownership Timers
@@ -438,8 +477,8 @@ bool CommandQueueTP::DeadTimeAllocationTimer::is_reallocation_time(){
     unsigned next_refresh = ccc_ + refresh_period - (ccc_ % refresh_period);
  
     unsigned deadtime = (turn_start <= next_refresh && next_refresh < turn_end)?
-        TP_BUFFER_TIME:
-        WORST_CASE_DELAY;
+        cc->refresh_worst_case_time():
+        cc->worst_case_time();
 
     return ccc_ == (turn_end - deadtime);
 }
@@ -466,8 +505,8 @@ void CommandQueueTP::DeadTimeAllocationTimer::step(){
     unsigned next_refresh = ccc_ + refresh_period - (ccc_ % refresh_period);
  
     unsigned deadtime = (turn_start <= next_refresh && next_refresh < turn_end)?
-        TP_BUFFER_TIME:
-        WORST_CASE_DELAY;
+        cc->refresh_worst_case_time():
+        cc->worst_case_time();
 
     if( ccc_ == (turn_end - deadtime -1)){
          cc->turnAllocator->allocate_next();
@@ -477,6 +516,25 @@ void CommandQueueTP::DeadTimeAllocationTimer::step(){
 
 
 //=============================================================================
+// Partitioning
+//=============================================================================
+int CommandQueueTP::worst_case_time(){
+    if(partitioning){
+        return WC_RANK_BANK_PART;
+    } else {
+        return WORST_CASE_DELAY;
+    }
+}
+
+int CommandQueueTP::refresh_worst_case_time(){
+    if(partitioning){
+        return REF_WC_RANK_BANK_PART;
+    } else {
+        return TP_BUFFER_TIME;
+    }
+}
+
+//=============================================================================
 // Dead Time Calculators
 //=============================================================================
 
@@ -484,11 +542,11 @@ void CommandQueueTP::DeadTimeAllocationTimer::step(){
 // Strict
 //-----------------------------------------------------------------------------
 int CommandQueueTP::StrictDeadTimeCalc::normal_deadtime(){
-    return WORST_CASE_DELAY;
+    return cc->worst_case_time();
 }
 
 int CommandQueueTP::StrictDeadTimeCalc::refresh_deadtime(){
-    return TP_BUFFER_TIME;
+    return cc->refresh_worst_case_time();
 }
 
 //-----------------------------------------------------------------------------
@@ -501,13 +559,13 @@ int CommandQueueTP::MonotonicDeadTimeCalc::normal_deadtime(){
     //         cc->turnAllocator->next())
     return cc->securityPolicy->isLabelLEQ(
             cc->turnAllocator->current(),
-            cc->turnAllocator->next()) ? 0 : WORST_CASE_DELAY;
+            cc->turnAllocator->next()) ? 0 : cc->worst_case_time();
 }
 
 int CommandQueueTP::MonotonicDeadTimeCalc::refresh_deadtime(){
     return cc->securityPolicy->isLabelLEQ(
             cc->turnAllocator->current(),
-            cc->turnAllocator->next()) ? 0 : TP_BUFFER_TIME;
+            cc->turnAllocator->next()) ? 0 : cc->refresh_worst_case_time();
 }
 
 //=============================================================================

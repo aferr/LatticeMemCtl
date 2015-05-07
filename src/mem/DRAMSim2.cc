@@ -87,6 +87,7 @@ DRAMSim2::DRAMSim2(const Params *p) : DRAMSim2Wrapper(p)
     tp_config[1] = p->turn_allocation_time;
     tp_config[2] = p->turn_allocation_policy;
     tp_config[3] = p->dead_time_policy;
+    tp_config[4] = p->rank_bank_partitioning;
     dramsim2 = new DRAMSim::MultiChannelMemorySystem(p->deviceConfigFile, 
             p->systemConfigFile, atoi((p->tpTurnLength).c_str()), p->genTrace, p->cwd,
             p->traceFile, memoryCapacity, p->outputFile, NULL, NULL,

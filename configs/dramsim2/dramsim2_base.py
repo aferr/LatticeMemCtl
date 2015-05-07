@@ -170,6 +170,7 @@ def add_options():
         parser.add_option("--dead_time_policy", type="int", default=0, help="")
         parser.add_option("--turn_allocation_policy", type="int", default=0, help="")
         parser.add_option("--turn_allocation_time", type="int", default=0, help="")
+        parser.add_option("--rank_bank_partitioning", type="int", default=0, help="")
 
         (options, args) = parser.parse_args()
 
@@ -241,7 +242,8 @@ def setup_dramsim(options):
                             security_policy = options.security_policy,
                             turn_allocation_time = options.turn_allocation_time,
                             dead_time_policy = options.dead_time_policy,
-                            turn_allocation_policy = options.turn_allocation_policy
+                            turn_allocation_policy = options.turn_allocation_policy,
+                            rank_bank_partitioning = options.rank_bank_partitioning
                         );
     else: # or we just use the original memory model
         DRAM = SimpleMemory( range = AddrRange(memorysize) )

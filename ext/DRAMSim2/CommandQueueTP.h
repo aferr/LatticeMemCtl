@@ -47,12 +47,19 @@ class CommandQueueTP : public CommandQueue
         int p0Period;
         int p1Period;
 		int offset;
+        bool partitioning;
+
+        int pid_last_pop;
+        int last_pid;
 
         virtual unsigned getCurrentPID();
         virtual bool isBufferTime();
-        virtual bool isBufferTimePure();
+        // virtual bool isBufferTimePure();
         virtual int normal_deadtime(int tlength);
         virtual int refresh_deadtime(int tlength);
+
+        virtual int worst_case_time();
+        virtual int refresh_worst_case_time();
 
         virtual void update_stats();
 
