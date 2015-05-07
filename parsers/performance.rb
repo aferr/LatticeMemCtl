@@ -29,7 +29,7 @@ def abs_tp o={}
   puts "abs_ntc".green
   puts r
   gb = grouped_bar r, o
-  csv = grouped_csv r.transpose, o
+  csv = grouped_csv r.transpose, o.merge(do_avg: false)
   string_to_f gb,  "#{o[:out_dir]}/#{o[:nametag]}_#{o[:mname]}.svg"
   string_to_f csv, "#{o[:out_dir]}/#{o[:nametag]}_#{o[:mname]}.csv"
 end

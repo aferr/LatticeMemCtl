@@ -23,10 +23,11 @@ PAPER_DIM = {
 def grouped_csv data, o={}
   o = {
     x_labels: $specint,
-    legend: %w[]
+    legend: %w[],
+    do_avg: true,
   }.merge o
 
-  "%-15s" % "bench," +  "#{o[:legend].inject("") { |s, l| s += "%-15s" % "#{l}, " }} \n" +
+  str = "%-15s" % "bench," +  "#{o[:legend].inject("") { |s, l| s += "%-15s" % "#{l}, " }} \n" +
     data.each_with_index.inject("") do |s, (bench_data, i)|
         s += "%-15s" % "#{o[:x_labels][i]}: " +
           bench_data.inject("") do |si, legend_data|
@@ -34,6 +35,18 @@ def grouped_csv data, o={}
           end + "\n"
         s
     end
+
+  # Add Averages
+  str += "%-15s" % "avg:"
+  str += data.transpose.map do |bench_data|
+      bench_data.reject { |element| element == 0 }
+  end.map do |bench_data|
+      bench_data == [] ? 0 : bench_data.reduce(:+) / bench_data.size
+  end.inject("") do |s, avg_data|
+      s += "%-13f" % avg_data + ", "; s
+  end + "\n"
+
+  str
 
 end
 

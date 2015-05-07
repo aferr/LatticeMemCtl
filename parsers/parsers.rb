@@ -52,7 +52,7 @@ $mpworkloads = {
   sjg_sgj: %w[ sjeng sjeng ],
   ast_h264: %w[ astar h264ref ],
   h264_hmm: %w[ h264ref hmmer ],
-  #ast_ast: %w[ astar astar],
+  ast_ast: %w[ astar astar],
 
   # Float workloads
   # milc_milc: %w[milc milc],
