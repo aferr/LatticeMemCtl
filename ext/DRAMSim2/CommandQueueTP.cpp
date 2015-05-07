@@ -631,7 +631,7 @@ CommandQueueTP::PriorityTurnAllocator::PriorityTurnAllocator(CommandQueueTP *cc)
 {
     int num_pids = cc->num_pids;
     // epoch_length = num_pids*(num_pids+1)/2;
-    epoch_length = num_pids;
+    epoch_length = 1000;
     epoch_remaining = epoch_length;
 
     bandwidth_limit = ((int*) malloc(sizeof(int) * num_pids));
@@ -640,7 +640,10 @@ CommandQueueTP::PriorityTurnAllocator::PriorityTurnAllocator(CommandQueueTP *cc)
     // for(int i=1; i < num_pids; i++){
     //     bandwidth_limit[i] = bandwidth_limit[i-1] + num_pids - i;
     // }
-    for(int i=0; i< num_pids; i++){ bandwidth_limit[i] = i + 1; }
+    bandwidth_limit[0] = 1000 - (num_pids - 1) * 20;
+    for(int i=1; i< num_pids; i++){
+        bandwidth_limit[i] = bandwidth_limit[i-1] + 20;
+    }
 
     bandwidth_remaining = ((int*) malloc(sizeof(int) * num_pids));
     for(int i=0; i < num_pids; i++) bandwidth_remaining[i]=bandwidth_limit[i];

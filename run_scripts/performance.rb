@@ -74,7 +74,7 @@ module RunScripts
             rank_bank_partitioning: true,
             tl0: 18,
             tl1: 18,
-            nametag: "rb_part_",
+            nametag: "",
         )
     end
 

@@ -167,10 +167,10 @@ def sav_script( options = {} )
 
     options = {
         #TP Minimum: 
-        tl0: 44,
-        tl1: 44,
-        tl2: 44,
-        tl3: 44,
+        tl0: 18,
+        tl1: 18,
+        tl2: 18,
+        tl3: 18,
         #FA Minimum:
         # tl0: 18,
         # tl1: 18,
@@ -243,7 +243,7 @@ def sav_script( options = {} )
       end; n
     )
 
-    cacheSize = 4;
+    cacheSize = 2;
 
     o = options
 
