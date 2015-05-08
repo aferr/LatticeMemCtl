@@ -48,6 +48,8 @@
 
 using namespace std;
 
+extern bool has_reset;
+
 std::string
 hexstr( int i ){
     std::stringstream s;
@@ -215,7 +217,10 @@ DRAMSim2::MemoryPort::recvTimingReq(PacketPtr pkt)
 #endif
             Transaction tr = Transaction(transType, addr, NULL, threadID,
                     dramsim2->currentClockCycle, 0);
-            retVal = dramsim2->addTransaction(tr);
+            
+            if(has_reset){
+                retVal = dramsim2->addTransaction(tr);
+            }
             //std::cout << "case 2" << std::endl;
             //std::cout << "Thread: " << threadID << std::endl;
             //std::cout << "Addr  : " << std::hex << setfill('0') << setw(8) << addr << std::endl;
@@ -238,7 +243,11 @@ DRAMSim2::MemoryPort::recvTimingReq(PacketPtr pkt)
 #endif
                 Transaction tr = Transaction(transType, addr, NULL, threadID,
                         dramsim2->currentClockCycle, 0);
-                retVal = dramsim2->addTransaction(tr);
+                
+                if(has_reset){
+                    retVal = dramsim2->addTransaction(tr);
+                }
+                
                 if (retVal == true) {
                 	dram->doAtomicAccess(pkt);
                 	this->addPendingDelete(pkt);

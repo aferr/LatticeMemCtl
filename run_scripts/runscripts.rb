@@ -272,7 +272,7 @@ def sav_script( options = {} )
     filename = "#{options[:nametag]}_"+filename if options[:nametag]
     filename = options[:filename] unless options[:filename].nil?
   
-    FileUtils.mkdir_p( result_dir ) unless File.directory?( result_dir )
+    FileUtils.mkdir_p(result_dir) unless File.directory?(result_dir)
     FileUtils.mkdir_p("time") unless File.directory?("time")
 
     script = File.new($scriptgen_dir.path+"/run_#{filename}","w+")
