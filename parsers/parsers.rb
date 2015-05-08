@@ -161,9 +161,9 @@ def find_time(filename, opts = {} )
   ticks / insts
 end
 
-def find_time_cpu(filename, n, opts={})
-    term_reg = /term_cpu\s*#{n}/
-    multi_reg = /system.switch_cpus#{n}.cpi\s*(\d*\.\d*)/
+def find_time_cpu(filename, cpu, opts={})
+    term_reg = /term_cpu\s*#{cpu}/
+    multi_reg = /system.switch_cpus#{cpu}.cpi\s*(\d*\.\d*)/
     found_term = false
     File.open(filename, 'r') do |f|
         f.each_line do |l|
@@ -176,19 +176,25 @@ def find_time_cpu(filename, n, opts={})
     (puts filename.to_s.red; return nil) 
 end
 
+def find_stat_cpu filename, regex, cpu, opts = {}
+    (puts filename.red; return nil) unless File.exists? filename
+    term_reg = /term_cpu\s*#{cpu}/
+    found_term = false
+    File.open(filename,'r') do |f|
+        f.each_line.each do |l|
+            found_term = true if l =~ term_reg
+            next unless found_term
+            return l.match(regex)[1].to_f if l =~ regex
+        end
+    end
+    (puts filename.blue; return nil) 
+end
 
-#Memoization hash
-#@@stats = Hash.new
+
 def find_stat filename, regex, opts = {}
-    #s=@@stats[[filename,regex]]; return s unless s.nil?
     (puts filename.red; return nil) unless File.exists? filename
     File.open(filename,'r') do |f|
-      f.each_line.to_a.reverse.each do |l|
-        return l.match(regex)[1].to_f if l =~ regex
-        # if l =~ regex
-        #   return @@stats[[filename,regex]] = l.match(regex)[1].to_f
-        # end
-      end
+        f.each_line.each { |l| return l.match(regex)[1].to_f if l =~ regex }
     end
     (puts filename.blue; return nil) 
 end
@@ -215,11 +221,9 @@ def stp( p={} )
     single_times = ((p[:workloads][wl]).map do |b|
         find_stat (single_m5out p.merge(bench: b)), single_reg
     end * (p[:numcpus]/2)).flatten
-    puts single_times.to_s.yellow
     s = p[:numcpus].times.map do |i|
         tisp = single_times[i]
         timp = find_time_cpu (m5out_file p), i
-        puts timp.to_s.blue
         (tisp.nil? || timp.nil?) ? [] : tisp/timp
     end
     s.include?([]) ? 0 : s.reduce(:+)
