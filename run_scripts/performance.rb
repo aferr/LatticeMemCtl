@@ -73,7 +73,7 @@ module RunScripts
     end
 
     def secure_spec
-        securemerge(
+        secure(
             addrpar: true,
             scheme: "tp",
             num_wl: 8,
@@ -83,6 +83,7 @@ module RunScripts
             rank_bank_partitioning: true,
             tl0: 18,
             tl1: 18,
+            nametag: ""
         )
     end
 
