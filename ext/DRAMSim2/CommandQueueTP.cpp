@@ -630,7 +630,7 @@ CommandQueueTP::PriorityTurnAllocator::PriorityTurnAllocator(CommandQueueTP *cc)
 {
     int num_pids = cc->num_pids;
     // epoch_length = num_pids*(num_pids+1)/2;
-    epoch_length = 1000;
+    epoch_length = 100000;
     epoch_remaining = epoch_length;
 
     bandwidth_limit = ((int*) malloc(sizeof(int) * num_pids));

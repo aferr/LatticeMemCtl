@@ -85,8 +85,27 @@ $mpworkloads = {
   # pov_pov: %w[povray povray],
   # lbm_lbm: %w[lbm lbm],
   # spx_spx: %w[sphinx3 sphinx3]
-
 }
+
+$workloads_8core = {
+    mix_1: %w[astar astar astar astar libquantum libquantum libquantum libquantum],
+    mix_2: %w[astar h264ref hmmer gobmk libquantum libquantum libquantum libquantum],
+    mix_3: %w[astar astar astar astar astar astar libquantum libquantum],
+    mix_4: %w[astar h264ref hmmer gobmk sjeng mcf bzip2 libquantum],
+    mix_5: %w[astar astar astar astar mcf mcf mcf mcf],
+    mix_6: %w[astar astar astar astar astar astar mcf mcf],
+    mix_7: %w[astar h264ref hmmer gobmk mcf mcf mcf mcf],
+    mix_8: %w[mcf mcf mcf mcf libquantum libquantum libquantum libquantum],
+    mix_9: %w[sjeng mcf bzip2 libquantum astar h264ref hmmer gobmk]
+}
+
+def workloads_for n
+    if n == 8
+        ($workloads_8core.merge (workloads_of_size 8))
+    else
+        workloads_of_size n
+    end
+end
 
 def workloads_of_size n, wl2=$mpworkloads
   wl2.keys.inject({}) do |hash, name|
@@ -243,7 +262,7 @@ def sav_script( options = {} )
       end; n
     )
 
-    cacheSize = 1;
+    cacheSize = 4;
 
     o = options
 
@@ -368,25 +387,27 @@ def single opts={}
 end
 
 def iterate_mp o={}
-  o = {
-    num_wl: 2,
-    workloads: $mpworkloads,
-    skip3: true,
-    skip5: true,
-    skip7: true
-  }.merge o
-
-  2.upto(o[:num_wl]) do |n|
-    wls = workloads_of_size n, o[:workloads]
-    wls.keys.each do |wl|
-      p = o.merge(wl_name: wl)
-      wls[wl].each_with_index do |benchmark,i|
-        p = p.merge( "p#{i}".to_sym => benchmark )
-      end
-      sav_script p unless eval("o[:skip#{n}]")
+    o = {
+      num_wl: 2,
+      workloads: $mpworkloads,
+      skip3: true,
+      skip5: true,
+      skip7: true
+    }.merge o
+    
+    2.upto(o[:num_wl]) do |n|
+        wls = workloads_for n
+        puts wls
+        wls.keys.each do |wl|
+            puts wl.to_s.green
+            p = o.merge(wl_name: wl)
+            puts wls[wl].to_s.blue
+            wls[wl].each_with_index do |benchmark,i|
+                p = p.merge( "p#{i}".to_sym => benchmark )
+            end
+            sav_script p unless eval("o[:skip#{n}]")
+        end
     end
-  end
-
 end
 
 end

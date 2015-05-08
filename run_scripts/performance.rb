@@ -6,6 +6,13 @@ include RunScripts
 
 module RunScripts
 
+    $test_run_opts = {
+        maxinsts: 100,
+        fastforward: 100,
+        runmode: :local,
+        debug: true
+    }
+
     def synthetic
         o = {
             addrpar: true,
@@ -65,16 +72,17 @@ module RunScripts
     end
 
     def secure_spec
-        secure(
+        securemerge(
             addrpar: true,
             scheme: "tp",
-            num_wl: 2,
+            num_wl: 8,
+            skip2: true,
             skip4: true,
             skip6: true,
             rank_bank_partitioning: true,
             tl0: 18,
             tl1: 18,
-            nametag: "",
+            nametag: "4mb_",
         )
     end
 
