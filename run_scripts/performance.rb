@@ -55,9 +55,10 @@ module RunScripts
     def baseline
       iterate_mp(
         scheme: "none",
-        num_wl: 2,
+        num_wl: 8,
         skip4: true,
         skip6: true,
+        skip2: true,
       )
     end
 
@@ -82,7 +83,6 @@ module RunScripts
             rank_bank_partitioning: true,
             tl0: 18,
             tl1: 18,
-            nametag: "4mb_",
         )
     end
 

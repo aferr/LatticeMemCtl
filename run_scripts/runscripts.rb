@@ -397,11 +397,8 @@ def iterate_mp o={}
     
     2.upto(o[:num_wl]) do |n|
         wls = workloads_for n
-        puts wls
         wls.keys.each do |wl|
-            puts wl.to_s.green
             p = o.merge(wl_name: wl)
-            puts wls[wl].to_s.blue
             wls[wl].each_with_index do |benchmark,i|
                 p = p.merge( "p#{i}".to_sym => benchmark )
             end
