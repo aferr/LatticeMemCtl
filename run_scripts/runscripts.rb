@@ -243,7 +243,7 @@ def sav_script( options = {} )
       end; n
     )
 
-    cacheSize = 2;
+    cacheSize = 1;
 
     o = options
 
@@ -254,9 +254,11 @@ def sav_script( options = {} )
     filename = options[:filename] unless options[:filename].nil?
   
     FileUtils.mkdir_p( result_dir ) unless File.directory?( result_dir )
+    FileUtils.mkdir_p("time") unless File.directory?("time")
 
     script = File.new($scriptgen_dir.path+"/run_#{filename}","w+")
     script.puts("#!/bin/bash")
+    script.puts("/usr/bin/time -o time/#{filename}.time \\")
     script.puts("build/ARM/gem5.fast \\") unless debug
     script.puts("build/ARM/gem5.debug \\") if debug 
     script.puts("--remote-gdb-port=0 \\")

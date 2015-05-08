@@ -25,10 +25,7 @@ include RunScripts
 #------------------------------------------------------------------------------
 # Performance
 #----------------------------------------------------------------------------
-# baseline
-# single_core
-# ncore_ntc
-# ncore_ntc_donor
-# ncore_2tc
+baseline
+single_core
 # synthetic
 secure_spec
