@@ -96,7 +96,7 @@ exitSimLoop(const std::string &message, int exit_code, Tick when, Tick repeat)
     if(is_mem_exit) fprintf(stderr, "is_mem_exit\n");
     if(has_reset) fprintf(stderr, "has_reset\n");
 
-    //if(!has_reset && is_mem_exit) return;
+    if(!has_reset && is_mem_exit) return;
     
     has_reset = true;
     Event *event = new SimLoopExitEvent(message, exit_code, repeat);
@@ -148,8 +148,7 @@ void CountedExitEvent::process()
     if (--downCounter == 0) {
         downCounter = reset_val;
         fprintf(stderr, "counted event at zero\n");
-        // if(!has_reset)
-        exitSimLoop(cause, 0);
+        if(!has_reset) exitSimLoop(cause, 0);
     } else {
         cout << cause << " @ " << curTick() << endl;
     }

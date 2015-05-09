@@ -56,6 +56,7 @@ typedef struct {
     void* port;
 } AccessMetaInfo;
 
+class System;
 class DRAMSim2 : public DRAMSim2Wrapper
 {
   public:

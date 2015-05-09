@@ -66,6 +66,8 @@
 #include "sim/system.hh"
 #include "sim/eventq.hh"
 #include "sim/sim_events.hh"
+#include "sim/global_system_ptr.cc"
+
 
 using namespace std;
 using namespace TheISA;
@@ -92,7 +94,8 @@ System::System(Params *p)
       _params(p),
       totalNumInsts(0),
       totalNumMem(0),
-      instEventQueue("system instruction-based event queue")
+      instEventQueue("system instruction-based event queue"),
+      memEventQueue("system memory-based event queue")
 {
     // add self to global system list
     systemList.push_back(this);
@@ -121,7 +124,7 @@ System::System(Params *p)
     if(p->max_memory_accesses > 0){
         const char *cause = "reached the max total number of memory transactions";
         Event *event = new SimLoopExitEvent(cause, 0);
-        instEventQueue.schedule(event, p->max_memory_accesses);
+        memEventQueue.schedule(event, p->max_memory_accesses);
     }
 
     // Get the generic system master IDs
@@ -193,6 +196,7 @@ System::init()
     // check that the system port is connected
     if (!_systemPort.isConnected())
         panic("System port on %s is not connected.\n", name());
+    global_system_ptr = this;
 }
 
 MasterPort&

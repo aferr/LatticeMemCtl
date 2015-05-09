@@ -33,6 +33,7 @@ system = System(cpu = [CPUClass(cpu_id=i, tcid=cpu_tcid(i)) for i in xrange(opti
                 fast_forward = (options.fast_forward != None),
                 fixAddr = options.fixaddr)
 
+
 # Sanity check
 if options.fastmem and (options.caches or options.l2cache):
     fatal("You cannot use fastmem in combination with caches!")

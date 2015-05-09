@@ -14,7 +14,8 @@ $duration = 1
 
 #Gem5 options
 $fastforward = 10**9
-$maxinsts = 10**8
+$maxinsts = nil #10**8
+$maxmem = 500*10**3
 $maxtick = 2*10**15 
 $cpus = %w[detailed] #timing is also available
 $cacheSizes = [0,1,2,4]
@@ -70,21 +71,9 @@ $mpworkloads = {
   lib_ast: %w[ libquantum astar ],
   mcf_h264: %w[ mcf h264ref ],
   lib_sjg: %w[ libquantum sjeng ],
-  xln_gcc: %w[ xalan gcc ],
-  gcc_gob: %w[ gcc gobmk ],
   sjg_sgj: %w[ sjeng sjeng ],
   ast_h264: %w[ astar h264ref ],
   h264_hmm: %w[ h264ref hmmer ],
-  ast_ast: %w[ astar astar],
-
-  # # Float workloads
-  # milc_milc: %w[milc milc],
-  # namd_namd: %w[namd namd],
-  # deal_deal: %w[dealII dealII],
-  # splx_splx: %w[soplex soplex],
-  # pov_pov: %w[povray povray],
-  # lbm_lbm: %w[lbm lbm],
-  # spx_spx: %w[sphinx3 sphinx3]
 }
 
 $workloads_8core = {
@@ -199,6 +188,7 @@ def sav_script( options = {} )
         runmode: :qsub,
         maxinsts: $maxinsts,
         fastforward: $fastforward,
+        max_memory_accesses: $maxmem,
         result_dir: "results",
         cpu: "detailed",
         scheme: "none",

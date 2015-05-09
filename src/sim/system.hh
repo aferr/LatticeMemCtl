@@ -396,6 +396,7 @@ class System : public MemObject
     Counter totalNumMem;
 
     EventQueue instEventQueue;
+    EventQueue memEventQueue;
     std::map<std::pair<uint32_t,uint32_t>, Tick>  lastWorkItemStarted;
     std::map<uint32_t, Stats::Histogram*> workItemStats;
 

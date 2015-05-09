@@ -21,12 +21,12 @@ include RunScripts
 # monotonic_short
 # inv_prio_short
 # tp_config_test
-maxmem_test
+# maxmem_test
 
 #------------------------------------------------------------------------------
 # Performance
 #----------------------------------------------------------------------------
-# baseline
-# single_core
+baseline
+single_core
 # synthetic
-# secure_spec
+secure_spec

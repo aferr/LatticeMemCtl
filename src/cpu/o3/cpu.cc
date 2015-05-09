@@ -1490,14 +1490,6 @@ FullO3CPU<Impl>::instDone(ThreadID tid, DynInstPtr &inst)
         totalCommittedInsts++;
     }
 
-    fprintf(stderr, "instDone\n");
-    if(inst->isLoad() || inst->isStore()){
-        fprintf(stderr, "had a load or store\n");
-        fprintf(stderr, "totalNumMem %li\n", system->totalNumMem);
-        system->totalNumMem++;
-        system->instEventQueue.serviceEvents(system->totalNumMem);
-    }
-
     thread[tid]->numOp++;
     thread[tid]->numOps++;
     committedOps[tid]++;

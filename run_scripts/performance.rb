@@ -7,8 +7,9 @@ include RunScripts
 module RunScripts
 
     $test_run_opts = {
-        maxinsts: 100,
-        fastforward: 100,
+        # maxinsts: 100,
+        # max_memory_accesses: 100,
+        # fastforward: 100,
         runmode: :local,
         debug: true
     }
@@ -58,7 +59,7 @@ module RunScripts
         num_wl: 8,
         skip4: true,
         skip6: true,
-        skip2: true,
+        skip2: true
       )
     end
 

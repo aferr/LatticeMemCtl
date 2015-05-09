@@ -45,10 +45,13 @@
 #include <map>
 
 #include "mem/DRAMSim2.hh"
+#include "sim/system.hh"
 
 using namespace std;
 
 extern bool has_reset;
+
+extern System* global_system_ptr;
 
 std::string
 hexstr( int i ){
@@ -98,6 +101,8 @@ DRAMSim2::DRAMSim2(const Params *p) : DRAMSim2Wrapper(p)
     // intentionally set CPU:Memory clock ratio as 1, we do the synchronization later
     dramsim2->setCPUClockSpeed(0);
     num_pids = p->numPids;
+
+
     
     std::cout << "CPU Clock = " << (int)(1000000 / p->cpu_clock) << "MHz" << std::endl;
     std::cout << "DRAM Clock = " << (1000 / tCK) << "MHz" << std::endl;
@@ -331,6 +336,11 @@ void DRAMSim2::read_complete(unsigned id, uint64_t address, uint64_t clock_cycle
         }
         ongoingAccess.erase(ongoingAccess.find(index));
     }
+
+    global_system_ptr->totalNumMem++;
+    global_system_ptr->memEventQueue.serviceEvents(
+            global_system_ptr->totalNumMem);
+
 }
 
 void DRAMSim2::write_complete(unsigned id, uint64_t address, uint64_t clock_cycle, uint64_t threadID)
@@ -369,6 +379,10 @@ void DRAMSim2::write_complete(unsigned id, uint64_t address, uint64_t clock_cycl
         }
         ongoingAccess.erase(ongoingAccess.find(index));
     }
+
+    global_system_ptr->totalNumMem++;
+    global_system_ptr->memEventQueue.serviceEvents(
+            global_system_ptr->totalNumMem);
 }
 
 void DRAMSim2::report_power(double a, double b, double c, double d)
