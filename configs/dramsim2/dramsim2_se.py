@@ -29,6 +29,7 @@ system = System(cpu = [CPUClass(cpu_id=i, tcid=cpu_tcid(i)) for i in xrange(opti
                 mem_mode = test_mem_mode,
                 numPids = options.numpids,
                 numCpus = options.num_cpus,
+                max_memory_accesses = options.max_memory_accesses,
                 fast_forward = (options.fast_forward != None),
                 fixAddr = options.fixaddr)
 

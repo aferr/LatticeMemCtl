@@ -166,6 +166,9 @@ def add_options():
         parser.add_option("--lattice_config", type="int", default=1,
                 help="Lattice configuration number")
 
+        parser.add_option("--max_memory_accesses", type="int", default=-1,
+                help="Max memory accesses")
+
         parser.add_option("--security_policy", type="int", default=0,help="")
         parser.add_option("--dead_time_policy", type="int", default=0, help="")
         parser.add_option("--turn_allocation_policy", type="int", default=0, help="")

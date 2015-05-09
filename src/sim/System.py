@@ -79,6 +79,8 @@ class System(MemObject):
         
     fixAddr = Param.Bool(False, "whether using fixed address mapping")
 
+    max_memory_accesses = Param.Int(-1, "mem trans before ending sim")
+
     init_param = Param.UInt64(0, "numerical value to pass into simulator")
     boot_osflags = Param.String("a", "boot flags to pass to the kernel")
     kernel = Param.String("", "file that contains the kernel code")

@@ -235,6 +235,7 @@ def sav_script( options = {} )
     runmode    = options[:runmode]
     # maximum number of instructions
     maxinsts   = options[:maxinsts]
+    maxmem     = options[:max_memory_accesses]
     # number of instructions to fastforward,
     # 0 removes --fastforward from the script
     fastforward= options[:fastforward]
@@ -296,7 +297,8 @@ def sav_script( options = {} )
         script.puts("    --l3config=#{l3config} \\")
     end
     script.puts("    --fast-forward=#{fastforward} \\") unless fastforward == 0
-    script.puts("    --maxinsts=#{maxinsts} \\")
+    script.puts("    --maxinsts=#{maxinsts} \\") unless maxinsts.nil?
+    script.puts("    --max_memory_accesses=#{maxmem} \\") unless maxmem.nil?
     script.puts("    --maxtick=#{$maxtick} \\")
     script.puts("    --nocwf \\") if options[:nocwf]
 

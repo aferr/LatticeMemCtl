@@ -259,6 +259,7 @@ FullO3CPU<Impl>::FullO3CPU(DerivO3CPUParams *params)
       deferRegistration(params->defer_registration),
       lastRunningCycle(curCycle())
 {
+    fprintf(stderr, "hello from FullO3CPU\n");
     if (!deferRegistration) {
         _status = Running;
     } else {
@@ -1488,6 +1489,15 @@ FullO3CPU<Impl>::instDone(ThreadID tid, DynInstPtr &inst)
         committedInsts[tid]++;
         totalCommittedInsts++;
     }
+
+    fprintf(stderr, "instDone\n");
+    if(inst->isLoad() || inst->isStore()){
+        fprintf(stderr, "had a load or store\n");
+        fprintf(stderr, "totalNumMem %li\n", system->totalNumMem);
+        system->totalNumMem++;
+        system->instEventQueue.serviceEvents(system->totalNumMem);
+    }
+
     thread[tid]->numOp++;
     thread[tid]->numOps++;
     committedOps[tid]++;

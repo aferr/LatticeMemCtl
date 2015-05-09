@@ -89,7 +89,16 @@ exitSimLoop(const std::string &message, int exit_code, Tick when, Tick repeat)
     //   cout << message << " @ " << curTick() << endl;
     //   return;
     // }
+    fprintf(stderr, "in exitSimLoop\n"); 
+    const char *trans_exit_cause =
+        "reached the max total number of memory transactions";
+    bool is_mem_exit = !(message.find(trans_exit_cause) == string::npos);
+    if(is_mem_exit) fprintf(stderr, "is_mem_exit\n");
+    if(has_reset) fprintf(stderr, "has_reset\n");
+
+    //if(!has_reset && is_mem_exit) return;
     
+    has_reset = true;
     Event *event = new SimLoopExitEvent(message, exit_code, repeat);
     mainEventQueue.schedule(event, when);
 }
@@ -138,7 +147,8 @@ void CountedExitEvent::process()
     term_cpu_val = -1;
     if (--downCounter == 0) {
         downCounter = reset_val;
-        has_reset = true;
+        fprintf(stderr, "counted event at zero\n");
+        // if(!has_reset)
         exitSimLoop(cause, 0);
     } else {
         cout << cause << " @ " << curTick() << endl;

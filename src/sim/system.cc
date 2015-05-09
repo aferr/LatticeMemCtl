@@ -65,6 +65,7 @@
 #include "sim/full_system.hh"
 #include "sim/system.hh"
 #include "sim/eventq.hh"
+#include "sim/sim_events.hh"
 
 using namespace std;
 using namespace TheISA;
@@ -90,6 +91,7 @@ System::System(Params *p)
       numWorkIds(p->num_work_ids),
       _params(p),
       totalNumInsts(0),
+      totalNumMem(0),
       instEventQueue("system instruction-based event queue")
 {
     // add self to global system list
@@ -116,6 +118,11 @@ System::System(Params *p)
             debugSymbolTable = new SymbolTable;
     }
 
+    if(p->max_memory_accesses > 0){
+        const char *cause = "reached the max total number of memory transactions";
+        Event *event = new SimLoopExitEvent(cause, 0);
+        instEventQueue.schedule(event, p->max_memory_accesses);
+    }
 
     // Get the generic system master IDs
     MasterID tmp_id M5_VAR_USED;
@@ -362,6 +369,7 @@ System::resume()
 {
     SimObject::resume();
     totalNumInsts = 0;
+    totalNumMem = 0;
 }
 
 void

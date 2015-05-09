@@ -34,6 +34,20 @@ module RunScripts
         )
     end
 
+    def maxmem_test
+        iterate_mp $test_opts.merge(
+            scheme: "tp",
+            addrpar: true,
+            workloads: {
+                nothing_hardstride: %w[nothing hardstride],
+                # hardstride_hardstride: %w[nothing hardstride],
+                hardstride_nothing: %w[hardstride nothing],
+            },
+            maxinsts: 0,
+            max_memory_accesses: 100,
+        )
+    end
+
     def tp_config_test
         o = $test_opts.merge(
             addrpar: true,
