@@ -362,7 +362,6 @@ BaseSimpleCPU::preExecute()
 #endif // ALPHA_ISA
 
     // check for instruction-count-based events
-    fprintf(stderr, "cpu/simple comInst\n"); 
     comInstEventQueue[0]->serviceEvents(numInst);
     system->instEventQueue.serviceEvents(system->totalNumInsts);
 
