@@ -656,7 +656,7 @@ unsigned CommandQueueTP::PriorityTurnAllocator::highest_nonempty_wbw(){
     bool has_bw;
     bool is_empty;
     while(tcid_candidate !=top){
-        has_bw = bandwidth_remaining[tcid_candidate];
+        has_bw = true; // bandwidth_remaining[tcid_candidate];
         is_empty = cc->tcidEmpty(tcid_candidate);
         if(has_bw && !is_empty) break;
         tcid_candidate = cc->securityPolicy->nextHigherTC(tcid_candidate);
