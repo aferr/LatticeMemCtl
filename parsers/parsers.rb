@@ -23,20 +23,9 @@ $specint = [
 ]
 $schemes = %w[ none tp ]
 
-# Workloads
-def benchmarks_in wl
-  $mpworkloads[wl]
-end
-
 $mpworkloads = {
-
-  #synthetic workloads
-  # nothing_hardstride: %w[nothing hardstride],
-  # hardstride_nothing: %w[hardstride nothing],
-
   # integer workloads
   mcf_bz2: %w[ mcf bzip2 ],
-  # bz2_mcf: %w[ bzip2 mcf ],
   mcf_xln: %w[ mcf xalan ],
   mcf_mcf: %w[ mcf mcf ],
   mcf_lib: %w[mcf libquantum],
@@ -52,16 +41,49 @@ $mpworkloads = {
   sjg_sgj: %w[ sjeng sjeng ],
   ast_h264: %w[ astar h264ref ],
   h264_hmm: %w[ h264ref hmmer ],
-  ast_ast: %w[ astar astar],
+  # ast_ast: %w[ astar astar],
 
-  # Float workloads
+  # # Float workloads
   # milc_milc: %w[milc milc],
   # namd_namd: %w[namd namd],
-  # deal_deal: %w[deal deal],
+  # deal_deal: %w[dealII dealII],
   # splx_splx: %w[soplex soplex],
   # pov_pov: %w[povray povray],
   # lbm_lbm: %w[lbm lbm],
   # spx_spx: %w[sphinx3 sphinx3]
+}
+
+$workloads_8core= {
+
+  #synthetic workloads
+  # nothing_hardstride: %w[nothing hardstride],
+  # hardstride_nothing: %w[hardstride nothing],
+
+  # integer workloads
+  mcf_bz2: (%w[ mcf bzip2 ] * 4),
+  mcf_xln: (%w[ mcf xalan ] * 4),
+  mcf_mcf: (%w[ mcf mcf ] * 4),
+  mcf_lib: (%w[mcf libquantum] * 4),
+  mcf_ast: (%w[mcf astar] * 4),
+  ast_mcf: (%w[astar mcf] * 4),
+  lib_mcf: (%w[libquantum mcf] * 4),
+  lib_lib: (%w[ libquantum libquantum] * 4),
+  lib_ast: (%w[ libquantum astar ] * 4),
+  mcf_h264:(%w[ mcf h264ref ] * 4),
+  lib_sjg: (%w[ libquantum sjeng ] * 4),
+  sjg_sgj: (%w[ sjeng sjeng ] * 4),
+  ast_h264:(%w[ astar h264ref ] * 4),
+  h264_hmm:(%w[ h264ref hmmer ] * 4),
+  ast_ast: (%w[ astar astar]  * 4),
+  mix_1: %w[astar astar astar astar libquantum libquantum libquantum libquantum],
+  mix_2: %w[astar h264ref hmmer gobmk libquantum libquantum libquantum libquantum],
+  mix_3: %w[astar astar astar astar astar astar libquantum libquantum],
+  mix_4: %w[astar h264ref hmmer gobmk sjeng mcf bzip2 libquantum],
+  mix_5: %w[astar astar astar astar mcf mcf mcf mcf],
+  mix_6: %w[astar astar astar astar astar astar mcf mcf],
+  mix_7: %w[astar h264ref hmmer gobmk mcf mcf mcf mcf],
+  mix_8: %w[mcf mcf mcf mcf libquantum libquantum libquantum libquantum],
+  mix_9: %w[sjeng mcf bzip2 libquantum astar h264ref hmmer gobmk]
 
 }
 
@@ -162,6 +184,7 @@ def find_time(filename, opts = {} )
 end
 
 def find_time_cpu(filename, cpu, opts={})
+    (puts filename.red; return nil) unless File.exists? filename
     term_reg = /term_cpu\s*#{cpu}/
     multi_reg = /system.switch_cpus#{cpu}.cpi\s*(\d*\.\d*)/
     found_term = false
@@ -220,7 +243,7 @@ def stp( p={} )
     single_reg = /system.switch_cpus.cpi\s*(\d*\.\d*)/
     single_times = ((p[:workloads][wl]).map do |b|
         find_stat (single_m5out p.merge(bench: b)), single_reg
-    end * (p[:numcpus]/2)).flatten
+    end).flatten
     s = p[:numcpus].times.map do |i|
         tisp = single_times[i]
         timp = find_time_cpu (m5out_file p), i
@@ -229,15 +252,16 @@ def stp( p={} )
     s.include?([]) ? 0 : s.reduce(:+)
 end
 
-# Average Normalized Turnaround Time
-def antt( p={} )
-  wl = p[:workload]
-  s = p[:numcpus].times.map do |i|
-    tisp = single_time p.merge(bench: benchmarks_in(wl)[i%2])
-    timp = find_time m5out_file(i%2 == 1 ? p.merge(workload: wl.to_s + 'r') : p)
-    (tisp.nil? || timp.nil?) ? [] : timp/tisp
-  end
-  s.include?([]) ? 0 : s.reduce(:+)
+def norm_ipc p={}
+    file = m5out_file p
+    base_file = m5out_file p.merge(scheme: "none", nametag: nil)
+    s = p[:numcpus].times.map do |i|
+        reg = /system.switch_cpus#{i}.ipc\s*(\d*\.\d*)/
+        ipc = find_stat file, reg, p
+        base_ipc = find_stat base_file, reg, p
+        (ipc.nil? || base_ipc.nil?) ? [] : ipc/base_ipc
+    end
+    s.include?([]) ? 0 : s.reduce(:+)
 end
 
 def data_of p={}
@@ -250,7 +274,7 @@ end
 
 def stp_data_of(p={}) data_of(p){|o| stp o} end
 
-def antt_data_of(p={}) data_of(p){|o| antt o} end
+def norm_ipc_data_of(p={}) data_of(p){|o| norm_ipc o} end
 
 def latency_data_of(p={}) data_of(p){|o| get_m5out_stat(m5out_file o)} end
 

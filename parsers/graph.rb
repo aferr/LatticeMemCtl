@@ -29,7 +29,7 @@ def grouped_csv data, o={}
 
   str = "%-15s" % "bench," +  "#{o[:legend].inject("") { |s, l| s += "%-15s" % "#{l}, " }} \n" +
     data.each_with_index.inject("") do |s, (bench_data, i)|
-        s += "%-15s" % "#{o[:x_labels][i]}: " +
+        s += "%-15s" % "#{o[:x_labels][i]}, " +
           bench_data.inject("") do |si, legend_data|
               si += "%-13f" % legend_data + ", "; si
           end + "\n"
@@ -48,6 +48,10 @@ def grouped_csv data, o={}
 
   str
 
+end
+
+def csv_to_arr filename, o={}
+    (CSV.read filename)[1..-1].transpose[1..-1]
 end
 
 def grouped_bar data, o={}
