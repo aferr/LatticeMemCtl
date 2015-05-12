@@ -519,7 +519,7 @@ void CommandQueueTP::DeadTimeAllocationTimer::step(){
 //=============================================================================
 int CommandQueueTP::worst_case_time(){
     if(partitioning){
-        return WC_RANK_BANK_PART;
+        return FIX_WORST_CASE_DELAY;
     } else {
         return WORST_CASE_DELAY;
     }
@@ -527,7 +527,7 @@ int CommandQueueTP::worst_case_time(){
 
 int CommandQueueTP::refresh_worst_case_time(){
     if(partitioning){
-        return REF_WC_RANK_BANK_PART;
+        return FIX_TP_BUFFER_TIME;
     } else {
         return TP_BUFFER_TIME;
     }
@@ -630,7 +630,7 @@ CommandQueueTP::PriorityTurnAllocator::PriorityTurnAllocator(CommandQueueTP *cc)
 {
     int num_pids = cc->num_pids;
     // epoch_length = num_pids*(num_pids+1)/2;
-    epoch_length = 100000;
+    epoch_length = 1000;
     epoch_remaining = epoch_length;
 
     bandwidth_limit = ((int*) malloc(sizeof(int) * num_pids));
@@ -656,7 +656,7 @@ unsigned CommandQueueTP::PriorityTurnAllocator::highest_nonempty_wbw(){
     bool has_bw;
     bool is_empty;
     while(tcid_candidate !=top){
-        has_bw = true; //bandwidth_remaining[tcid_candidate];
+        has_bw = bandwidth_remaining[tcid_candidate];
         is_empty = cc->tcidEmpty(tcid_candidate);
         if(has_bw && !is_empty) break;
         tcid_candidate = cc->securityPolicy->nextHigherTC(tcid_candidate);

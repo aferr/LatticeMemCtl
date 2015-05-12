@@ -27,5 +27,5 @@ include RunScripts
 #----------------------------------------------------------------------------
 baseline
 single_core
-# synthetic
 secure_spec
+#synthetic
