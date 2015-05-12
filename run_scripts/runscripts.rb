@@ -97,10 +97,24 @@ $workloads_8core = {
     mix_9: %w[sjeng mcf bzip2 libquantum astar h264ref hmmer gobmk]
 }
 
+$workloads_4core = {
+    mix_1: %w[astar astar libquantum libquantum ],
+    mix_2: %w[h264ref hmmer libquantum libquantum],
+    mix_3: %w[astar astar astar libquantum ],
+    mix_4: %w[h264ref hmmer sjeng libquantum],
+    mix_5: %w[astar astar mcf mcf],
+    mix_6: %w[astar astar astar mcf],
+    # mix_7: %w[astar h264ref hmmer gobmk mcf mcf mcf mcf],
+    mix_8: %w[mcf mcf libquantum libquantum ],
+    mix_9: %w[mcf libquantum ast h264ref]
+}
+
 def workloads_for n
     if n == 8
         ($workloads_8core.merge (workloads_of_size 8))
-    else
+    elsif n ==4
+        ($workloads_4core.merge (workloads_of_size 4))
+    else  
         workloads_of_size n
     end
 end
@@ -184,10 +198,10 @@ def sav_script( options = {} )
 
     options = {
         #TP Minimum: 
-        tl0: 19,
-        tl1: 19,
-        tl2: 19,
-        tl3: 19,
+        tl0: 44,
+        tl1: 44,
+        tl2: 44,
+        tl3: 44,
         #FA Minimum:
         # tl0: 18,
         # tl1: 18,
@@ -387,14 +401,15 @@ end
 def iterate_mp o={}
     o = {
       num_wl: 2,
-      workloads: $mpworkloads,
       skip3: true,
       skip5: true,
       skip7: true
     }.merge o
     
     2.upto(o[:num_wl]) do |n|
-        wls = workloads_for n
+        wls = o[:workloads].nil? ?
+            wls = (workloads_for n) :
+            o[:workloads]
         wls.keys.each do |wl|
             p = o.merge(wl_name: wl)
             wls[wl].each_with_index do |benchmark,i|

@@ -81,14 +81,14 @@ module RunScripts
             skip2: true,
             skip4: true,
             skip6: true,
-            rank_bank_partitioning: true,
-            tl0: 19,
-            tl1: 19,
+            tl0: 44,
+            tl1: 44,
         )
     end
 
     def secure o={}
-        # # TDM, strict, turn start
+        o = {nametag: ""}.merge o
+        # TDM, strict, turn start
         iterate_mp o.merge(
             turn_allocation_policy: 0,
             turn_allocatrion_time: 0,
