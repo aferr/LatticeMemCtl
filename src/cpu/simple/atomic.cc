@@ -438,6 +438,11 @@ AtomicSimpleCPU::tick()
 {
     DPRINTF(SimpleCPU, "Tick\n");
 
+    if(curTick() < offset_cycles * 1000){
+        schedule(tickEvent, offset_cycles * 1000);
+        return;
+    }
+
     Tick latency = 0;
 
     for (int i = 0; i < width || locked; ++i) {

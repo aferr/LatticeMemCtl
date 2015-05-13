@@ -115,7 +115,9 @@ CPUProgressEvent::description() const
 }
 
 BaseCPU::BaseCPU(Params *p, bool is_checker)
-    : MemObject(p), instCnt(0), _cpuId(p->cpu_id),
+    : MemObject(p),
+      tcid(p->tcid), offset_cycles(p->offset_cycles),
+      instCnt(0), _cpuId(p->cpu_id),
       _instMasterId(p->system->getMasterId(name() + ".inst")),
       _dataMasterId(p->system->getMasterId(name() + ".data")),
       interrupts(p->interrupts),
@@ -125,8 +127,6 @@ BaseCPU::BaseCPU(Params *p, bool is_checker)
     if (_cpuId == -1 ) {
         _cpuId = cpuList.size();
     }
-
-    tcid = p->tcid;
 
     insertContextSwitches();
 

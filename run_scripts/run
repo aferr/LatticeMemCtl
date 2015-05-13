@@ -17,8 +17,8 @@ include RunScripts
 # single_short
 # baseline_short
 # secure_short
-# all_secure_test
-diamond_test
+all_secure_test
+# diamond_test
 
 #------------------------------------------------------------------------------
 # Performance

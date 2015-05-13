@@ -83,6 +83,8 @@ class BaseCPU(MemObject):
 
     tcid = Param.Int(-1, "tcid")
 
+    offset_cycles = Param.Int(0, "offset cycles")
+
     function_trace = Param.Bool(False, "Enable function trace")
     function_trace_start = Param.Tick(0, "Tick to start function trace")
 

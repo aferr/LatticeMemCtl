@@ -36,6 +36,8 @@ from m5.objects import *
 from m5.util import *
 from O3_ARM_v7a import *
 
+import sys
+
 addToPath('../common')
 
 def getCPUClass(cpu_type):
@@ -308,6 +310,8 @@ def run(options, root, testsys, cpu_class, numpids):
             switch_cpus[i].system =  testsys
             switch_cpus[i].workload = testsys.cpu[i].workload
             switch_cpus[i].clock = testsys.cpu[i].clock
+            switch_cpus[i].tcid = testsys.cpu[i].tcid
+            switch_cpus[i].cpu_id = testsys.cpu[i].cpu_id
             # simulation period
             if options.maxinsts:
                 switch_cpus[i].max_insts_any_thread = options.maxinsts
@@ -376,6 +380,8 @@ def run(options, root, testsys, cpu_class, numpids):
             switch_cpus_1[i].workload = testsys.cpu[i].workload
             switch_cpus[i].clock = testsys.cpu[i].clock
             switch_cpus_1[i].clock = testsys.cpu[i].clock
+            switch_cpus[i].tcid = testsys.cpu[i].tcid
+            switch_cpus[i].cpu_id = testsys.cpu[i].cpu_id
 
             # if restoring, make atomic cpu simulate only a few instructions
             if options.checkpoint_restore != None:

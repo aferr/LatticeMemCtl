@@ -89,6 +89,7 @@ class BaseCPU : public MemObject
 {
   public:
   int tcid;
+  int offset_cycles;
 
   private:
     void contextSwitchInternal(){

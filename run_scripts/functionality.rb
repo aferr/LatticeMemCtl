@@ -40,6 +40,7 @@ module RunScripts
         secure $test_opts.merge(
             security_policy: 0,
             num_wl: 4,
+            skip2: true,
             addrpar: true,
             scheme: "tp",
             workloads: {
