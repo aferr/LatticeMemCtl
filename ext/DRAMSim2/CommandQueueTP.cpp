@@ -17,9 +17,21 @@ CommandQueueTP::CommandQueueTP(vector< vector<BankState> > &states,
     p1Period = p1Period_;
 	offset = offset_;
 
-    securityPolicy = new TOLattice(this);
 
     map<int,int> tp_config = *tp_config_;
+    securityPolicy = new TOLattice(this);
+    switch(tp_config[0]){
+        case 0: securityPolicy = new TOLattice(this); break;
+        case 1:
+                securityPolicy = new DiamondLattice(this);
+                if(num_pids!=4){
+                    fprintf(stderr, "diamond only supports 4SDs\n");
+                    exit(1);
+                }
+                break;
+        default: securityPolicy = new TOLattice(this); break;
+    }
+
     switch(tp_config[1]){
         case 0: turnAllocationTimer = new TurnStartAllocationTimer(this); break;
         case 1: turnAllocationTimer = new DeadTimeAllocationTimer(this); break;
@@ -53,20 +65,12 @@ void
 CommandQueueTP::step(){
    SimulatorObject::step();
    turnAllocationTimer->step();
-   // PRINT("-----------------------------------------------------------------------------");
-   // PRINT("Time" <<  currentClockCycle);
-   // PRINT("Current pid" << getCurrentPID());
-   // if(isBufferTime()) PRINT("It is buffer time\n");
-   // print();
-   // PRINT("-----------------------------------------------------------------------------");
-   // PRINT("");
-   // PRINT("");
    update_stats();
 }
 
 void
 CommandQueueTP::update_stats(){
-   #ifdef VALIDATE_STATS
+   #ifdef debug_cctp
    PRINT("-----------------------------------------------------------------------------");
    PRINT("Time" <<  currentClockCycle);
    PRINT("Current pid" << getCurrentPID());
@@ -118,7 +122,7 @@ void CommandQueueTP::enqueue(BusPacket *newBusPacket)
     unsigned pid = newBusPacket->threadID;
     newBusPacket->enqueueTime = currentClockCycle;
     newBusPacket->enqueueTimeisSet = true;
-#ifdef VALIDATE_STATS
+#ifdef debug_cctp
     PRINT("enqueueing at " << currentClockCycle << " ");
     newBusPacket->print();
     print();
@@ -397,31 +401,6 @@ bool CommandQueueTP::isBufferTime(){
   return ccc_ >= (turn_end - deadtime);
 }
 
-// bool CommandQueueTP::isBufferTimePure(){
-//   unsigned ccc_ = currentClockCycle - offset;
-//   unsigned current_tc = CommandQueueTP::getCurrentPID();
-//   unsigned schedule_length = p0Period + p1Period * (num_pids - 1);
-//   unsigned schedule_start = ccc_ - ( ccc_ % schedule_length );
-// 
-//   unsigned turn_start = current_tc == 0 ?
-//     schedule_start :
-//     schedule_start + p0Period + p1Period * (current_tc-1);
-//   unsigned turn_end = current_tc == 0 ?
-//     turn_start + p0Period :
-//     turn_start + p1Period;
-// 
-//   // Time between refreshes to ANY rank.
-//   unsigned refresh_period = REFRESH_PERIOD/NUM_RANKS/tCK;
-//   unsigned next_refresh = ccc_ + refresh_period - (ccc_ % refresh_period);
-//  
-//   unsigned deadtime = (turn_start <= next_refresh && next_refresh < turn_end) ?
-//     refresh_worst_case_time(): 
-//     worst_case_time();
-// 
-//   return ccc_ >= (turn_end - deadtime);
-// 
-// }
-
 //=============================================================================
 // Turn Ownership Timers
 //=============================================================================
@@ -519,7 +498,7 @@ void CommandQueueTP::DeadTimeAllocationTimer::step(){
 //=============================================================================
 int CommandQueueTP::worst_case_time(){
     if(partitioning){
-        return WC_RANK_BANK_PART;
+        return FIX_WORST_CASE_DELAY;
     } else {
         return WORST_CASE_DELAY;
     }
@@ -527,7 +506,7 @@ int CommandQueueTP::worst_case_time(){
 
 int CommandQueueTP::refresh_worst_case_time(){
     if(partitioning){
-        return REF_WC_RANK_BANK_PART;
+        return FIX_TP_BUFFER_TIME;
     } else {
         return TP_BUFFER_TIME;
     }
@@ -629,67 +608,71 @@ CommandQueueTP::PriorityTurnAllocator::PriorityTurnAllocator(CommandQueueTP *cc)
     : TurnAllocator(cc)
 {
     int num_pids = cc->num_pids;
-    // epoch_length = num_pids*(num_pids+1)/2;
-    epoch_length = 100000;
+    epoch_length = 1000;
     epoch_remaining = epoch_length;
 
-    bandwidth_limit = ((int*) malloc(sizeof(int) * num_pids));
-    // For now assume total order with 0 as bottom.
-    // bandwidth_limit[0] = num_pids;
-    // for(int i=1; i < num_pids; i++){
-    //     bandwidth_limit[i] = bandwidth_limit[i-1] + num_pids - i;
-    // }
-    bandwidth_limit[0] = epoch_length - (num_pids - 1) * 20;
-    for(int i=1; i< num_pids; i++){
-        bandwidth_limit[i] = bandwidth_limit[i-1] + 20;
+    bandwidth_minimum= ((int*) malloc(sizeof(int) * num_pids));
+    bandwidth_minimum[0] = 0;
+    for(int i=1; i<num_pids; i++){
+        bandwidth_minimum[i] = 20;
     }
+    block_time = ((int*) malloc(sizeof(int) * num_pids));
 
-    bandwidth_remaining = ((int*) malloc(sizeof(int) * num_pids));
-    for(int i=0; i < num_pids; i++) bandwidth_remaining[i]=bandwidth_limit[i];
+    reset_epoch();
+
     turn_owner = cc->securityPolicy->bottom();
     next_owner = cc->securityPolicy->bottom();
+}
+
+void CommandQueueTP::PriorityTurnAllocator::reset_epoch(){
+    epoch_remaining = epoch_length;
+    for(int i=0; i < cc->num_pids; i++){
+        block_time[i] = 0;
+        for(int j=0; j < cc->num_pids; j++){
+            if(cc->securityPolicy->isLabelLEQ(i,j)
+                && !(cc->securityPolicy->isLabelLEQ(j,i)) )
+                block_time[i] += bandwidth_minimum[j];
+        }
+    }
 }
 
 unsigned CommandQueueTP::PriorityTurnAllocator::highest_nonempty_wbw(){
     unsigned tcid_candidate = cc->securityPolicy->bottom();
     unsigned top = cc->securityPolicy->top();
-    bool has_bw;
-    bool is_empty;
     while(tcid_candidate !=top){
-        has_bw = true; //bandwidth_remaining[tcid_candidate];
-        is_empty = cc->tcidEmpty(tcid_candidate);
+        // has_bw = bandwidth_remaining[tcid_candidate];
+        bool has_bw = epoch_remaining > block_time[tcid_candidate];
+        bool is_empty = cc->tcidEmpty(tcid_candidate);
         if(has_bw && !is_empty) break;
+        block_time[tcid_candidate] -= 1;
         tcid_candidate = cc->securityPolicy->nextHigherTC(tcid_candidate);
     }
     return tcid_candidate;
 }
 
 void CommandQueueTP::PriorityTurnAllocator::allocate_next(){
-   // PRINT("-----------------------------------------------------------------------------");
-   // PRINT("Priority Allocation time" << cc->currentClockCycle);
-    int num_pids = cc->num_pids;
+#ifdef debug_cctp
+    PRINT("-----------------------------------------------------------------------------");
+    PRINT("Priority Allocation time" << cc->currentClockCycle);
+#endif
     //Reset bandwidth limits on an epoch change
-    if(epoch_remaining == 0){
-        epoch_remaining = epoch_length;
-        for(int i=0; i<num_pids; i++){
-            bandwidth_remaining[i] = bandwidth_limit[i];
-        }
-    }
+    if(epoch_remaining == 0) reset_epoch();
     epoch_remaining -= 1;
-    // PRINT("epoch remaining " << epoch_remaining);
+    
+#ifdef debug_cctp
+    PRINT("epoch remaining " << epoch_remaining);
+#endif
 
-    // for(int i=0; i<num_pids; i++)
-    //     PRINT("bandwidth_remaining[" << i << "] " <<
-    //            bandwidth_remaining[i])
     
     next_owner =  highest_nonempty_wbw();
 
-    // Deduct bandwidth from the next owner and all those above it 
-    // TODO Assumes lattice is TO
-    for(int i=next_owner; i < num_pids; i++){
-        bandwidth_remaining[i] -= 1;
-    }
-    //PRINT("-----------------------------------------------------------------------------");
+#ifdef debug_cctp
+    PRINT("next_owner" << next_owner);
+    for(int i=0; i<cc->num_pids; i++)
+        PRINT("block_time[" << i << "] " << block_time[i])
+
+    PRINT("-----------------------------------------------------------------------------");
+#endif
 
 }
 
@@ -704,13 +687,11 @@ unsigned CommandQueueTP::PriorityTurnAllocator::next(){ return next_owner; }
 //=============================================================================
 // Lattice
 //=============================================================================
+
+//-----------------------------------------------------------------------------
+// Totally Ordered Lattice
+//-----------------------------------------------------------------------------
 unsigned CommandQueueTP::TOLattice::nextHigherTC(unsigned tcid){
-    // if(tcid == num_pids - 1){
-    //     return tcid;
-    // } else {
-    //     if(cc->tcidEmpty(tcid+1)) return nextHigherTC(tcid+1);
-    //     else return tcid+1;
-    // }
     if(tcid == num_pids -1) return tcid;
     else return tcid+1;
 }
@@ -726,3 +707,32 @@ unsigned CommandQueueTP::TOLattice::bottom(){
 unsigned CommandQueueTP::TOLattice::top(){
     return cc->num_pids - 1;
 }
+
+//-----------------------------------------------------------------------------
+// Diamond Lattice
+//-----------------------------------------------------------------------------
+unsigned CommandQueueTP::DiamondLattice::nextHigherTC(unsigned tcid){
+    if(tcid == num_pids -1) {
+        return tcid;
+    } else if(tcid == 1 || tcid == 2){
+        return num_pids - 1;
+    } else{
+        if(next_incomp == 1){
+            next_incomp = 2;
+            return 1;
+        } else {
+            next_incomp = 1;
+            return 2;
+        }
+    }
+}
+
+bool CommandQueueTP::DiamondLattice::isLabelLEQ(unsigned tc1, unsigned tc2){
+    if(tc1 == 0) return true;
+    if(tc2 == 3) return true;
+    if(tc1 == tc2) return true;
+    return false;
+}
+
+unsigned CommandQueueTP::DiamondLattice::top(){ return 3; }
+unsigned CommandQueueTP::DiamondLattice::bottom(){ return 0; }

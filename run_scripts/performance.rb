@@ -63,7 +63,8 @@ module RunScripts
     end
 
     def single_core
-      single()
+      single(
+      )
     end
     
     def ncore_ntc
@@ -80,14 +81,13 @@ module RunScripts
             skip2: true,
             skip4: true,
             skip6: true,
-            rank_bank_partitioning: true,
-            tl0: 18,
-            tl1: 18,
-            nametag: ""
+            tl0: 44,
+            tl1: 44,
         )
     end
 
     def secure o={}
+        o = {nametag: ""}.merge o
         # TDM, strict, turn start
         iterate_mp o.merge(
             turn_allocation_policy: 0,

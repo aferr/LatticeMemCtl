@@ -189,10 +189,11 @@ class CommandQueueTP : public CommandQueue
 
         private:
         unsigned highest_nonempty_wbw();
+        void reset_epoch();
         int epoch_length;
         int epoch_remaining;
-        int *bandwidth_limit;
-        int *bandwidth_remaining;
+        int *bandwidth_minimum;
+        int *block_time;
         unsigned turn_owner;
         unsigned next_owner;
     };
@@ -223,6 +224,19 @@ class CommandQueueTP : public CommandQueue
         virtual unsigned top();
         virtual unsigned bottom();
 
+    };
+
+    class DiamondLattice : public Lattice
+    {
+        public:
+        DiamondLattice(CommandQueueTP* cc) : Lattice(cc),
+            next_incomp(1) {}
+        virtual unsigned nextHigherTC(unsigned tcid);
+        virtual bool isLabelLEQ(unsigned tc1, unsigned tc2);
+        virtual unsigned top();
+        virtual unsigned bottom();
+        private:
+        unsigned next_incomp;
     };
 
     Lattice *securityPolicy;

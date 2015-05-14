@@ -17,15 +17,13 @@ include RunScripts
 # single_short
 # baseline_short
 # secure_short
-# donor_short
-# monotonic_short
-# inv_prio_short
-# tp_config_test
+# all_secure_test
+diamond_test
 
 #------------------------------------------------------------------------------
 # Performance
 #----------------------------------------------------------------------------
-baseline
-single_core
-# synthetic
-secure_spec
+#baseline
+#single_core
+#secure_spec
+#synthetic
