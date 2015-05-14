@@ -59,23 +59,23 @@ $p0periods = [64,96,128,192,256]
 #Multiprogram Workloads
 $mpworkloads = {
   # integer workloads
-  mcf_bz2: %w[ mcf bzip2 ],
-  mcf_xln: %w[ mcf xalan ],
-  mcf_mcf: %w[ mcf mcf ],
-  mcf_lib: %w[mcf libquantum],
-  mcf_ast: %w[mcf astar],
-  ast_mcf: %w[astar mcf],
-  lib_mcf: %w[libquantum mcf],
-  lib_lib: %w[ libquantum libquantum],
-  lib_ast: %w[ libquantum astar ],
-  mcf_h264: %w[ mcf h264ref ],
-  lib_sjg: %w[ libquantum sjeng ],
-  xln_gcc: %w[ xalan gcc ],
-  gcc_gob: %w[ gcc gobmk ],
-  sjg_sgj: %w[ sjeng sjeng ],
-  ast_h264: %w[ astar h264ref ],
-  h264_hmm: %w[ h264ref hmmer ],
-  ast_ast: %w[ astar astar],
+  # mcf_bz2: %w[ mcf bzip2 ],
+  # mcf_xln: %w[ mcf xalan ],
+  # mcf_mcf: %w[ mcf mcf ],
+  # mcf_lib: %w[mcf libquantum],
+  # mcf_ast: %w[mcf astar],
+  # ast_mcf: %w[astar mcf],
+  # lib_mcf: %w[libquantum mcf],
+  # lib_lib: %w[ libquantum libquantum],
+  # lib_ast: %w[ libquantum astar ],
+  # mcf_h264: %w[ mcf h264ref ],
+  # lib_sjg: %w[ libquantum sjeng ],
+  # xln_gcc: %w[ xalan gcc ],
+  # gcc_gob: %w[ gcc gobmk ],
+  # sjg_sgj: %w[ sjeng sjeng ],
+  # ast_h264: %w[ astar h264ref ],
+  # h264_hmm: %w[ h264ref hmmer ],
+  # ast_ast: %w[ astar astar],
 
   # # Float workloads
   # milc_milc: %w[milc milc],
@@ -88,15 +88,22 @@ $mpworkloads = {
 }
 
 $workloads_8core = {
-    mix_1: %w[astar astar astar astar libquantum libquantum libquantum libquantum],
-    mix_2: %w[astar h264ref hmmer gobmk libquantum libquantum libquantum libquantum],
-    mix_3: %w[astar astar astar astar astar astar libquantum libquantum],
-    mix_4: %w[astar h264ref hmmer gobmk sjeng mcf bzip2 libquantum],
-    mix_5: %w[astar astar astar astar mcf mcf mcf mcf],
-    mix_6: %w[astar astar astar astar astar astar mcf mcf],
-    mix_7: %w[astar h264ref hmmer gobmk mcf mcf mcf mcf],
-    mix_8: %w[mcf mcf mcf mcf libquantum libquantum libquantum libquantum],
-    mix_9: %w[sjeng mcf bzip2 libquantum astar h264ref hmmer gobmk]
+    # mix_1: %w[astar astar astar astar libquantum libquantum libquantum libquantum],
+    # mix_2: %w[astar h264ref hmmer gobmk libquantum libquantum libquantum libquantum],
+    # mix_3: %w[astar astar astar astar astar astar libquantum libquantum],
+    # mix_4: %w[astar h264ref hmmer gobmk sjeng mcf bzip2 libquantum],
+    # mix_5: %w[astar astar astar astar mcf mcf mcf mcf],
+    # mix_6: %w[astar astar astar astar astar astar mcf mcf],
+    # mix_7: %w[astar h264ref hmmer gobmk mcf mcf mcf mcf],
+    # mix_8: %w[mcf mcf mcf mcf libquantum libquantum libquantum libquantum],
+    # mix_9: %w[sjeng mcf bzip2 libquantum astar h264ref hmmer gobmk],
+
+    mix_10: (%w[libquantum]*4 + %w[astar]*4),
+    mix_11: (%w[libquantum]*4 + %w[astar h264ref hmmer gobmk]),
+    mix_12: (%w[libquantum]*2 + %w[astar]*4),
+    mix_13: %w[libquantum bzip2 mcf sjeng gobj hmmer h264ref astar],
+    mix_14: (%w[mcf]*4 + %w[astar]*4),
+    mix_15: (%w[libquantum]*4 + %w[mcf]*4)
 }
 
 def workloads_for n
