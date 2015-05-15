@@ -279,7 +279,7 @@ def sav_script( options = {} )
       end; n
     )
 
-    cacheSize = 4;
+    cacheSize = 0;
 
     o = options
 

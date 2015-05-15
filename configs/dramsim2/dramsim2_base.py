@@ -258,7 +258,7 @@ def setup_cache(options):
     options.l1d_assoc=2
     options.l1i_size="32kB"
     options.l1i_assoc=2
-    options.l2_size="256kB"
+    options.l2_size="512kB"
     options.l2_assoc=8
                       
 
