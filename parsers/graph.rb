@@ -37,7 +37,7 @@ def grouped_csv data, o={}
     end
 
   # Add Averages
-  str += "%-15s" % "avg:"
+  str += "%-15s" % "avg,"
   str += data.transpose.map do |bench_data|
       bench_data.reject { |element| element == 0 }
   end.map do |bench_data|
@@ -51,7 +51,12 @@ def grouped_csv data, o={}
 end
 
 def csv_to_arr filename, o={}
-    (CSV.read filename)[1..-1].transpose[1..-1]
+    o = {keep_list: o[:x_labels]}.merge o
+    (CSV.read filename)[1..-1].reject do |name,_,_|
+        not (o[:keep_list].include? name)
+    end.transpose[1..-2].map do |i|
+        i.map { |j| j.to_f }
+    end
 end
 
 def grouped_bar data, o={}
@@ -99,7 +104,7 @@ def grouped_bar data, o={}
         text(lambda { o[:x_labels][index] } ).
         font(o[:font]).
         text_angle(-Math::PI/6).
-        left(lambda { group_width * (index-0.5) +
+        left(lambda { group_width * index +
                      (group_width - o[:group_space] - bar_width)/2.0 } )
 
     data.size.times do |group|
