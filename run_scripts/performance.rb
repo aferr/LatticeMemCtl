@@ -88,52 +88,52 @@ module RunScripts
 
     def secure o={}
         o = {nametag: ""}.merge o
-        # TDM, strict, turn start
-        iterate_mp o.merge(
-            turn_allocation_policy: 0,
-            turn_allocatrion_time: 0,
-            dead_time_policy: 0,
-            nametag: o[:nametag] + "tdm_strict_start"
-        )
+        # # TDM, strict, turn start
+        # iterate_mp o.merge(
+        #     turn_allocation_policy: 0,
+        #     turn_allocatrion_time: 0,
+        #     dead_time_policy: 0,
+        #     nametag: o[:nametag] + "tdm_strict_start"
+        # )
 
-        # TDM, Monotonic, turn start
-        iterate_mp o.merge(
-            turn_allocation_policy: 0,
-            turn_allocatrion_time: 0,
-            dead_time_policy: 1,
-            nametag: o[:nametag] + "tdm_monotonic_start"
-        )
-        
-        # Preempting, Strict, turn start
-        iterate_mp o.merge(
-            turn_allocation_policy: 1,
-            turn_allocation_time: 0,
-            dead_time_policy: 0,
-            nametag: o[:nametag] + "preempting_strict_start"
-        )
+        # # TDM, Monotonic, turn start
+        # iterate_mp o.merge(
+        #     turn_allocation_policy: 0,
+        #     turn_allocatrion_time: 0,
+        #     dead_time_policy: 1,
+        #     nametag: o[:nametag] + "tdm_monotonic_start"
+        # )
+        # 
+        # # Preempting, Strict, turn start
+        # iterate_mp o.merge(
+        #     turn_allocation_policy: 1,
+        #     turn_allocation_time: 0,
+        #     dead_time_policy: 0,
+        #     nametag: o[:nametag] + "preempting_strict_start"
+        # )
 
-        # Preempting,  Monotonic, Turn Start
-        iterate_mp o.merge(
-            turn_allocation_policy: 1,
-            turn_allocation_time: 0,
-            dead_time_policy: 1,
-            nametag: o[:nametag] + "preempting_monotonic_start"
-        )
-         
-        # Preempting,  Monotonic, Dead Time
-        iterate_mp o.merge(
-            turn_allocation_policy: 1,
-            turn_allocation_time: 1,
-            dead_time_policy: 1,
-            nametag: o[:nametag] + "preempting_monotonic_dead"
-        )
+        # # Preempting,  Monotonic, Turn Start
+        # iterate_mp o.merge(
+        #     turn_allocation_policy: 1,
+        #     turn_allocation_time: 0,
+        #     dead_time_policy: 1,
+        #     nametag: o[:nametag] + "preempting_monotonic_start"
+        # )
+        #  
+        # # Preempting,  Monotonic, Dead Time
+        # iterate_mp o.merge(
+        #     turn_allocation_policy: 1,
+        #     turn_allocation_time: 1,
+        #     dead_time_policy: 1,
+        #     nametag: o[:nametag] + "preempting_monotonic_dead"
+        # )
 
         # Priority, Strict, turn start
         iterate_mp o.merge(
             turn_allocation_policy: 2,
             turn_allocation_time: 0,
             dead_time_policy: 0,
-            nametag: o[:nametag] + "priority_strict_start"
+            nametag: o[:nametag] + "short_epoch_priority_strict_start"
         )
 
         # Priority, Monotonic, turn start
@@ -141,7 +141,7 @@ module RunScripts
             turn_allocation_policy: 2,
             turn_allocation_time: 0,
             dead_time_policy: 1,
-            nametag: o[:nametag] + "priority_monotonic_start"
+            nametag: o[:nametag] + "short_epoch_priority_monotonic_start"
         )
 
         # Priority, Monotonic, Dead Time
@@ -149,7 +149,7 @@ module RunScripts
             turn_allocation_policy: 2,
             turn_allocation_time: 1,
             dead_time_policy: 1,
-            nametag: o[:nametag] + "priority_monotonic_dead"
+            nametag: o[:nametag] + "short_epoch_priority_monotonic_dead"
         )
     end
 

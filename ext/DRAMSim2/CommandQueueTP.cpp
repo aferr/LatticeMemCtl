@@ -608,13 +608,13 @@ CommandQueueTP::PriorityTurnAllocator::PriorityTurnAllocator(CommandQueueTP *cc)
     : TurnAllocator(cc)
 {
     int num_pids = cc->num_pids;
-    epoch_length = 1000;
+    epoch_length = 20;
     epoch_remaining = epoch_length;
 
     bandwidth_minimum= ((int*) malloc(sizeof(int) * num_pids));
-    bandwidth_minimum[0] = 0;
+    bandwidth_minimum[0] = 2;
     for(int i=1; i<num_pids; i++){
-        bandwidth_minimum[i] = 20;
+        bandwidth_minimum[i] = 1;
     }
     block_time = ((int*) malloc(sizeof(int) * num_pids));
 
