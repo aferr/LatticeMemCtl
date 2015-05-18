@@ -9,28 +9,34 @@ include Parsers
 # Absolute (Non-Normalized) Graphs
 #------------------------------------------------------------------------------
 def abs_baseline o={}
-  r = o[:fun].call o.merge(
-     {}
-  )
-  puts "abs_baseline".green
-  puts r
-  gb = grouped_bar r, o #.merge(legend: [8])
-  csv = grouped_csv r.transpose, o #.merge(legend: [8])
-  string_to_f gb, "#{o[:out_dir]}/baseline_#{o[:mname]}.svg"
-  string_to_f csv, "#{o[:out_dir]}/baseline_#{o[:mname]}.csv"
+    puts "abs_baseline".green
+    if o[:parse]
+        r = o[:fun].call o.merge(
+           {}
+        )
+        puts r
+        csv = grouped_csv r.transpose, o
+        string_to_f csv, "#{o[:out_dir]}/baseline_#{o[:mname]}.csv"
+    end
+    r = csv_to_arr "#{o[:out_dir]}/baseline_#{o[:mname]}.csv", o
+    gb = grouped_bar r, o
+    string_to_f gb, "#{o[:out_dir]}/baseline_#{o[:mname]}.svg"
 end
 
 def abs_tp o={}
-  o = {nametag: "tdm_strict_start"}.merge o
-  r = o[:fun].call o.merge(
-    scheme: "tp",
-  )
-  puts o[:nametag].to_s.green
-  puts r
-  gb = grouped_bar r, o
-  csv = grouped_csv r.transpose, o.merge(do_avg: false)
-  string_to_f gb,  "#{o[:out_dir]}/#{o[:nametag]}_#{o[:mname]}.svg"
-  string_to_f csv, "#{o[:out_dir]}/#{o[:nametag]}_#{o[:mname]}.csv"
+    o = {nametag: "tdm_strict_start"}.merge o
+    puts o[:nametag].to_s.green
+    if o[:parse]
+        r = o[:fun].call o.merge(
+          scheme: "tp",
+        )
+        puts r
+        csv = grouped_csv r.transpose, o.merge(do_avg: false)
+        string_to_f csv, "#{o[:out_dir]}/#{o[:nametag]}_#{o[:mname]}.csv"
+    end
+    r = csv_to_arr "#{o[:out_dir]}/#{o[:nametag]}_#{o[:mname]}.csv", o
+    gb = grouped_bar r, o
+    string_to_f gb,  "#{o[:out_dir]}/#{o[:nametag]}_#{o[:mname]}.svg"
 end
 
 %w[tdm preempting priority].product(
@@ -42,25 +48,28 @@ end
 end
 
 def safe_unnorm o ={}
-    r = [
-        "tdm_strict_start",
-        "tdm_monotonic_start",
-        "preempting_strict_start",
-        "preempting_monotonic_start",
-        "preempting_monotonic_dead",
-        "priority_strict_start",
-        "priority_monotonic_start",
-        "priority_monotonic_dead",
-    ].map do |name|
-        (o[:fun].call o.merge(
-            nametag: name, scheme: "tp"
-        )).flatten
-    end
     leg = %w[tdm tdm+m pre pre+m pre+m+d prio prio+m prio+m+d]
+    if o[:parse]
+        r = [
+            "tdm_strict_start",
+            "tdm_monotonic_start",
+            "preempting_strict_start",
+            "preempting_monotonic_start",
+            "preempting_monotonic_dead",
+            "priority_strict_start",
+            "priority_monotonic_start",
+            "priority_monotonic_dead",
+        ].map do |name|
+            (o[:fun].call o.merge(
+                nametag: name, scheme: "tp"
+            )).flatten
+        end
+        csv = grouped_csv r.transpose, o.merge( legend: leg )
+        string_to_f csv, "#{o[:out_dir]}/safe_schemes_#{o[:mname]}.csv"
+    end
+    r = csv_to_arr "#{o[:out_dir]}/safe_schemes_#{o[:mname]}.csv", o
     gb = grouped_bar r, o.merge( legend: leg )
-    csv = grouped_csv r.transpose, o.merge( legend: leg )
     string_to_f gb, "#{o[:out_dir]}/safe_schemes_#{o[:mname]}.svg"
-    string_to_f csv, "#{o[:out_dir]}/safe_schemes_#{o[:mname]}.csv"
 end
 
 #------------------------------------------------------------------------------
@@ -88,48 +97,55 @@ def norm_ntc o={}
 end
 
 def safe_schemes o ={}
-    schemes = [
-        "tdm_strict_start",
-        "tdm_monotonic_start",
-        "preempting_strict_start",
-        "preempting_monotonic_start",
-        "preempting_monotonic_dead",
-        "priority_strict_start",
-        "priority_monotonic_start",
-        "priority_monotonic_dead",
-    ].map do |name|
-        (o[:fun].call o.merge(
-            nametag: name, scheme: "tp"
-        )).flatten
-    end
-    r = normalized(schemes, [baseline(o)[0]]*8)
     leg = %w[tdm tdm+m pre pre+m pre+m+d prio prio+m prio+m+d]
+    if o[:parse]
+        schemes = [
+            "tdm_strict_start",
+            "tdm_monotonic_start",
+            "preempting_strict_start",
+            "preempting_monotonic_start",
+            "preempting_monotonic_dead",
+            "priority_strict_start",
+            "priority_monotonic_start",
+            "priority_monotonic_dead",
+        ].map do |name|
+            (o[:fun].call o.merge(
+                nametag: name, scheme: "tp"
+            )).flatten
+        end
+        r = normalized(schemes, [baseline(o)[0]]*8)
+        csv = grouped_csv r.transpose, o.merge( legend: leg )
+        string_to_f csv, "#{o[:out_dir]}/safe_schemes_#{o[:mname]}_norm.csv"
+    end
+    r = csv_to_arr "#{o[:out_dir]}/safe_schemes_#{o[:mname]}_norm.csv", o
     gb = grouped_bar r, o.merge( legend: leg )
-    csv = grouped_csv r.transpose, o.merge( legend: leg )
     string_to_f gb, "#{o[:out_dir]}/safe_schemes_#{o[:mname]}_norm.svg"
-    string_to_f csv, "#{o[:out_dir]}/safe_schemes_#{o[:mname]}_norm.csv"
 end
 
 def safe_schemes_norm_tp o={}
-    schemes = [
-        "tdm_monotonic_start",
-        "preempting_strict_start",
-        "preempting_monotonic_start",
-        "preempting_monotonic_dead",
-        "priority_strict_start",
-        "priority_monotonic_start",
-        "priority_monotonic_dead",
-    ].map do |name|
-        (o[:fun].call o.merge(
-            nametag: name, scheme: "tp"
-        )).flatten
-    end
-    r = normalized(schemes, [ntc(o)[0]]*7)
+    puts "safe_schemes_norm_tp".to_s.green
     leg = %w[tdm+m pre pre+m pre+m+d prio prio+m prio+m+d]
+    if o[:parse]
+        schemes = [
+            "tdm_monotonic_start",
+            "preempting_strict_start",
+            "preempting_monotonic_start",
+            "preempting_monotonic_dead",
+            "priority_strict_start",
+            "priority_monotonic_start",
+            "priority_monotonic_dead",
+        ].map do |name|
+            (o[:fun].call o.merge(
+                nametag: name, scheme: "tp"
+            )).flatten
+        end
+        r = normalized(schemes, [ntc(o)[0]]*7)
+        csv = grouped_csv r.transpose, o.merge( legend: leg )
+        string_to_f csv, "#{o[:out_dir]}/safe_schemes_#{o[:mname]}_norm_tp.csv"
+    end
+    r = csv_to_arr "#{o[:out_dir]}/safe_schemes_#{o[:mname]}_norm_tp.csv", o
     gb = grouped_bar r, o.merge( legend: leg )
-    csv = grouped_csv r.transpose, o.merge( legend: leg )
     string_to_f gb, "#{o[:out_dir]}/safe_schemes_#{o[:mname]}_norm_tp.svg"
-    string_to_f csv, "#{o[:out_dir]}/safe_schemes_#{o[:mname]}_norm_tp.csv"
 end
 
 #------------------------------------------------------------------------------
@@ -163,23 +179,29 @@ def latency_data_of(p={}) data_of(p){|o| latency_data o} end
 
 def baseline_latency o={}
     puts "baseline_latency".green
-    r = (latency_data_of o)[0]
     legend = %w[wtmux tmux dead queueing]
-    gb = grouped_bar r.transpose, o.merge( legend: legend )
-    csv = grouped_csv r, o.merge( legend: legend )
+    if o[:parse]
+        r = (latency_data_of o)[0]
+        csv = grouped_csv r, o.merge( legend: legend )
+        string_to_f csv, "#{o[:out_dir]}/baseline_latency.csv"
+    end
+    r = csv_to_arr "#{o[:out_dir]}/baseline_latency.csv", o
+    gb = grouped_bar r, o.merge( legend: legend )
     string_to_f gb,  "#{o[:out_dir]}/baseline_latency.svg"
-    string_to_f csv, "#{o[:out_dir]}/baseline_latency.csv"
 end
 
 def tp_latency o={}
     o = {nametag: "tdm_strict_start"}.merge o
-    puts "#{p[:nametag]}_latency".green
-    r = (latency_data_of o.merge(scheme: "tp"))[0]
+    puts "#{o[:nametag]}_latency".green
     legend = %w[wtmux tmux dead queueing]
-    gb = grouped_bar r.transpose, o.merge( legend: legend )
-    csv = grouped_csv r, o.merge( legend: legend )
+    if o[:parse]
+        r = (latency_data_of o.merge(scheme: "tp"))[0]
+        csv = grouped_csv r, o.merge( legend: legend )
+        string_to_f csv, "#{o[:out_dir]}/#{o[:nametag]}_latency.csv"
+    end
+    r = csv_to_arr "#{o[:out_dir]}/#{o[:nametag]}_latency.csv", o
+    gb = grouped_bar r, o.merge( legend: legend )
     string_to_f gb,  "#{o[:out_dir]}/#{o[:nametag]}_latency.svg"
-    string_to_f csv, "#{o[:out_dir]}/#{o[:nametag]}_latency.csv"
 end
 
 %w[tdm preempting priority].product(
@@ -191,17 +213,20 @@ end
 end
 
 def latency_norm o={}
-  puts "latency_norm".green
-  o = o.merge(scheme: "tp")
-  r = normalized(
-    (latency_data_of o)[0],
-    (latency_data_of o.merge(nametag: "tdm_strict_start"))[0]
-  )
-  legend = %w[wtmux tmux dead queueing]
-  gb = grouped_bar r.transpose, o.merge( legend: legend )
-  csv = grouped_csv r, o.merge( legend: legend )
-  string_to_f gb,  "#{o[:out_dir]}/#{o[:nametag]}_latency_norm.svg"
-  string_to_f csv, "#{o[:out_dir]}/#{o[:nametag]}_latency_norm.csv"
+    legend = %w[wtmux tmux dead queueing]
+    puts "#{o[:nametag]}_latency_norm".green
+    if o[:parse]
+        o = o.merge(scheme: "tp")
+        r = normalized(
+          (latency_data_of o)[0],
+          (latency_data_of o.merge(nametag: "tdm_strict_start"))[0]
+        )
+        csv = grouped_csv r, o.merge( legend: legend )
+        string_to_f csv, "#{o[:out_dir]}/#{o[:nametag]}_latency_norm.csv"
+    end
+    r = csv_to_arr "#{o[:out_dir]}/#{o[:nametag]}_latency_norm.csv", o
+    gb = grouped_bar r, o.merge( legend: legend )
+    string_to_f gb,  "#{o[:out_dir]}/#{o[:nametag]}_latency_norm.svg"
 end
 
 %w[tdm preempting priority].product(
@@ -209,7 +234,6 @@ end
     %w[start dead]
 ).each do |alloc,dead,time|
     name = "#{alloc}_#{dead}_#{time}"
-    puts "#{name}_latency_norm".green
     sig  = "#{name}_latency_norm(o={})"
     body = "latency_norm o.merge(nametag: \"#{name}\")"
     eval "def #{sig} #{body} end"
@@ -224,9 +248,7 @@ if __FILE__ == $0
   out_dir = ARGV[1].to_s
   FileUtils.mkdir_p(out_dir) unless File.directory?(out_dir)
 
-  abs_o = {
-      x_labels: $workloads_8core.keys,
-      y_label: "System Throughput",
+  parse_o = {
       core_set: [8],
       dir: in_dir,
       out_dir: out_dir,
@@ -235,11 +257,10 @@ if __FILE__ == $0
       fun: method(:stp_data_of),
       mname: "stp",
       workloads: $workloads_8core,
-      # workloads: {
-      #     hardstride_nothing: %w[hardstride nothing],
-      #     nothing_hardstride: %w[nothing hardstride]
-      # },
+  }
 
+  abs_o = parse_o.merge(
+      #graph options
       group_space: 2,
       lower_text_margin: 25,
       legend_margin: 10,
@@ -249,7 +270,20 @@ if __FILE__ == $0
       # h: 360,
       # w: 864,
       # font: "18px arial"
-  }
+      keep_list: keep_list = %w[
+          mcf_mcf
+          mcf_lib
+          lib_lib
+          h264_hmm
+          mix_1  
+          mix_2  
+          mix_3  
+          mix_6  
+          mix_8  
+      ],
+      x_labels: keep_list,
+      y_label: "System Throughput",
+  )
 
   abs_baseline                   abs_o
   abs_tdm_strict_start           abs_o
@@ -267,7 +301,7 @@ if __FILE__ == $0
     legend_margin: 10,
     dot_size: 15,
     numeric_labels: false,
-    y_label: "Normalized Avg Latency"
+    y_label: "Avg Latency"
   )
 
   baseline_latency                   latency_o
@@ -282,6 +316,7 @@ if __FILE__ == $0
 
   latency_norm_o = latency_o.merge(
     group_space: 15,
+    y_label: "Normalized Avg Latency"
   )
 
   tdm_monotonic_start_latency_norm        latency_norm_o
@@ -292,18 +327,23 @@ if __FILE__ == $0
   priority_monotonic_start_latency_norm   latency_norm_o
   priority_monotonic_dead_latency_norm    latency_norm_o
 
-  normo = {
-      x_labels: $workloads_8core.keys,
+  normo = parse_o.merge( 
+
+      # graph options
+      keep_list: keep_list = %w[
+          mcf_mcf
+          mcf_lib
+          lib_lib
+          h264_hmm
+          mix_1  
+          mix_2  
+          mix_3  
+          mix_6  
+          mix_8  
+      ],
+      x_labels: keep_list,
       y_label: "Normalized STP",
-      core_set: [8],
-      dir: in_dir,
-      out_dir: out_dir,
-      numcpus: 8,
-      scheme: "none",
-      fun: method(:stp_data_of),
-      mname: "stp",
-      workloads: $workloads_8core,
-  }
+  )
 
   safe_schemes normo
   safe_schemes_norm_tp normo
