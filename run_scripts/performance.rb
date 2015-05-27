@@ -78,10 +78,22 @@ module RunScripts
             scheme: "tp",
             num_wl: 4,
             skip2: true,
-            skip4: true,
             skip6: true,
             tl0: 44,
             tl1: 44,
+        )
+    end
+
+    def diamond_spec
+        secure(
+            addrpar: true,
+            scheme: "tp",
+            num_wl: 4,
+            skip2: true,
+            tl0: 44,
+            tl1: 44,
+            security_policy: 1,
+            nametag: "diamond_"
         )
     end
 

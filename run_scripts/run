@@ -20,10 +20,12 @@ include RunScripts
 # all_secure_test
 # diamond_test
 
+
 #------------------------------------------------------------------------------
 # Performance
 #----------------------------------------------------------------------------
-# baseline
-# single_core
+baseline
+single_core
 secure_spec
+diamond_spec
 #synthetic
