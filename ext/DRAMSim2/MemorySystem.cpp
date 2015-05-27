@@ -268,35 +268,8 @@ void MemorySystem::RegisterCallbacks(
     memoryController->commandQueue->incr_stat = incr_stat;
 }
 
-void MemorySystem::RegisterStats(
-            void * queueing_delay,
-            void * head_of_queue_delay,
-            void * tmux_overhead,
-            void * wasted_tmux_overhead,
-            void * donations,
-            void * donated_issue_cycles,
-            void * donation_overhead,
-            void * dead_time_overhead,
-            void * monotonic_dead_time_recovered
-    ){
-        memoryController->commandQueue->queueing_delay = 
-            queueing_delay;
-        memoryController->commandQueue->head_of_queue_delay = 
-            head_of_queue_delay;
-        memoryController->commandQueue->tmux_overhead = 
-            tmux_overhead;
-        memoryController->commandQueue->wasted_tmux_overhead = 
-            wasted_tmux_overhead;
-        memoryController->commandQueue->donations = 
-            donations;
-        memoryController->commandQueue->donated_issue_cycles = 
-            donated_issue_cycles;
-        memoryController->commandQueue->donation_overhead = 
-            donation_overhead;
-        memoryController->commandQueue->dead_time_overhead = 
-            dead_time_overhead;
-        memoryController->commandQueue->monotonic_dead_time_recovered = 
-            monotonic_dead_time_recovered;
+void MemorySystem::RegisterStats(CommandQueueStats *stats){
+    memoryController->commandQueue->stats = stats;
 }
 
 } /*namespace DRAMSim */

@@ -1,4 +1,5 @@
-/*********************************************************************************
+
+void * dropped;/*********************************************************************************
  *  Copyright (c) 2010-2011, Elliott Cooper-Balis
  *                             Paul Rosenfeld
  *                             Bruce Jacob
@@ -524,31 +525,8 @@ void MultiChannelMemorySystem::RegisterCallbacks(
     }
 }
 
-void MultiChannelMemorySystem::RegisterStats(
-        void * queueing_delay,
-        void * head_of_queue_delay,
-        void * tmux_overhead,
-        void * wasted_tmux_overhead,
-        void * donations,
-        void * donated_issue_cycles,
-        void * donation_overhead,
-        void * dead_time_overhead,
-        void * monotonic_dead_time_recovered
-    ){
-    for(size_t i=0; i<NUM_CHANS; i++)
-    {
-        channels[i]->RegisterStats(
-                queueing_delay,
-                head_of_queue_delay,
-                tmux_overhead,
-                wasted_tmux_overhead,
-                donations,
-                donated_issue_cycles,
-                donation_overhead,
-                dead_time_overhead,
-                monotonic_dead_time_recovered
-            ); 
-    }
+void MultiChannelMemorySystem::RegisterStats(CommandQueueStats *stats){
+    for(size_t i=0; i<NUM_CHANS; i++) channels[i]->RegisterStats(stats); 
 }
 
 namespace DRAMSim {

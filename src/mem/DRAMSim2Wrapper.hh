@@ -56,6 +56,11 @@
 
 #include "MultiChannelMemorySystem.h"
 
+#ifndef CMDQSTATS
+#include "CommandQueueStats.h"
+#define CMDQSTATS
+#endif
+
 /**
  * The simple memory is a basic single-ported memory controller with
  * an infinite throughput and a fixed latency, potentially with a
@@ -70,14 +75,16 @@ class DRAMSim2Wrapper : public AbstractMemory
   public:
 
     Stats::Vector queueing_delay;
-    Stats::Vector head_of_queue_delay;
     Stats::Vector tmux_overhead;
     Stats::Vector wasted_tmux_overhead;
-    Stats::Vector donations;
-    Stats::Vector donated_issue_cycles;
-    Stats::Vector donation_overhead;
     Stats::Vector dead_time_overhead;
-    Stats::Vector monotonic_dead_time_recovered;
+
+    Stats::Vector donations;
+    Stats::Vector steals;
+    Stats::Vector donation_overhead;
+
+    Stats::Vector dropped;
+    Stats::Vector total_turns;
 
     void updateDRAMSim2(){
             while ( (double)dramsim2->currentClockCycle

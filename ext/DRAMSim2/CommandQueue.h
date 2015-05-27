@@ -56,6 +56,11 @@
 #include "SimulatorObject.h"
 #include "Callback.h"
 
+#ifndef CMDQSTATS
+#include "CommandQueueStats.h"
+#define CMDQSTATS
+#endif
+
 using namespace std;
 
 namespace DRAMSim
@@ -68,18 +73,7 @@ namespace DRAMSim
         virtual void check_donor_issue(){};
 
         StatCallback_t* incr_stat;
-
-        void * queueing_delay;
-        void * head_of_queue_delay;
-        void * tmux_overhead;
-
-        void * wasted_tmux_overhead;
-        void * donations;
-        void * donated_issue_cycles;
-        void * donation_overhead;
-
-        void * dead_time_overhead;
-        void * monotonic_dead_time_recovered;
+        CommandQueueStats* stats;
 
         ostream &dramsim_log;
         //typedefs

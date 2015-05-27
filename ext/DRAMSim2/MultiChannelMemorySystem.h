@@ -67,18 +67,7 @@ namespace DRAMSim {
                         double refreshpower, double actprepower),
                     StatIncrCB* incr_stat
                     );
-            void RegisterStats(
-                    void * queueing_delay,
-                    void * head_of_queue_delay,
-                    void * tmux_overhead,
-                    void * wasted_tmux_overhead,
-                    void * donations,
-                    void * donated_issue_cycles,
-                    void * donation_overhead,
-                    void * dead_time_overhead,
-                    void * monotonic_dead_time_recovered
-                    );
-
+            void RegisterStats(CommandQueueStats *stats);
             void InitOutputFiles(string tracefilename);
             void setCPUClockSpeed(uint64_t cpuClkFreqHz);
 

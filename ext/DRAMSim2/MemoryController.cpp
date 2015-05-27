@@ -316,7 +316,7 @@ void MemoryController::update()
         if(pbp->busPacketType != REFRESH){
             assert(pbp->enqueueTimeisSet);
             assert(pbp->enqueueTime <= currentClockCycle);
-            (*(commandQueue->incr_stat))(commandQueue->queueing_delay,
+            (*(commandQueue->incr_stat))(commandQueue->stats->queueing_delay,
                     pbp->threadID, currentClockCycle - pbp->enqueueTime,0);
             commandQueue->check_donor_issue();
         }

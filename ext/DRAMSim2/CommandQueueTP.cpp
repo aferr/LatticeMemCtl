@@ -17,7 +17,6 @@ CommandQueueTP::CommandQueueTP(vector< vector<BankState> > &states,
     p1Period = p1Period_;
 	offset = offset_;
 
-
     map<int,int> tp_config = *tp_config_;
     securityPolicy = new TOLattice(this);
     switch(tp_config[0]){
@@ -83,17 +82,17 @@ CommandQueueTP::update_stats(){
 
    for(int i=0; i < num_pids; i++){
        if( !tcidEmpty(i) && getCurrentPID()!=i ){
-           (*incr_stat)(tmux_overhead,i,
+           (*incr_stat)(stats->tmux_overhead,i,
                    qsbytc_ignore_ref(i),NULL);
            if( tcidEmpty(getCurrentPID()) ){
-               (*incr_stat)(wasted_tmux_overhead,i,
+               (*incr_stat)(stats->wasted_tmux_overhead,i,
                        qsbytc_ignore_ref(i),NULL);
            }
        }
    }
 
    if(isBufferTime() && qsbytc_has_nonref(getCurrentPID())){
-       (*incr_stat)(dead_time_overhead, getCurrentPID(),
+       (*incr_stat)(stats->dead_time_overhead, getCurrentPID(),
                qsbytc_ignore_ref(getCurrentPID()),NULL);
    }
 
@@ -101,7 +100,7 @@ CommandQueueTP::update_stats(){
         if( qsbytc_has_nonref(i) && getCurrentPID()!=i &&
             !qsbytc_has_nonref(getCurrentPID()) &&
             qsbytc_has_nonref(TDMTurnAllocator::natural_turn(this)) ){
-                    (*incr_stat)(donation_overhead,i,
+                    (*incr_stat)(stats->donation_overhead,i,
                             qsbytc_ignore_ref(i),NULL);
         }
     }
@@ -214,7 +213,6 @@ void CommandQueueTP::refreshPopClosePage(BusPacket **busPacket, bool &
                     {
                         *busPacket = packet;
                         queue.erase(queue.begin() + j);
-                        (*queue.begin())->beginHeadTime = currentClockCycle;
                         sendingREF = true;
                     }
 
@@ -428,6 +426,12 @@ void CommandQueueTP::TurnStartAllocationTimer::step(){
 
     if(is_next_new_turn){
        cc->turnAllocator->allocate_next();
+       if( cc->securityPolicy->isLabelLEQ( 
+                   cc->turnAllocator->current(),
+                   cc->turnAllocator->next()) ){
+           (*(cc->incr_stat))(cc->stats->dropped,cc->turnAllocator->current(),1,0);
+       }
+       (*(cc->incr_stat))(cc->stats->total_turns,cc->turnAllocator->current(),1,0);
     }
     if(cc->is_turn_start()){
        cc->turnAllocator->allocate_turn();
@@ -464,6 +468,7 @@ bool CommandQueueTP::DeadTimeAllocationTimer::is_reallocation_time(){
 void CommandQueueTP::DeadTimeAllocationTimer::step(){
     if(cc->is_turn_start()){
         cc->turnAllocator->allocate_turn();
+        (*(cc->incr_stat))(cc->stats->total_turns,cc->turnAllocator->current(),1,0);
     }
     
     unsigned ccc_ = cc->currentClockCycle - cc->offset;
@@ -488,6 +493,12 @@ void CommandQueueTP::DeadTimeAllocationTimer::step(){
 
     if( ccc_ == (turn_end - deadtime -1)){
          cc->turnAllocator->allocate_next();
+
+         if( cc->securityPolicy->isLabelLEQ( 
+                     cc->turnAllocator->current(),
+                     cc->turnAllocator->next()) ){
+             (*(cc->incr_stat))(cc->stats->dropped,cc->turnAllocator->current(),1,0);
+        }
     }
     
 }
@@ -594,7 +605,8 @@ void CommandQueueTP::PreemptingTurnAllocator::allocate_next(){
     unsigned  nat_tcid = TDMTurnAllocator::next();
     next_owner = next_nonempty(nat_tcid);
     if(cc->tcidEmpty(nat_tcid)){
-        (*(cc->incr_stat))(cc->donations,next_owner,1,NULL);
+        (*(cc->incr_stat))(cc->stats->donations,nat_tcid,1,NULL);
+        (*(cc->incr_stat))(cc->stats->steals,next_owner,1,NULL);
     } 
 }
 
@@ -608,11 +620,11 @@ CommandQueueTP::PriorityTurnAllocator::PriorityTurnAllocator(CommandQueueTP *cc)
     : TurnAllocator(cc)
 {
     int num_pids = cc->num_pids;
-    epoch_length = 20;
+    epoch_length = num_pids;
     epoch_remaining = epoch_length;
 
     bandwidth_minimum= ((int*) malloc(sizeof(int) * num_pids));
-    bandwidth_minimum[0] = 2;
+    bandwidth_minimum[0] = 0;
     for(int i=1; i<num_pids; i++){
         bandwidth_minimum[i] = 1;
     }

@@ -211,7 +211,7 @@ def sav_script( options = {} )
         # tl1: 18,
         # tl2: 18,
         # tl3: 18,
-        l3config: "shared",
+        l3config: "private",
         runmode: :qsub,
         maxinsts: $maxinsts,
         fastforward: $fastforward,
@@ -278,7 +278,7 @@ def sav_script( options = {} )
       end; n
     )
 
-    cacheSize = 4;
+    cacheSize = 1;
 
     o = options
 

@@ -46,6 +46,8 @@
 
 #include "mem/DRAMSim2.hh"
 
+#define VALIDATE_STATS
+
 using namespace std;
 
 extern bool has_reset;
@@ -110,17 +112,18 @@ DRAMSim2::DRAMSim2(const Params *p) : DRAMSim2Wrapper(p)
     DRAMSim::StatCallback_t * incr_stat = new DRAMSim::Callback<DRAMSim2,
         void, void*, int, int, void*>(this, &DRAMSim2::incr_stat);
     dramsim2->RegisterCallbacks(read_cb, write_cb, NULL, incr_stat);
-    dramsim2->RegisterStats(
-                (void*)&queueing_delay,
-                (void*)&head_of_queue_delay,
-                (void*)&tmux_overhead,
-                (void*)&wasted_tmux_overhead,
-                (void*)&donations,
-                (void*)&donated_issue_cycles,
-                (void*)&donation_overhead,
-                (void*)&dead_time_overhead,
-                (void*)&monotonic_dead_time_recovered
-            );
+
+    CommandQueueStats *stats = new CommandQueueStats();
+        stats->queueing_delay = (void*)&queueing_delay;
+        stats->tmux_overhead = (void*)&tmux_overhead;
+        stats->wasted_tmux_overhead = (void*)&wasted_tmux_overhead;
+        stats->dead_time_overhead = (void*)&dead_time_overhead;
+        stats->donations = (void*)&donations;
+        stats->steals= (void*)&donations;
+        stats->donation_overhead = (void*)&donation_overhead;
+        stats->dropped = (void*)&dropped;
+        stats->total_turns = (void*)&total_turns;
+    dramsim2->RegisterStats(stats);
 }
 
 DRAMSim2 *
