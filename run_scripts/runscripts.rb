@@ -110,7 +110,14 @@ $workloads_4core = {
     mix_6: %w[astar astar astar mcf],
     # mix_7: %w[astar h264ref hmmer gobmk mcf mcf mcf mcf],
     mix_8: %w[mcf mcf libquantum libquantum ],
-    mix_9: %w[mcf libquantum ast h264ref]
+    mix_9: %w[mcf libquantum ast h264ref],
+
+    mix_10: (%w[libquantum]*2 + %w[astar]*2),
+    mix_11: (%w[libquantum]*2 + %w[hmmer gobmk]),
+    mix_12: (%w[libquantum]*1 + %w[astar]*3),
+    mix_13: %w[bzip2 sjeng hmmer h264ref ],
+    mix_14: (%w[mcf]*2 + %w[astar]*2),
+    mix_15: (%w[libquantum]*2 + %w[mcf]*2)
 }
 
 def workloads_for n

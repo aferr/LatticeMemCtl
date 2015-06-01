@@ -46,8 +46,6 @@
 
 #include "mem/DRAMSim2.hh"
 
-#define VALIDATE_STATS
-
 using namespace std;
 
 extern bool has_reset;
