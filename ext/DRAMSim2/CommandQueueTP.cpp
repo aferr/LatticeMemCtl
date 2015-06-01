@@ -668,8 +668,8 @@ void CommandQueueTP::PriorityTurnAllocator::allocate_next(){
     PRINT("Priority Allocation time" << cc->currentClockCycle);
 #endif
     //Reset bandwidth limits on an epoch change
-    if(epoch_remaining == 0) reset_epoch();
     epoch_remaining -= 1;
+    if(epoch_remaining == 0) reset_epoch();
     
 #ifdef debug_cctp
     PRINT("epoch remaining " << epoch_remaining);
