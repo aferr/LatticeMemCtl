@@ -62,7 +62,6 @@ class L3Shared( L3Config ):
                             split_mshrq = options.split_mshr,
                             split_rport = options.split_rport,
                             save_trace = options.do_cache_trace,
-                            cw_first = not (options.nocwf),
                             do_flush = options.do_flush,
                             flushRatio = options.flushRatio,
                             context_sw_freq = options.context_sw_freq,
@@ -102,7 +101,6 @@ class L3Private( L3Config ):
                     use_set_part = options.use_set_part,
                     use_way_part = options.use_way_part,
                     save_trace = options.do_cache_trace,
-                    cw_first = not (options.nocfw),
                     l3_trace_file = options.l3tracefile
                 )
                 for i in xrange( options.num_cpus )

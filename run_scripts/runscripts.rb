@@ -285,7 +285,7 @@ def sav_script( options = {} )
       end; n
     )
 
-    cacheSize = 1;
+    cacheSize = options[:cacheSize] || "1MB";
 
     o = options
 
@@ -315,13 +315,12 @@ def sav_script( options = {} )
     script.puts("    --l2cache \\")
     unless cacheSize == 0
         script.puts("    --l3cache \\")
-        script.puts("    --l3_size=#{cacheSize}MB\\")
+        script.puts("    --l3_size=#{cacheSize}\\")
         script.puts("    --l3config=#{l3config} \\")
     end
     script.puts("    --fast-forward=#{fastforward} \\") unless fastforward == 0
     script.puts("    --maxinsts=#{maxinsts} \\")
     script.puts("    --maxtick=#{$maxtick} \\")
-    script.puts("    --nocwf \\") if options[:nocwf]
 
     #Protection Mechanisms
     script.puts("    --fixaddr \\")       if scheme == "fa" || options[:addrpar]

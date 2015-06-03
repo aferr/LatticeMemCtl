@@ -13,51 +13,11 @@ module RunScripts
         debug: true
     }
 
-    def synthetic
-        o = {
-            addrpar: true,
-            scheme: "tp",
-            workloads: {
-                hardstride_nothing: %w[hardstride nothing],
-                nothing_hardstride: %w[nothing hardstride],
-            },
-            maxinsts: 10**4,
-            fastforward: 10**3,
-            num_wl: 2,
-            skip4: true,
-            skip6: true,
-            runmode: :local,
-            debug: true,
-        }
-
-        # single
-        single o.merge(
-            scheme: "none",
-            benchmarks: %w[nothing hardstride]
-        )
-
-        # baseline
-        iterate_mp o.merge(
-            scheme: "none",
-        )
-
-        #secure
-        secure o
-        
-    end
-
-    $some_workloads = {
-      mcf_bz2: %w[ mcf bzip2 ],
-      mcf_ast: %w[mcf astar],
-      ast_mcf: %w[astar mcf],
-    }
-
     def baseline
       iterate_mp(
         scheme: "none",
-        num_wl: 4,
+        num_wl: 8,
         skip6: true,
-        skip2: true,
       )
     end
 
@@ -66,21 +26,12 @@ module RunScripts
       )
     end
     
-    def ncore_ntc
-      iterate_mp $secure_opts.merge(
-        num_wl: 2,
-      )
-    end
-
     def secure_spec
         secure(
             addrpar: true,
             scheme: "tp",
-            num_wl: 4,
-            skip2: true,
+            num_wl: 8,
             skip6: true,
-            tl0: 44,
-            tl1: 44,
         )
     end
 
@@ -90,12 +41,50 @@ module RunScripts
             scheme: "tp",
             num_wl: 4,
             skip2: true,
-            tl0: 44,
-            tl1: 44,
             security_policy: 1,
             nametag: "diamond_"
         )
     end
+
+    def cache_sweep
+        %w[512KB 1.5MB 2MB].each do |cache|
+            secure(
+                addrpar: true,
+                scheme: "tp",
+                num_wl: 8,
+                skip6: true,
+                skip2: true,
+                skip4: true,
+                cacheSize: cache,
+                nametag: "#{cache}_LLC_"
+            )
+            iterate_mp(
+                addrpar: true,
+                scheme: "tp",
+                num_wl: 8,
+                skip2: true,
+                skip4: true,
+                skip6: true,
+                cacheSize: cache,
+                nametag: "#{cache}_LLC"
+            )
+        end
+    end
+
+    def secure_partitioned
+        secure(
+                addrpar: true,
+                scheme: "tp",
+                num_wl: 8,
+                skip6: true,
+                skip2: true,
+                skip4: true,
+                tl0: 19,
+                tl1: 19,
+                rank_bank_partitioning: true
+        )
+    end
+        
 
     def secure o={}
         o = {nametag: ""}.merge o

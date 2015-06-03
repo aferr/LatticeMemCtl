@@ -153,8 +153,6 @@ def add_options():
                 help="do detailed trace for address")
         parser.add_option("--trace_addr", type="int", default=0,
                 help="address for detailed trace")
-        parser.add_option("--nocwf", action="store_true", default=False,
-                help="Enable to turn off critical word first timing")
         parser.add_option("--do_flush", action="store_true", default=False,
                 help="Flush the cache occasionally to model context switching.")
         parser.add_option("--flushRatio", type="float", default=1,

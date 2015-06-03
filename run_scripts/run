@@ -28,4 +28,5 @@ baseline
 single_core
 secure_spec
 diamond_spec
-#synthetic
+secure_partitioned
+cache_sweep
