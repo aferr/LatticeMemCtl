@@ -406,15 +406,6 @@ bool CommandQueueTP::isBufferTime(){
 //-----------------------------------------------------------------------------
 // Turn Start
 //-----------------------------------------------------------------------------
-bool CommandQueueTP::TurnStartAllocationTimer::is_reallocation_time(){
-    unsigned ccc_ = cc->currentClockCycle - cc->offset;
-    int schedule_time = ccc_ %
-        (cc->p0Period + (cc->num_pids-1) * cc->p1Period);
-    bool is_turn_start = schedule_time==0 ||
-        ((schedule_time-cc->p0Period)%cc->p1Period==0);
-    return is_turn_start;
-}
-
 void CommandQueueTP::TurnStartAllocationTimer::step(){
     int p0Period = cc->p0Period;
     int p1Period = cc->p1Period;
@@ -426,45 +417,22 @@ void CommandQueueTP::TurnStartAllocationTimer::step(){
 
     if(is_next_new_turn){
        cc->turnAllocator->allocate_next();
-       if( cc->securityPolicy->isLabelLEQ( 
-                   cc->turnAllocator->current(),
-                   cc->turnAllocator->next()) ){
-           (*(cc->incr_stat))(cc->stats->dropped,cc->turnAllocator->current(),1,0);
-       }
-       (*(cc->incr_stat))(cc->stats->total_turns,cc->turnAllocator->current(),1,0);
     }
     if(cc->is_turn_start()){
        cc->turnAllocator->allocate_turn();
+       int current = cc->turnAllocator->current();
+       int next = cc->turnAllocator->next();
+       if( cc->securityPolicy->isLabelLEQ(current, next)){
+           (*(cc->incr_stat))(cc->stats->dropped,current,1,0);
+       }
+       (*(cc->incr_stat))(cc->stats->total_turns,next,1,0);
     }
 }
+
 
 //-----------------------------------------------------------------------------
 // Dead Time
 //-----------------------------------------------------------------------------
-bool CommandQueueTP::DeadTimeAllocationTimer::is_reallocation_time(){
-    unsigned ccc_ = cc->currentClockCycle - cc->offset + 1;
-    unsigned current_tc = TDMTurnAllocator::natural_turn(cc);
-    unsigned schedule_length = cc->p0Period + cc->p1Period * (cc->num_pids - 1);
-    unsigned schedule_start = ccc_ - ( ccc_ % schedule_length );
-
-    unsigned turn_start = current_tc == 0 ?
-      schedule_start :
-      schedule_start + cc->p0Period + cc->p1Period * (current_tc-1);
-    unsigned turn_end = current_tc == 0 ?
-      turn_start + cc->p0Period :
-      turn_start + cc->p1Period;
-
-    // Time between refreshes to ANY rank.
-    unsigned refresh_period = REFRESH_PERIOD/NUM_RANKS/tCK;
-    unsigned next_refresh = ccc_ + refresh_period - (ccc_ % refresh_period);
- 
-    unsigned deadtime = (turn_start <= next_refresh && next_refresh < turn_end)?
-        cc->refresh_worst_case_time():
-        cc->worst_case_time();
-
-    return ccc_ == (turn_end - deadtime);
-}
-
 void CommandQueueTP::DeadTimeAllocationTimer::step(){
     if(cc->is_turn_start()){
         cc->turnAllocator->allocate_turn();
@@ -494,15 +462,28 @@ void CommandQueueTP::DeadTimeAllocationTimer::step(){
     if( ccc_ == (turn_end - deadtime -1)){
          cc->turnAllocator->allocate_next();
 
-         if( cc->securityPolicy->isLabelLEQ( 
-                     cc->turnAllocator->current(),
-                     cc->turnAllocator->next()) ){
-             (*(cc->incr_stat))(cc->stats->dropped,cc->turnAllocator->current(),1,0);
+         int current = cc->turnAllocator->current();
+         int next = cc->turnAllocator->next();
+         if( cc->securityPolicy->isLabelLEQ( current, next) ){
+             (*(cc->incr_stat))(cc->stats->dropped,current,1,0);
         }
     }
     
 }
-
+/*/
+void CommandQueueTP::DeadTimeAllocationTimer::step(){
+    if(cc->is_turn_start()){
+       cc->turnAllocator->allocate_turn();
+       cc->turnAllocator->allocate_next();
+       if( cc->securityPolicy->isLabelLEQ( 
+                   cc->turnAllocator->current(),
+                   cc->turnAllocator->next()) ){
+           (*(cc->incr_stat))(cc->stats->dropped,cc->turnAllocator->current(),1,0);
+       }
+       (*(cc->incr_stat))(cc->stats->total_turns,cc->turnAllocator->current(),1,0);
+    }
+}
+*/
 
 //=============================================================================
 // Partitioning
@@ -604,7 +585,7 @@ unsigned CommandQueueTP::PreemptingTurnAllocator::next_nonempty(unsigned tcid){
 void CommandQueueTP::PreemptingTurnAllocator::allocate_next(){
     unsigned  nat_tcid = TDMTurnAllocator::next();
     next_owner = next_nonempty(nat_tcid);
-    if(cc->tcidEmpty(nat_tcid)){
+    if(next_owner!=nat_tcid){
         (*(cc->incr_stat))(cc->stats->donations,nat_tcid,1,NULL);
         (*(cc->incr_stat))(cc->stats->steals,next_owner,1,NULL);
     } 
@@ -662,6 +643,18 @@ unsigned CommandQueueTP::PriorityTurnAllocator::highest_nonempty_wbw(){
     return tcid_candidate;
 }
 
+unsigned CommandQueueTP::PriorityTurnAllocator::highest_wbw(){
+    unsigned tcid_candidate = cc->securityPolicy->bottom();
+    unsigned top = cc->securityPolicy->top();
+    while(tcid_candidate !=top){
+        bool has_bw = epoch_remaining > block_time[tcid_candidate];
+        if(has_bw) break;
+        tcid_candidate = cc->securityPolicy->nextHigherTC(tcid_candidate);
+    }
+    return tcid_candidate;
+}
+
+
 void CommandQueueTP::PriorityTurnAllocator::allocate_next(){
 #ifdef debug_cctp
     PRINT("-----------------------------------------------------------------------------");
@@ -690,7 +683,7 @@ void CommandQueueTP::PriorityTurnAllocator::allocate_next(){
 
 void CommandQueueTP::PriorityTurnAllocator::allocate_turn(){
     turn_owner = next_owner;
-    next_owner = cc->securityPolicy->bottom();
+    next_owner = highest_wbw();
 }
 
 unsigned CommandQueueTP::PriorityTurnAllocator::current(){ return turn_owner; }

@@ -79,7 +79,6 @@ class CommandQueueTP : public CommandQueue
         public:
         CommandQueueTP *cc;
         TurnAllocationTimer(CommandQueueTP *cc) : cc(cc) {}
-        virtual bool is_reallocation_time() = 0;
         virtual void step() = 0;
     };
 
@@ -88,7 +87,6 @@ class CommandQueueTP : public CommandQueue
         public:
         TurnStartAllocationTimer(CommandQueueTP *cc) :
             TurnAllocationTimer(cc) {}
-        virtual bool is_reallocation_time();
         virtual void step();
     };
 
@@ -97,7 +95,6 @@ class CommandQueueTP : public CommandQueue
         public:
             DeadTimeAllocationTimer(CommandQueueTP *cc) :
                 TurnAllocationTimer(cc) {}
-        virtual bool is_reallocation_time();
         virtual void step();
     };
     
@@ -188,6 +185,7 @@ class CommandQueueTP : public CommandQueue
 
         private:
         unsigned highest_nonempty_wbw();
+        unsigned highest_wbw();
         void reset_epoch();
         int epoch_length;
         int epoch_remaining;

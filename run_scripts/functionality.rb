@@ -15,7 +15,8 @@ module RunScripts
         num_wl: 2,
         runmode: :local,
         tl0: 44,
-        tl1: 44
+        tl1: 44,
+        cacheSize: 0
     }
 
     # Single test
@@ -40,10 +41,11 @@ module RunScripts
         secure $test_opts.merge(
             security_policy: 0,
             num_wl: 4,
+            skip2: true,
             addrpar: true,
             scheme: "tp",
             workloads: {
-                hrd_hrd: (%w[hardstride] *4)
+                hrd_hrd: (%w[hardstride] * 4)
             }
         )
     end

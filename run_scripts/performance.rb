@@ -47,21 +47,21 @@ module RunScripts
     end
 
     def cache_sweep
-        %w[512KB 1.5MB 2MB].each do |cache|
-            secure(
+        %w[512kB 1.5MB 2MB].each do |cache|
+            secure $test_run_opts.merge(
                 addrpar: true,
                 scheme: "tp",
-                num_wl: 8,
+                num_wl: 4,
                 skip6: true,
                 skip2: true,
                 skip4: true,
                 cacheSize: cache,
                 nametag: "#{cache}_LLC_"
             )
-            iterate_mp(
+            iterate_mp $test_run_opts.merge(
                 addrpar: true,
                 scheme: "tp",
-                num_wl: 8,
+                num_wl: 4,
                 skip2: true,
                 skip4: true,
                 skip6: true,
@@ -75,12 +75,11 @@ module RunScripts
         secure(
                 addrpar: true,
                 scheme: "tp",
-                num_wl: 8,
-                skip6: true,
+                num_wl: 4,
                 skip2: true,
-                skip4: true,
                 tl0: 19,
                 tl1: 19,
+                nametag: "part_",
                 rank_bank_partitioning: true
         )
     end

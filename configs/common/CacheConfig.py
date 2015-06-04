@@ -43,7 +43,9 @@ class L3Config(object):
             '4MB' : '8.48ns',
             '3MB' : '7.5',
             '2MB' : '6.5ns',
-            '1MB' : '5ns'
+            '1MB' : '5ns',
+            '1.5MB' : '4.5ns',
+            '512kB' : '4ns'
         }
 
     def connect_l2( self ): return
@@ -96,7 +98,7 @@ class L3Private( L3Config ):
                 L3Cache(
                     size = options.l3_size,
                     latency = self.latencies[options.l3_size],
-                    assoc = options.l3_assoc,
+                    assoc = (12 if options.l3_size == '1.5MB' else options.l3_assoc),
                     block_size = options.cacheline_size,
                     use_set_part = options.use_set_part,
                     use_way_part = options.use_way_part,
