@@ -24,9 +24,9 @@ include RunScripts
 #------------------------------------------------------------------------------
 # Performance
 #----------------------------------------------------------------------------
-baseline
-single_core
-secure_spec
-diamond_spec
-secure_partitioned
+# baseline
+# single_core
+# secure_spec
+# diamond_spec
+# secure_partitioned
 cache_sweep

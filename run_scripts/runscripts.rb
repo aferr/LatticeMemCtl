@@ -23,9 +23,6 @@ $l3configs = %w[shared private]
 
 #dramsim options
 $device = "DDR3_micron_16M_8B_x8_sg15.ini"
-$schemes = %w[tp none fa]
-$turnlengths = [0] + (7..9).to_a
-$p0periods = [64,96,128,192,256]
 
 # Workload Characterization
 # Have phases: bzip2, gcc, gobmk, h264ref
@@ -60,17 +57,17 @@ $p0periods = [64,96,128,192,256]
 $mpworkloads = {
   mcf_mcf: %w[ mcf mcf ],
   mcf_lib: %w[mcf libquantum],
- mcf_ast: %w[mcf astar],
- ast_mcf: %w[astar mcf],
+  mcf_ast: %w[mcf astar],
+  ast_mcf: %w[astar mcf],
   lib_mcf: %w[libquantum mcf],
   lib_lib: %w[ libquantum libquantum],
- lib_ast: %w[ libquantum astar ],
- mcf_h264: %w[ mcf h264ref ],
+  lib_ast: %w[ libquantum astar ],
+  mcf_h264: %w[ mcf h264ref ],
   lib_sjg: %w[ libquantum sjeng ],
- sjg_sgj: %w[ sjeng sjeng ],
- ast_h264: %w[ astar h264ref ],
+  sjg_sgj: %w[ sjeng sjeng ],
+  ast_h264: %w[ astar h264ref ],
   h264_hmm: %w[ h264ref hmmer ],
- ast_ast: %w[ astar astar],
+  ast_ast: %w[ astar astar],
 
   # # Float workloads
   # milc_milc: %w[milc milc],

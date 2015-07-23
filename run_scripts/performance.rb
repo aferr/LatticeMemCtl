@@ -10,7 +10,10 @@ module RunScripts
         maxinsts: 100,
         fastforward: 100,
         runmode: :local,
-        debug: true
+        debug: true,
+        workloads: {
+            hard: %w[hardstride]*4
+        }
     }
 
     def baseline
@@ -47,23 +50,22 @@ module RunScripts
     end
 
     def cache_sweep
-        %w[512kB 1.5MB 2MB].each do |cache|
-            secure $test_run_opts.merge(
+        %w[512kB 1536kB 2MB].each do |cache|
+            secure(
                 addrpar: true,
                 scheme: "tp",
                 num_wl: 4,
                 skip6: true,
                 skip2: true,
-                skip4: true,
                 cacheSize: cache,
                 nametag: "#{cache}_LLC_"
             )
-            iterate_mp $test_run_opts.merge(
+        #1MB
+            iterate_mp(
                 addrpar: true,
                 scheme: "tp",
                 num_wl: 4,
                 skip2: true,
-                skip4: true,
                 skip6: true,
                 cacheSize: cache,
                 nametag: "#{cache}_LLC"
