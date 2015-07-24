@@ -188,6 +188,8 @@ def add_options():
             sys.exit(1)
         return options
 
+def es_max_bandwidth(option, opt, value, parser):
+    setattr(parser.values, option.dest, value.split(","))
 
 ###############################################################################
 # DRAM

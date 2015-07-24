@@ -4,6 +4,11 @@
 #define lattice
 #endif
 
+#ifndef TPCONFIG
+#define TPCONFIG
+#include "TPConfig.h"
+#endif
+
 #define BLOCK_TIME 12
 
 #include <map>
@@ -20,7 +25,7 @@ class CommandQueueTP : public CommandQueue
                 ostream &dramsim_log_,unsigned tpTurnLength,
                 int num_pids, bool fixAddr_,
                 bool diffPeriod_, int p0Period_, int p1Period_, int offset_,
-                map<int,int>* tp_config);
+                TPConfig* tp_config);
 
         virtual void enqueue(BusPacket *newBusPacket);
         virtual bool hasRoomFor(unsigned numberToEnqueue, unsigned rank, 
@@ -34,6 +39,8 @@ class CommandQueueTP : public CommandQueue
                 unsigned pid);
         virtual void step();
         virtual void print();
+
+        TPConfig::EpochSettings* epoch_settings;
 
     protected:
         virtual void refreshPopClosePage(BusPacket **busPacket, bool & sendingREF);
@@ -208,7 +215,7 @@ class CommandQueueTP : public CommandQueue
         Lattice(CommandQueueTP* cc) : num_pids(cc->num_pids), cc(cc) {}
         virtual unsigned nextHigherTC(unsigned tcid) = 0;
         virtual bool isLabelLEQ(unsigned tc1, unsigned tc2) = 0;
-        virtual unsigned top() = 0;
+        virtual bool isTop(unsigned tcid) = 0;
         virtual unsigned bottom() = 0;
     };
 
@@ -218,9 +225,8 @@ class CommandQueueTP : public CommandQueue
         TOLattice(CommandQueueTP* cc) : Lattice(cc) {}
         virtual unsigned nextHigherTC(unsigned tcid);
         virtual bool isLabelLEQ(unsigned tc1, unsigned tc2);
-        virtual unsigned top();
+        virtual bool isTop(unsigned tcid);
         virtual unsigned bottom();
-
     };
 
     class DiamondLattice : public Lattice
@@ -230,7 +236,21 @@ class CommandQueueTP : public CommandQueue
             next_incomp(1) {}
         virtual unsigned nextHigherTC(unsigned tcid);
         virtual bool isLabelLEQ(unsigned tc1, unsigned tc2);
-        virtual unsigned top();
+        virtual bool isTop(unsigned tcid);
+        virtual unsigned bottom();
+        private:
+        unsigned next_incomp;
+    };
+
+
+    class CloudLattice : public Lattice
+    {
+        public:
+        CloudLattice(CommandQueueTP* cc) : Lattice(cc),
+            next_incomp(1) {}
+        virtual unsigned nextHigherTC(unsigned tcid);
+        virtual bool isLabelLEQ(unsigned tc1, unsigned tc2);
+        virtual bool isTop(unsigned tcid);
         virtual unsigned bottom();
         private:
         unsigned next_incomp;

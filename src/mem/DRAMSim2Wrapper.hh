@@ -55,6 +55,10 @@
 #include "params/DRAMSim2Wrapper.hh"
 
 #include "MultiChannelMemorySystem.h"
+#ifndef TPCONFIG
+#define TPCONFIG
+#include "TPConfig.h"
+#endif
 
 #ifndef CMDQSTATS
 #include "CommandQueueStats.h"

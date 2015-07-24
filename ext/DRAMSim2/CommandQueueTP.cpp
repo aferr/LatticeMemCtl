@@ -1,13 +1,13 @@
 #include "CommandQueueTP.h"
 #include "SystemConfiguration.h"
-
+#define debug_cctp
 using namespace DRAMSim;
 
 CommandQueueTP::CommandQueueTP(vector< vector<BankState> > &states, 
         ostream &dramsim_log_, unsigned tpTurnLength_,
         int num_pids_, bool fixAddr_,
         bool diffPeriod_, int p0Period_, int p1Period_, int offset_,
-        map<int,int>* tp_config_
+        TPConfig* tp_config_
         ) : CommandQueue(states,dramsim_log_,num_pids_)
 {
     fixAddr = fixAddr_;
@@ -17,9 +17,8 @@ CommandQueueTP::CommandQueueTP(vector< vector<BankState> > &states,
     p1Period = p1Period_;
 	offset = offset_;
 
-    map<int,int> tp_config = *tp_config_;
-    securityPolicy = new TOLattice(this);
-    switch(tp_config[0]){
+    TPConfig *tp_config = tp_config_;
+    switch(tp_config->security_policy){
         case 0: securityPolicy = new TOLattice(this); break;
         case 1:
                 securityPolicy = new DiamondLattice(this);
@@ -28,33 +27,37 @@ CommandQueueTP::CommandQueueTP(vector< vector<BankState> > &states,
                     exit(1);
                 }
                 break;
+        case 2:
+                securityPolicy = new CloudLattice(this);
+                if(num_pids!=3){
+                    fprintf(stderr, "there should be exactly 3 nonempty SDs%s",
+                            " when using the cloud policy\n");
+                    exit(1);
+                }
         default: securityPolicy = new TOLattice(this); break;
     }
 
-    switch(tp_config[1]){
+    switch(tp_config->allocation_timer){
         case 0: turnAllocationTimer = new TurnStartAllocationTimer(this); break;
         case 1: turnAllocationTimer = new DeadTimeAllocationTimer(this); break;
         default: turnAllocationTimer = new TurnStartAllocationTimer(this);
     }
 
-    switch(tp_config[2]){
+    switch(tp_config->allocator){
         case 0: turnAllocator = new TDMTurnAllocator(this); break;
         case 1: turnAllocator = new PreemptingTurnAllocator(this); break;
         case 2: turnAllocator = new PriorityTurnAllocator(this); break;
         default: turnAllocator = new TDMTurnAllocator(this);
     }
    
-    switch(tp_config[3]){
+    switch(tp_config->dead_time_calc){
         case 0: deadTimeCalc = new StrictDeadTimeCalc(this); break;
         case 1: deadTimeCalc = new MonotonicDeadTimeCalc(this); break;
         default: deadTimeCalc = new StrictDeadTimeCalc(this);
     }
 
-    switch(tp_config[4]){
-        case 0: partitioning = false; break;
-        case 1: partitioning = true; break;
-        default: partitioning = false;
-    }
+    partitioning = tp_config->partitioning;
+    epoch_settings = tp_config->epoch_settings;
 
     pid_last_pop = 0;
     last_pid = 0;
@@ -575,8 +578,9 @@ void CommandQueueTP::PreemptingTurnAllocator::allocate_turn(){
 
 unsigned CommandQueueTP::PreemptingTurnAllocator::next_nonempty(unsigned tcid){
     unsigned next = tcid;
-    unsigned top = cc->securityPolicy->top();
-    while(cc->tcidEmpty(next) && next!=top){
+    // unsigned top = cc->securityPolicy->top();
+    // while(cc->tcidEmpty(next) && next!=top){
+    while(cc->tcidEmpty(next) && !(cc->securityPolicy->isTop(next))){
         next = cc->securityPolicy->nextHigherTC(next);
     }
     return next;
@@ -601,13 +605,12 @@ CommandQueueTP::PriorityTurnAllocator::PriorityTurnAllocator(CommandQueueTP *cc)
     : TurnAllocator(cc)
 {
     int num_pids = cc->num_pids;
-    epoch_length = num_pids;
+    epoch_length = cc->epoch_settings->epoch_length;
     epoch_remaining = epoch_length;
 
     bandwidth_minimum= ((int*) malloc(sizeof(int) * num_pids));
-    bandwidth_minimum[0] = 0;
-    for(int i=1; i<num_pids; i++){
-        bandwidth_minimum[i] = 1;
+    for(int i=0; i<num_pids; i++){
+        bandwidth_minimum[i] = cc->epoch_settings->bandwidth_minimum[i];
     }
     block_time = ((int*) malloc(sizeof(int) * num_pids));
 
@@ -631,9 +634,7 @@ void CommandQueueTP::PriorityTurnAllocator::reset_epoch(){
 
 unsigned CommandQueueTP::PriorityTurnAllocator::highest_nonempty_wbw(){
     unsigned tcid_candidate = cc->securityPolicy->bottom();
-    unsigned top = cc->securityPolicy->top();
-    while(tcid_candidate !=top){
-        // has_bw = bandwidth_remaining[tcid_candidate];
+    while(!(cc->securityPolicy->isTop(tcid_candidate))){
         bool has_bw = epoch_remaining > block_time[tcid_candidate];
         bool is_empty = cc->tcidEmpty(tcid_candidate);
         if(has_bw && !is_empty) break;
@@ -645,8 +646,7 @@ unsigned CommandQueueTP::PriorityTurnAllocator::highest_nonempty_wbw(){
 
 unsigned CommandQueueTP::PriorityTurnAllocator::highest_wbw(){
     unsigned tcid_candidate = cc->securityPolicy->bottom();
-    unsigned top = cc->securityPolicy->top();
-    while(tcid_candidate !=top){
+    while(!(cc->securityPolicy->isTop(tcid_candidate))){
         bool has_bw = epoch_remaining > block_time[tcid_candidate];
         if(has_bw) break;
         tcid_candidate = cc->securityPolicy->nextHigherTC(tcid_candidate);
@@ -709,8 +709,8 @@ unsigned CommandQueueTP::TOLattice::bottom(){
     return 0;
 }
 
-unsigned CommandQueueTP::TOLattice::top(){
-    return cc->num_pids - 1;
+bool CommandQueueTP::TOLattice::isTop(unsigned tcid){
+    return tcid == (cc->num_pids - 1);
 }
 
 //-----------------------------------------------------------------------------
@@ -739,5 +739,33 @@ bool CommandQueueTP::DiamondLattice::isLabelLEQ(unsigned tc1, unsigned tc2){
     return false;
 }
 
-unsigned CommandQueueTP::DiamondLattice::top(){ return 3; }
+bool CommandQueueTP::DiamondLattice::isTop(unsigned tcid){ return tcid == 3; }
 unsigned CommandQueueTP::DiamondLattice::bottom(){ return 0; }
+
+//-----------------------------------------------------------------------------
+// Cloud Lattice
+//-----------------------------------------------------------------------------
+unsigned CommandQueueTP::CloudLattice::nextHigherTC(unsigned tcid){
+    if(tcid == 1 || tcid == 2){
+        return tcid;
+    } else{
+        if(next_incomp == 1){
+            next_incomp = 2;
+            return 1;
+        } else {
+            next_incomp = 1;
+            return 2;
+        }
+    }
+}
+
+bool CommandQueueTP::CloudLattice::isLabelLEQ(unsigned tc1, unsigned tc2){
+    if(tc1 == 0) return true;
+    if(tc1 == tc2) return true;
+    return false;
+}
+
+bool CommandQueueTP::CloudLattice::isTop(unsigned tcid){
+    return tcid == 1 || tcid == 2;
+}
+unsigned CommandQueueTP::CloudLattice::bottom(){ return 0; }

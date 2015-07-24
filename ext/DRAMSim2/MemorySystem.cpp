@@ -40,6 +40,11 @@
 #include "IniReader.h"
 #include <unistd.h>
 
+#ifndef TPCONFIG
+#define TPCONFIG
+#include "TPConfig.h"
+#endif
+
 using namespace std;
 
 
@@ -57,7 +62,7 @@ MemorySystem::MemorySystem(unsigned id, unsigned int megsOfMemory,
         const string &outputFilename_, unsigned tpTurnLength, bool genTrace, 
         const string &traceFilename_, int num_pids, bool fixAddr,
         bool diffPeriod, int p0Period, int p1Period, int offset, int lattice_config,
-        map<int,int>* tp_config) :
+        TPConfig* tp_config) :
 		dramsim_log(dramsim_log_),
 		ReturnReadData(NULL),
 		WriteDataDone(NULL),

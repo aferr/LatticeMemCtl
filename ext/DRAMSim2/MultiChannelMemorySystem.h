@@ -36,6 +36,11 @@
 #include "CSVWriter.h"
 #include <map>
 
+#ifndef TPCONFIG
+#define TPCONFIG
+#include "TPConfig.h"
+#endif
+
 using namespace std;
 namespace DRAMSim {
 
@@ -50,7 +55,7 @@ namespace DRAMSim {
                     const IniReader::OverrideMap *paramOverrides=NULL,
                     int num_pids=2, bool fixAddr=false,
                     bool diffPeriod=false, int p0Period=64, int p1Period=64, int offset=0,
-                    int lattice_config=1, map<int,int>* tp_config = new map<int,int>());
+                    int lattice_config=1, TPConfig *tp_config = new TPConfig());
             virtual ~MultiChannelMemorySystem();
             bool addTransaction(Transaction *trans);
             bool addTransaction(const Transaction &trans);

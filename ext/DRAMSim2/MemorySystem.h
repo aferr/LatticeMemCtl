@@ -56,6 +56,11 @@
 #include <deque>
 #include <map>
 
+#ifndef TPCONFIG
+#define TPCONFIG
+#include "TPConfig.h"
+#endif
+
 using namespace std;
 
 namespace DRAMSim
@@ -72,7 +77,7 @@ public:
             const string &outputFilename_, unsigned tpTurnLength, bool genTrace, 
             const string &traceFilename_, int num_pids, bool fixAddr,
             bool diffPeriod, int p0Period, int p1Period, int offset, int lattice_config,
-            map<int,int>* tp_config);
+            TPConfig* tp_config);
 	virtual ~MemorySystem();
 	void update();
 	bool addTransaction(Transaction *trans);

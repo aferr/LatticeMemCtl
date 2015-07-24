@@ -28,3 +28,4 @@ class DRAMSim2(DRAMSim2Wrapper):
     turn_allocation_policy = Param.Int(0, "")
     dead_time_policy = Param.Int(0, "")
     rank_bank_partitioning = Param.Int(0, "") 
+    epoch_length = Param.Int(4,"")

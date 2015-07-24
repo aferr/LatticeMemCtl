@@ -3,6 +3,12 @@
 #include "AddressMapping.h"
 #include <iomanip>
 #include <map>
+
+#ifndef TPCONFIG
+#define TPCONFIG
+#include "TPConfig.h"
+#endif
+
 using namespace DRAMSim;
 
 bool isInteresting( Transaction* trans ){
@@ -21,7 +27,7 @@ MemoryControllerTP::MemoryControllerTP(MemorySystem *parent,
         int p0Period,
         int p1Period,
         int offset,
-        map<int,int>* tp_config
+        TPConfig* tp_config
         ) :
     MemoryController(
         parent,csvOut_,

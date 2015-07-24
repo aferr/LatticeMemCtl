@@ -11,31 +11,45 @@ module RunScripts
         fastforward: 100,
         runmode: :local,
         debug: true,
+        num_wl: 4,
+        skip2: true,
         workloads: {
             hard: %w[hardstride]*4
         }
     }
 
+    $cloud_policy_4 = {
+        securityPolicy: 2,
+        p0threadID: 0,
+        p1threadID: 0,
+        p2threadID: 1,
+        p3threadID: 2,
+        numpids: 3,
+        epoch_length: 4,
+        tl0: 88,
+        tl1: 44
+    }
+
     def baseline
       iterate_mp(
         scheme: "none",
-        num_wl: 8,
-        skip6: true,
+        num_wl: 4,
+        skip2: true,
       )
     end
 
     def single_core
-      single(
-      )
+      single()
     end
     
     def secure_spec
-        secure(
+        # 4 cores
+        secure({
             addrpar: true,
             scheme: "tp",
-            num_wl: 8,
-            skip6: true,
-        )
+            num_wl: 4,
+            skip2: true,
+        }.merge $cloud_policy)
     end
 
     def diamond_spec
@@ -45,13 +59,26 @@ module RunScripts
             num_wl: 4,
             skip2: true,
             security_policy: 1,
-            nametag: "diamond_"
+            nametag: "diamond_",
+            epoch_length: 4
+        )
+    end
+
+    def total_spec
+        secure(
+            addrpar: true,
+            scheme: "tp",
+            num_wl: 4,
+            skip2: true,
+            security_policy: 0,
+            nametag: "total_",
+            epoch_length: 4
         )
     end
 
     def cache_sweep
         %w[512kB 1536kB 2MB].each do |cache|
-            secure(
+            secure $cloud_policy_4.merge(
                 addrpar: true,
                 scheme: "tp",
                 num_wl: 4,
@@ -61,7 +88,7 @@ module RunScripts
                 nametag: "#{cache}_LLC_"
             )
         #1MB
-            iterate_mp(
+            iterate_mp $cloud_policy_4.merge(
                 addrpar: true,
                 scheme: "tp",
                 num_wl: 4,
@@ -74,12 +101,12 @@ module RunScripts
     end
 
     def secure_partitioned
-        secure(
+        secure $cloud_policy_4.merge(
                 addrpar: true,
                 scheme: "tp",
                 num_wl: 4,
                 skip2: true,
-                tl0: 19,
+                tl0: 38,
                 tl1: 19,
                 nametag: "part_",
                 rank_bank_partitioning: true

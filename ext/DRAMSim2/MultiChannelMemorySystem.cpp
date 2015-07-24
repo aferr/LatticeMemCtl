@@ -39,6 +39,11 @@ void * dropped;/****************************************************************
 #include "AddressMapping.h"
 #include "IniReader.h"
 
+#ifndef TPCONFIG
+#define TPCONFIG
+#include "TPConfig.h"
+#endif
+
 
 
 using namespace DRAMSim; 
@@ -55,7 +60,7 @@ MultiChannelMemorySystem::MultiChannelMemorySystem(const string &deviceIniFilena
         int num_pids,
         bool fixAddr,
         bool diffPeriod, int p0Period, int p1Period, int offset, int lattice_config,
-        map<int,int>* tp_config):
+        TPConfig* tp_config):
     megsOfMemory(megsOfMemory_), 
     deviceIniFilename(deviceIniFilename_),
     systemIniFilename(systemIniFilename_),

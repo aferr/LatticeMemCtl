@@ -84,17 +84,24 @@ DRAMSim2::DRAMSim2(const Params *p) : DRAMSim2Wrapper(p)
     std::cout << "device file: " << p->deviceConfigFile << std::endl;
     std::cout << "system file: " << p->systemConfigFile << std::endl;
     std::cout << "output file: " << p->outputFile << std::endl;
-    map<int,int> tp_config = *(new map<int,int>());
-    tp_config[0] = p->security_policy;
-    tp_config[1] = p->turn_allocation_time;
-    tp_config[2] = p->turn_allocation_policy;
-    tp_config[3] = p->dead_time_policy;
-    tp_config[4] = p->rank_bank_partitioning;
+    TPConfig* tp_config = new TPConfig();
+    tp_config->num_pids = p->numPids;
+    tp_config->partitioning = p->rank_bank_partitioning;
+    tp_config->security_policy = p->security_policy;
+    tp_config->allocation_timer = p->turn_allocation_time;
+    tp_config->allocator = p->turn_allocation_policy;
+    tp_config->dead_time_calc = p->dead_time_policy;
+    tp_config->epoch_settings = new TPConfig::EpochSettings(p->numPids);
+    tp_config->epoch_settings->epoch_length = p->epoch_length;
+    tp_config->epoch_settings->bandwidth_minimum[0] = 0;
+    for(int i=1; i<p->numPids; i++){
+        tp_config->epoch_settings->bandwidth_minimum[i] = 1;
+    }
     dramsim2 = new DRAMSim::MultiChannelMemorySystem(p->deviceConfigFile, 
             p->systemConfigFile, atoi((p->tpTurnLength).c_str()), p->genTrace, p->cwd,
             p->traceFile, memoryCapacity, p->outputFile, NULL, NULL,
             p->numPids, p->fixAddr, p->diffPeriod, p->p0Period, p->p1Period,
-            p->offset, p->lattice_config, &tp_config);
+            p->offset, p->lattice_config, tp_config);
     // intentionally set CPU:Memory clock ratio as 1, we do the synchronization later
     dramsim2->setCPUClockSpeed(0);
     num_pids = p->numPids;
