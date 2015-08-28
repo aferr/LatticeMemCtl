@@ -19,15 +19,16 @@ module RunScripts
     }
 
     $cloud_policy_4 = {
-        securityPolicy: 2,
+        security_policy: 2,
         p0threadID: 0,
         p1threadID: 0,
         p2threadID: 1,
         p3threadID: 2,
         numpids: 3,
         epoch_length: 4,
-        tl0: 88,
-        tl1: 44
+        tl0: 60,
+        tl1: 44,
+        num_wl: 4
     }
 
     def baseline
@@ -44,12 +45,12 @@ module RunScripts
     
     def secure_spec
         # 4 cores
-        secure({
+        secure $cloud_policy_4.merge(
             addrpar: true,
             scheme: "tp",
             num_wl: 4,
             skip2: true,
-        }.merge $cloud_policy)
+        )
     end
 
     def diamond_spec
@@ -66,13 +67,20 @@ module RunScripts
 
     def total_spec
         secure(
-            addrpar: true,
+            nametag: "total_",
             scheme: "tp",
+            addrpar: true,
             num_wl: 4,
             skip2: true,
             security_policy: 0,
-            nametag: "total_",
-            epoch_length: 4
+            p0threadID: 0,
+            p1threadID: 0,
+            p2threadID: 1,
+            p3threadID: 2,
+            numpids: 3,
+            epoch_length: 4,
+            tl0: 60,
+            tl1: 44,
         )
     end
 
@@ -156,7 +164,7 @@ module RunScripts
             nametag: o[:nametag] + "preempting_monotonic_dead"
         )
 
-        # Priority, Strict, turn start
+        #  # Priority, Strict, turn start
         iterate_mp o.merge(
             turn_allocation_policy: 2,
             turn_allocation_time: 0,

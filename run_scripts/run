@@ -27,7 +27,7 @@ include RunScripts
 baseline
 single_core
 secure_spec
-diamond_spec
 total_spec
-secure_partitioned
-cache_sweep
+# diamond_spec
+# secure_partitioned
+# cache_sweep
