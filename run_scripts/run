@@ -24,10 +24,10 @@ include RunScripts
 #------------------------------------------------------------------------------
 # Performance
 #----------------------------------------------------------------------------
-baseline
-single_core
-secure_spec
+# baseline
+# single_core
+# secure_spec
 total_spec
-# diamond_spec
-# secure_partitioned
-# cache_sweep
+diamond_spec
+cache_sweep
+cloud8

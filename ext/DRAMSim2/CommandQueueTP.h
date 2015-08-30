@@ -242,11 +242,23 @@ class CommandQueueTP : public CommandQueue
         unsigned next_incomp;
     };
 
-
     class CloudLattice : public Lattice
     {
         public:
         CloudLattice(CommandQueueTP* cc) : Lattice(cc),
+            next_incomp(1) {}
+        virtual unsigned nextHigherTC(unsigned tcid);
+        virtual bool isLabelLEQ(unsigned tc1, unsigned tc2);
+        virtual bool isTop(unsigned tcid);
+        virtual unsigned bottom();
+        private:
+        unsigned next_incomp;
+    };
+
+    class CloudLattice8 : public Lattice
+    {
+        public:
+        CloudLattice8(CommandQueueTP* cc) : Lattice(cc),
             next_incomp(1) {}
         virtual unsigned nextHigherTC(unsigned tcid);
         virtual bool isLabelLEQ(unsigned tc1, unsigned tc2);

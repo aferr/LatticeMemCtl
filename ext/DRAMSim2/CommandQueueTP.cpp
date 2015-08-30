@@ -39,6 +39,13 @@ CommandQueueTP::CommandQueueTP(vector< vector<BankState> > &states,
                             " when using the cloud policy\n");
                     exit(1);
                 }
+        case 3:
+                securityPolicy = new CloudLattice8(this);
+                if(num_pids!=5){
+                    fprintf(stderr, "there should be exactly 5 nonempty SDs%s",
+                            " when using the 8core cloud policy\n");
+                    exit(1);
+                }
         default: securityPolicy = new TOLattice(this); break;
     }
 
@@ -770,3 +777,32 @@ bool CommandQueueTP::CloudLattice::isTop(unsigned tcid){
     return tcid == 1 || tcid == 2;
 }
 unsigned CommandQueueTP::CloudLattice::bottom(){ return 0; }
+
+//-----------------------------------------------------------------------------
+// Cloud Lattice 8 core
+//-----------------------------------------------------------------------------
+unsigned CommandQueueTP::CloudLattice8::nextHigherTC(unsigned tcid){
+    if(tcid != 0){
+        return tcid;
+    } else{
+        if(next_incomp == 4){
+            next_incomp = 1;
+            return 4;
+        } else {
+            int tmp = next_incomp;
+            next_incomp += 1;
+            return tmp;
+        }
+    }
+}
+
+bool CommandQueueTP::CloudLattice8::isLabelLEQ(unsigned tc1, unsigned tc2){
+    if(tc1 == 0) return true;
+    if(tc1 == tc2) return true;
+    return false;
+}
+
+bool CommandQueueTP::CloudLattice8::isTop(unsigned tcid){
+    return tcid != 0;
+}
+unsigned CommandQueueTP::CloudLattice8::bottom(){ return 0; }
