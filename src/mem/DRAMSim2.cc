@@ -93,7 +93,7 @@ DRAMSim2::DRAMSim2(const Params *p) : DRAMSim2Wrapper(p)
     tp_config->dead_time_calc = p->dead_time_policy;
     tp_config->epoch_settings = new TPConfig::EpochSettings(p->numPids);
     tp_config->epoch_settings->epoch_length = p->epoch_length;
-    if(p->security_policy==3) tp_config->epoch_settings->epoch_length = 6;
+    // if(p->security_policy==3) tp_config->epoch_settings->epoch_length = 6;
     tp_config->epoch_settings->bandwidth_minimum[0] = 0;
     for(int i=1; i<p->numPids; i++){
         tp_config->epoch_settings->bandwidth_minimum[i] = 1;

@@ -100,6 +100,18 @@ module RunScripts
         end
     end
 
+    def epoch_sweep
+        [8, 12, 16].each do |epoch|
+            secure $cloud_policy_4.merge(
+                addrpar: true,
+                scheme: "tp",
+                num_wl: 4,
+                epoch_length: epoch,
+                nametag: "epoch_#{epoch}_"
+            )
+        end
+    end
+
     $cloud_policy_8 = {
         security_policy: 3,
         p0threadID: 0,
