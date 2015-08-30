@@ -53,6 +53,17 @@ module RunScripts
         )
     end
 
+    #note only run with tdm
+    def tp_even
+        secure(
+            addrpar: true,
+            scheme: "tp",
+            num_wl: 4,
+            skip2: true,
+            nametag: "even"
+        )
+    end
+
     def diamond_spec
         secure(
             addrpar: true,
@@ -83,8 +94,6 @@ module RunScripts
                 addrpar: true,
                 scheme: "tp",
                 num_wl: 4,
-                skip6: true,
-                skip2: true,
                 cacheSize: cache,
                 nametag: "#{cache}_LLC_"
             )
@@ -143,12 +152,12 @@ module RunScripts
         )
 
         # # TDM, Monotonic, turn start
-        # iterate_mp o.merge(
-        #     turn_allocation_policy: 0,
-        #     turn_allocatrion_time: 0,
-        #     dead_time_policy: 1,
-        #     nametag: o[:nametag] + "tdm_monotonic_start"
-        # )
+        iterate_mp o.merge(
+            turn_allocation_policy: 0,
+            turn_allocatrion_time: 0,
+            dead_time_policy: 1,
+            nametag: o[:nametag] + "tdm_monotonic_start"
+        )
           
         # # Preempting, Strict, turn start
         # iterate_mp o.merge(
@@ -175,20 +184,20 @@ module RunScripts
         # )
 
         # #  # Priority, Strict, turn start
-        # iterate_mp o.merge(
-        #     turn_allocation_policy: 2,
-        #     turn_allocation_time: 0,
-        #     dead_time_policy: 0,
-        #     nametag: o[:nametag] + "priority_strict_start"
-        # )
+        iterate_mp o.merge(
+            turn_allocation_policy: 2,
+            turn_allocation_time: 0,
+            dead_time_policy: 0,
+            nametag: o[:nametag] + "priority_strict_start"
+        )
 
-        # # Priority, Monotonic, turn start
-        # iterate_mp o.merge(
-        #     turn_allocation_policy: 2,
-        #     turn_allocation_time: 0,
-        #     dead_time_policy: 1,
-        #     nametag: o[:nametag] + "priority_monotonic_start"
-        # )
+        # Priority, Monotonic, turn start
+        iterate_mp o.merge(
+            turn_allocation_policy: 2,
+            turn_allocation_time: 0,
+            dead_time_policy: 1,
+            nametag: o[:nametag] + "priority_monotonic_start"
+        )
 
         # Priority, Monotonic, Dead Time
         iterate_mp o.merge(

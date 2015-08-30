@@ -22,7 +22,8 @@ CommandQueueTP::CommandQueueTP(vector< vector<BankState> > &states,
     epoch_settings = tp_config->epoch_settings;
     pid_last_pop = 0;
     last_pid = 0;
-    
+  
+      
     switch(tp_config->security_policy){
         case 0: securityPolicy = new TOLattice(this); break;
         case 1:
@@ -39,6 +40,7 @@ CommandQueueTP::CommandQueueTP(vector< vector<BankState> > &states,
                             " when using the cloud policy\n");
                     exit(1);
                 }
+                break;
         case 3:
                 securityPolicy = new CloudLattice8(this);
                 if(num_pids!=5){
@@ -46,6 +48,7 @@ CommandQueueTP::CommandQueueTP(vector< vector<BankState> > &states,
                             " when using the 8core cloud policy\n");
                     exit(1);
                 }
+                break;
         default: securityPolicy = new TOLattice(this); break;
     }
 
