@@ -328,6 +328,7 @@ def sav_script( options = {} )
     script.puts("    --turn_allocation_time #{options[:turn_allocation_time]} \\")
     script.puts("    --dead_time_policy #{options[:dead_time_policy]} \\")
     script.puts("    --rank_bank_partitioning #{options[:rank_bank_partitioning] ? 1 : 0} \\")
+    script.puts("    --epoch_length #{options[:epoch_length]} \\") unless options[:epoch_length].nil?
 
     #Security Policy
     options[:numpids] = options[:numcpus] if options[:numpids].nil?

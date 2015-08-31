@@ -27,7 +27,9 @@ include RunScripts
 # baseline
 # single_core
 # secure_spec
-total_spec
-diamond_spec
+# total_spec
+# diamond_spec
 cache_sweep
-cloud8
+# cloud8
+tp_even
+epoch_sweep
