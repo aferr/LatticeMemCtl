@@ -26,10 +26,11 @@ include RunScripts
 #----------------------------------------------------------------------------
 # baseline
 # single_core
-# secure_spec
-# total_spec
-# diamond_spec
+secure_spec
 cache_sweep
-# cloud8
-tp_even
+cloud8
 epoch_sweep
+diamond_spec
+total_spec
+tp_even
+total_three

@@ -26,8 +26,6 @@ module RunScripts
         p3threadID: 2,
         numpids: 3,
         epoch_length: 4,
-        tl0: 60,
-        tl1: 44,
         num_wl: 4
     }
 
@@ -55,17 +53,27 @@ module RunScripts
 
     #note only run with tdm
     def tp_even
-        secure(
+        o = {
             addrpar: true,
             scheme: "tp",
             num_wl: 4,
             skip2: true,
             nametag: "even"
+        }
+        
+        # # TDM, strict
+        iterate_mp o.merge(
+            turn_allocation_policy: 0,
+            turn_allocatrion_time: 0,
+            dead_time_policy: 0,
+            nametag: o[:nametag] + "tdm_strict_start",
+            tl0: 88, tl1: 44
         )
+
     end
 
     def diamond_spec
-        secure(
+        secure_best(
             addrpar: true,
             scheme: "tp",
             num_wl: 4,
@@ -88,13 +96,39 @@ module RunScripts
         )
     end
 
+    def total_three
+        secure_best(
+            nametag: "total_three_",
+            scheme: "tp",
+            addrpar: true,
+            num_wl: 4,
+            skip2: true,
+            security_policy: 0,
+            epoch_length: 4,
+            p0threadID: 0,
+            p1threadID: 0,
+            p2threadID: 1,
+            p3threadID: 2,
+        )
+    end
+
     def cache_sweep
         %w[512kB 1MB 1536kB 2MB].each do |cache|
-            secure $cloud_policy_4.merge(
+            o = $cloud_policy_4.merge(
                 addrpar: true,
                 scheme: "tp",
                 num_wl: 4,
+                skip2: true,
                 cacheSize: cache,
+                nametag: "#{cache}_LLC_"
+            )
+            secure_base o
+            secure_best o
+            iterate_mp(
+                scheme: "none",
+                num_wl: 4,
+                cacheSize: cache,
+                skip2: true,
                 nametag: "#{cache}_LLC_"
             )
         end
@@ -102,7 +136,7 @@ module RunScripts
 
     def epoch_sweep
         [8, 12, 16].each do |epoch|
-            secure $cloud_policy_4.merge(
+            secure_best $cloud_policy_4.merge(
                 addrpar: true,
                 scheme: "tp",
                 num_wl: 4,
@@ -123,9 +157,7 @@ module RunScripts
         p6threadID: 3,
         p7threadID: 4,
         numpids: 5,
-        epoch_length: 6,
-        tl0: 66,
-        tl1: 44,
+        epoch_length: 8,
         num_wl: 8,
         skip2: true,
         skip4: true,
@@ -133,7 +165,12 @@ module RunScripts
     }
 
     def cloud8
-        secure $cloud_policy_8.merge(
+        secure_base $cloud_policy_8.merge(
+            addrpar: true,
+            scheme: "tp",
+        )
+
+        secure_best $cloud_policy_8.merge(
             addrpar: true,
             scheme: "tp",
         )
@@ -151,7 +188,29 @@ module RunScripts
                 rank_bank_partitioning: true
         )
     end
-        
+ 
+    def secure_base o={}
+        o = {nametag: ""}.merge o
+        # TDM, strict, turn start
+        iterate_mp o.merge(
+            turn_allocation_policy: 0,
+            turn_allocatrion_time: 0,
+            dead_time_policy: 0,
+            nametag: o[:nametag] + "tdm_strict_start",
+            tl0: 88, tl1: 44
+        )       
+    end
+
+    def secure_best o={}
+        o = {nametag: ""}.merge o
+        # Priority, Monotonic, Dead Time
+        iterate_mp o.merge(
+            turn_allocation_policy: 2,
+            turn_allocation_time: 1,
+            dead_time_policy: 1,
+            nametag: o[:nametag] + "priority_monotonic_dead"
+        )
+    end
 
     def secure o={}
         o = {nametag: ""}.merge o
@@ -160,7 +219,8 @@ module RunScripts
             turn_allocation_policy: 0,
             turn_allocatrion_time: 0,
             dead_time_policy: 0,
-            nametag: o[:nametag] + "tdm_strict_start"
+            nametag: o[:nametag] + "tdm_strict_start",
+            tl0: 88, tl1: 44
         )
 
         # # TDM, Monotonic, turn start
@@ -168,7 +228,8 @@ module RunScripts
             turn_allocation_policy: 0,
             turn_allocatrion_time: 0,
             dead_time_policy: 1,
-            nametag: o[:nametag] + "tdm_monotonic_start"
+            nametag: o[:nametag] + "tdm_monotonic_start",
+            tl0: 88, tl1: 44
         )
           
         # # Preempting, Strict, turn start
@@ -177,6 +238,7 @@ module RunScripts
         #     turn_allocation_time: 0,
         #     dead_time_policy: 0,
         #     nametag: o[:nametag] + "preempting_strict_start"
+        #     tl0: 88, tl1: 44
         # )
 
         # # Preempting,  Monotonic, Turn Start
@@ -185,6 +247,7 @@ module RunScripts
         #     turn_allocation_time: 0,
         #     dead_time_policy: 1,
         #     nametag: o[:nametag] + "preempting_monotonic_start"
+        #     tl0: 88, tl1: 44
         # )
         #  
         # # Preempting,  Monotonic, Dead Time
@@ -193,9 +256,10 @@ module RunScripts
         #     turn_allocation_time: 1,
         #     dead_time_policy: 1,
         #     nametag: o[:nametag] + "preempting_monotonic_dead"
+        #     tl0: 88, tl1: 44
         # )
 
-        # #  # Priority, Strict, turn start
+        # Priority, Strict, turn start
         iterate_mp o.merge(
             turn_allocation_policy: 2,
             turn_allocation_time: 0,
