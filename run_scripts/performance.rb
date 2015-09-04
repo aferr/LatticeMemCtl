@@ -204,11 +204,19 @@ module RunScripts
     def secure_best o={}
         o = {nametag: ""}.merge o
         # Priority, Monotonic, Dead Time
+        # iterate_mp o.merge(
+        #     turn_allocation_policy: 2,
+        #     turn_allocation_time: 1,
+        #     dead_time_policy: 1,
+        #     nametag: o[:nametag] + "priority_monotonic_dead"
+        # )
+
+        # Priority, Strict, turn start
         iterate_mp o.merge(
             turn_allocation_policy: 2,
-            turn_allocation_time: 1,
-            dead_time_policy: 1,
-            nametag: o[:nametag] + "priority_monotonic_dead"
+            turn_allocation_time: 0,
+            dead_time_policy: 0,
+            nametag: o[:nametag] + "priority_strict_start"
         )
     end
 
