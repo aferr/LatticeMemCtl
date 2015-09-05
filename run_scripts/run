@@ -9,7 +9,7 @@ include RunScripts
 #------------------------------------------------------------------------------
 # Rerun
 #------------------------------------------------------------------------------
-# rerun
+rerun
 
 #------------------------------------------------------------------------------
 # Functionality
@@ -26,11 +26,11 @@ include RunScripts
 #----------------------------------------------------------------------------
 # baseline
 # single_core
-# secure_spec
-# cache_sweep
-# cloud8
-epoch_sweep
+secure_spec
+cache_sweep
+cloud8
+# epoch_sweep
 # diamond_spec
 # total_spec
 # tp_even
-# total_three
+total_three

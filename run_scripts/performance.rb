@@ -25,7 +25,7 @@ module RunScripts
         p2threadID: 1,
         p3threadID: 2,
         numpids: 3,
-        epoch_length: 4,
+        epoch_length: 12,
         num_wl: 4
     }
 
@@ -104,7 +104,7 @@ module RunScripts
             num_wl: 4,
             skip2: true,
             security_policy: 0,
-            epoch_length: 4,
+            epoch_length: 12,
             p0threadID: 0,
             p1threadID: 0,
             p2threadID: 1,
@@ -122,15 +122,15 @@ module RunScripts
                 cacheSize: cache,
                 nametag: "#{cache}_LLC_"
             )
-            secure_base o
+            # secure_base o
             secure_best o
-            iterate_mp(
-                scheme: "none",
-                num_wl: 4,
-                cacheSize: cache,
-                skip2: true,
-                nametag: "#{cache}_LLC_"
-            )
+            # iterate_mp(
+            #     scheme: "none",
+            #     num_wl: 4,
+            #     cacheSize: cache,
+            #     skip2: true,
+            #     nametag: "#{cache}_LLC_"
+            # )
         end
     end
 
@@ -157,7 +157,7 @@ module RunScripts
         p6threadID: 3,
         p7threadID: 4,
         numpids: 5,
-        epoch_length: 8,
+        epoch_length: 12,
         num_wl: 8,
         skip2: true,
         skip4: true,
@@ -165,10 +165,10 @@ module RunScripts
     }
 
     def cloud8
-        secure_base $cloud_policy_8.merge(
-            addrpar: true,
-            scheme: "tp",
-        )
+        # secure_base $cloud_policy_8.merge(
+        #     addrpar: true,
+        #     scheme: "tp",
+        # )
 
         secure_best $cloud_policy_8.merge(
             addrpar: true,
