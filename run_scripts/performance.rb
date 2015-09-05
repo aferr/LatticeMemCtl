@@ -211,12 +211,12 @@ module RunScripts
         #     nametag: o[:nametag] + "priority_monotonic_dead"
         # )
 
-        # Priority, Strict, turn start
+        # Priority, monotonic, turn start
         iterate_mp o.merge(
             turn_allocation_policy: 2,
             turn_allocation_time: 0,
-            dead_time_policy: 0,
-            nametag: o[:nametag] + "priority_strict_start"
+            dead_time_policy: 1,
+            nametag: o[:nametag] + "priority_monotonic_start"
         )
     end
 
