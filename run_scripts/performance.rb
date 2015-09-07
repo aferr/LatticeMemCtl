@@ -80,19 +80,19 @@ module RunScripts
             skip2: true,
             security_policy: 1,
             nametag: "diamond_",
-            epoch_length: 4
+            epoch_length: 12
         )
     end
 
     def total_spec
-        secure(
+        secure_best(
             nametag: "total_",
             scheme: "tp",
             addrpar: true,
             num_wl: 4,
             skip2: true,
             security_policy: 0,
-            epoch_length: 4,
+            epoch_length: 12,
         )
     end
 
@@ -109,6 +109,7 @@ module RunScripts
             p1threadID: 0,
             p2threadID: 1,
             p3threadID: 2,
+            numpids: 3
         )
     end
 
@@ -223,22 +224,22 @@ module RunScripts
     def secure o={}
         o = {nametag: ""}.merge o
         # TDM, strict, turn start
-        iterate_mp o.merge(
-            turn_allocation_policy: 0,
-            turn_allocatrion_time: 0,
-            dead_time_policy: 0,
-            nametag: o[:nametag] + "tdm_strict_start",
-            tl0: 88, tl1: 44
-        )
+        # iterate_mp o.merge(
+        #     turn_allocation_policy: 0,
+        #     turn_allocatrion_time: 0,
+        #     dead_time_policy: 0,
+        #     nametag: o[:nametag] + "tdm_strict_start",
+        #     tl0: 88, tl1: 44
+        # )
 
-        # # TDM, Monotonic, turn start
-        iterate_mp o.merge(
-            turn_allocation_policy: 0,
-            turn_allocatrion_time: 0,
-            dead_time_policy: 1,
-            nametag: o[:nametag] + "tdm_monotonic_start",
-            tl0: 88, tl1: 44
-        )
+        # # # TDM, Monotonic, turn start
+        # iterate_mp o.merge(
+        #     turn_allocation_policy: 0,
+        #     turn_allocatrion_time: 0,
+        #     dead_time_policy: 1,
+        #     nametag: o[:nametag] + "tdm_monotonic_start",
+        #     tl0: 88, tl1: 44
+        # )
           
         # # Preempting, Strict, turn start
         # iterate_mp o.merge(

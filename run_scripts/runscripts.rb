@@ -92,7 +92,7 @@ $workloads_8core = {
 
     mix_10: (%w[libquantum]*4 + %w[astar]*4),
     mix_11: (%w[libquantum]*4 + %w[astar h264ref hmmer gobmk]),
-    mix_12: (%w[libquantum]*2 + %w[astar]*4),
+    mix_12: (%w[libquantum]*2 + %w[astar]*6),
     mix_13: %w[libquantum bzip2 mcf sjeng gobj hmmer h264ref astar],
     mix_14: (%w[mcf]*4 + %w[astar]*4),
     mix_15: (%w[libquantum]*4 + %w[mcf]*4)
